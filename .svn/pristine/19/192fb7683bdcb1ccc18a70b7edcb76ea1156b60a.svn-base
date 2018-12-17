@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="accountWater">
+	
+	<!-- 账户流水表插入信息 -->
+	<insert id="insertAccountWater" parameterType="cn.smartcandy.common.commonbusi.AccountWater">
+		INSERT INTO a_aw(
+			aw_sequence,
+			batch_no,
+			a_acct,
+			a_property,
+			cbs_sequence,
+			cbs_name,
+			aw_amountSum,
+			aw_balance,
+			aw_date,
+			aw_time,
+			aw_flag,
+			aw_oper
+		)
+		VALUES(
+			#{aw_sequence},
+			#{batch_no},
+			#{a_acct},
+			#{a_property},
+			#{cbs_sequence},
+			#{cbs_name},
+			#{aw_amountSum},
+			#{aw_balance},
+			#{aw_date},
+			#{aw_time},
+			#{aw_flag},
+			#{aw_oper}
+		)
+	</insert>
+	
+	<!-- 查询账户流水信息 -->
+	<select id="selectAccountWater" parameterType="HashMap" resultType="HashMap">
+		SELECT 
+			aw.batch_no,
+			aw.aw_amountSum,
+			aw.aw_balance,
+			aw.aw_date,
+			aw.aw_time,
+			aw.aw_flag
+		FROM a_aw aw
+		INNER JOIN a_a a ON a.a_acct = aw.a_acct
+		WHERE  
+			a.customerSequence = #{customerSequence}
+			AND a.a_property = #{a_property}
+			<if test="8 == cut">
+				AND aw.aw_date >= #{startDate}
+				AND #{endDate} >= aw.aw_date
+			</if>
+			<if test="10 == cut">
+				AND aw.aw_time >= #{startDate}
+				AND #{endDate} >= aw.aw_time
+			</if>
+		ORDER BY 
+			aw.aw_time DESC
+	</select>
+	
+	
+	
+</mapper>

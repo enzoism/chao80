@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="roomMng">
+
+	<!-- 查询Room列表 -->
+	<select id="selectRoomList" parameterType="HashMap" resultType="HashMap">
+		 SELECT
+		 	roomSequence,
+			roomCode,
+			roomName,
+			roomType,
+			roomUseType,
+			roomMaxCustomerNum,
+			rommBedNum,
+			roomUseStatus,
+			roomShowColor,
+			roomServiceItem,
+			roomOpenTimePart,
+			roomEarliestBookTime,
+			roomLatestBookTime,
+			roomServiceTimeInterval,
+			roomImageURL,
+			roomDetail,
+			roomFlag,
+			roomRemark,
+			roomPosition
+		 FROM
+		 	c_room
+		 <where>
+		 	roomFlag = 'N'
+		 	<if test="null != roomSequence">AND roomSequence = #{roomSequence}</if>
+		 	<if test="null != roomCode">AND roomCode = #{roomCode}</if>
+		 	<if test="null != roomType">AND roomType = #{roomType}</if>
+		 	<if test="null != roomUseType">AND roomUseType = #{roomUseType}</if>
+		 	<if test="null != roomUseStatus">AND roomUseStatus = #{roomUseStatus}</if>
+		 	<if test="null != roomName">AND roomName like '%${roomName}%'</if>
+			<if test="null != roomServiceItem">AND roomServiceItem like '%,${roomServiceItem},%'</if>
+			<if test="null != roomOpenTimeStart">AND roomOpenTimePart >= #{roomOpenTimeStart}</if>
+			<if test="null != roomOpenTimeEnd">AND #{roomOpenTimeEnd} >= roomOpenTimePart</if>
+		 </where>
+		 ORDER BY  roomCode
+	</select>
+	
+	<!-- 查询Room明细 -->
+	<select id="selectRoomDetail" parameterType="String" resultType="cn.smartcandy.application.a.commonbean.Room">
+		 SELECT
+		 	roomSequence,
+			roomCode,
+			roomName,
+			roomType,
+			roomUseType,
+			roomMaxCustomerNum,
+			rommBedNum,
+			roomUseStatus,
+			roomShowColor,
+			roomServiceItem,
+			roomOpenTimePart,
+			roomEarliestBookTime,
+			roomLatestBookTime,
+			roomServiceTimeInterval,
+			roomImageURL,
+			roomDetail,
+			roomFlag,
+			roomRemark,
+			roomPosition
+		 FROM
+		 	c_room
+		 WHERE
+		 	roomSequence = #{roomSequence}
+	</select>
+	
+	<!-- 新增Room -->
+	<insert id="insertRoom" parameterType="cn.smartcandy.application.a.commonbean.Room">
+		INSERT INTO	c_room(
+			roomSequence,
+			roomCode,
+			roomName,
+			roomType,
+			roomUseType,
+			roomMaxCustomerNum,
+			rommBedNum,
+			roomUseStatus,
+			roomShowColor,
+			roomServiceItem,
+			roomOpenTimePart,
+			roomEarliestBookTime,
+			roomLatestBookTime,
+			roomServiceTimeInterval,
+			roomImageURL,
+			roomDetail,
+			roomFlag,
+			roomRemark,
+			roomPosition
+		) VALUES (
+			#{roomSequence},
+			#{roomCode},
+			#{roomName},
+			#{roomType},
+			#{roomUseType},
+			#{roomMaxCustomerNum},
+			#{rommBedNum},
+			#{roomUseStatus},
+			#{roomShowColor},
+			#{roomServiceItem},
+			#{roomOpenTimePart},
+			#{roomEarliestBookTime},
+			#{roomLatestBookTime},
+			#{roomServiceTimeInterval},
+			#{roomImageURL},
+			#{roomDetail},
+			#{roomFlag},
+			#{roomRemark},
+			#{roomPosition}
+		)
+	</insert>
+	<!-- 修改Room -->
+	<update id="updateRoom" parameterType="cn.smartcandy.application.a.commonbean.Room">
+		UPDATE
+			c_room
+		SET
+			roomCode = #{roomCode},
+			roomName = #{roomName},
+			roomType = #{roomType},
+			roomUseType = #{roomUseType},
+			roomMaxCustomerNum = #{roomMaxCustomerNum},
+			rommBedNum = #{rommBedNum},
+			roomUseStatus = #{roomUseStatus},
+			roomShowColor = #{roomShowColor},
+			roomServiceItem = #{roomServiceItem},
+			roomOpenTimePart = #{roomOpenTimePart},
+			roomEarliestBookTime = #{roomEarliestBookTime},
+			roomLatestBookTime = #{roomLatestBookTime},
+			roomServiceTimeInterval = #{roomServiceTimeInterval},
+			roomImageURL = #{roomImageURL},
+			roomDetail = #{roomDetail},
+			roomRemark = #{roomRemark},
+			roomPosition = #{roomPosition}
+		WHERE
+			roomSequence = #{roomSequence}
+	</update>
+	<!-- 修改Room状态 -->
+	<update id="updateRoomFlag" parameterType="cn.smartcandy.application.a.commonbean.Room">
+		UPDATE
+			c_room
+		SET
+			roomFlag = #{roomFlag}
+		WHERE
+			roomSequence = #{roomSequence}
+	</update>
+	
+	<!-- 删除Room -->
+	<delete id="deleteRoom" parameterType="cn.smartcandy.application.a.commonbean.Room">
+		DELETE FROM 
+			c_room 
+		WHERE 
+			roomSequence = #{roomSequence}
+	</delete>
+</mapper> 	

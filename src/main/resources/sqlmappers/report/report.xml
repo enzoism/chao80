@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="report">
+
+	<!-- 举报数据 -->
+	<insert id="insertReportMsg" parameterType="Map">
+		INSERT INTO a_report (
+			reportSequence,
+			reportType,
+			reportCause,
+			reportStatus,
+			reportContent,
+			userSequence,
+			userName,
+			defendSequence
+		)VALUES(
+			#{reportSequence},
+			#{reportType},
+			#{reportCause},
+			#{reportStatus},
+			#{reportContent},
+			#{userSequence},
+			#{userName},
+			#{defendSequence}
+		)
+	</insert>
+
+	<!-- 查询举报数量 -->
+	<select id="selectReportCount" parameterType="Map" resultType="int">
+		SELECT
+			count(reportSequence) 
+		FROM
+			a_report
+		WHERE
+			userSequence = #{userSequence}
+		AND defendSequence = #{defendSequence}
+		AND reportType = #{reportType}
+	</select>
+	
+	<!-- 查询举报生活照的状态 -->
+	<select id="selectReportPhotoStatus" parameterType="Map" resultType="String">
+		SELECT
+			photo.photoStatus
+		FROM
+			a_collection_photo photo
+		WHERE
+			photo.photoSequence = #{defendSequence}
+	</select>
+	<!-- 查询举报生活照列表 -->
+	<select id="selectReportPhotoDataList" parameterType="Map" resultType="Map">
+		SELECT
+			report.reportSequence,
+			report.userSequence,
+			report.userName,
+			photo.photoSequence,
+			photo.photoTitle,
+			photo.photoBrief,
+			photo.photoURL,
+			col.colSequence,
+			col.colTitle,
+			col.colThumb,
+			col.colContent
+		FROM
+			a_report AS report
+		INNER JOIN a_collection_photo AS photo ON report.defendSequence = photo.photoSequence
+		INNER JOIN a_collection AS col ON photo.colSequence = col.colSequence
+		WHERE
+			report.reportType = '4'
+		AND photo.photoStatus = 'N'
+		AND col.colStatus = 'N'
+	</select>
+	
+</mapper>

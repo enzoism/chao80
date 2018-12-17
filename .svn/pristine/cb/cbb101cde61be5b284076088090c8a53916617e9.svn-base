@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 权限组 -->
+<mapper namespace="usergroup">
+	
+	<!-- 查询所有用户权限组 -->
+	<select id="queryUserGroupList" parameterType="String" resultType="HashMap">
+		SELECT
+			*
+		FROM
+			c_role
+		<where>
+			<if test="null != _parameter">ro_sequence IN (
+				SELECT
+					r.ro_sequence
+				FROM
+					c_user u,
+					c_rr r
+				WHERE
+					u.ro_sequence = r.can_ro_sequence
+				AND u.userID = #{_parameter}
+			)</if>
+		</where>
+		ORDER BY
+			ro_dept_type ASC,
+			ro_name ASC
+	</select>
+	
+	<!-- 查询操作员类别 -->
+	<select id="queryOperType" parameterType="String" resultType="String">
+		SELECT * FROM C_USER WHERE userID = #{_parameter}
+	</select>
+	
+	<!-- 查询向角色与授权部门对照表(c_rr)是否存在相同的记录 -->
+	<select id="querySameRecord" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			*
+		FROM
+			c_rr
+		<where>
+			<if test="null != ro_dept_type">ro_dept_type = #{ro_dept_type}</if>
+			<if test="null != ro_authorize">AND ro_authorize = #{ro_authorize}</if>
+		</where>
+	</select>
+	
+	<!-- 添加记录到角色与授权部门对照表(c_rr)-->
+	<insert id="insertCrr" parameterType="map">
+		INSERT INTO c_rr (
+			ro_sequence,
+			can_ro_sequence
+		)
+		VALUES
+			(
+				#{ro_sequence},
+				#{can_ro_sequence}
+			)
+	</insert>
+	
+	<!-- 查询菜单项-->
+	<select id="selectMenuList" resultType="cn.smartcandy.common.purview.MenuItem">
+		SELECT
+			*
+		FROM
+			c_menu
+		WHERE
+			m_status = 'N'
+		ORDER BY
+			m_level ASC,
+			m_order ASC
+	</select>
+	
+	<!-- 查询所有菜单项和选中的菜单项 -->
+	<select id="selectAllMenuItemListByRoleSeq" parameterType="String" resultType="cn.smartcandy.common.purview.MenuItem">
+		SELECT
+			m.*, rm_tmp.m_sequence AS authM_Sequence
+		FROM
+			(
+				SELECT
+					m_sequence
+				FROM
+					c_rm rm
+				WHERE
+					rm.ro_sequence = #{_parameter}
+			) rm_tmp
+		RIGHT JOIN c_menu m ON m.m_sequence = rm_tmp.m_sequence
+		ORDER BY
+			m.m_level ASC,
+			m.m_order ASC
+	</select>
+	
+	<!-- 查询所属权限组菜单项 -->
+	<select id="selectLeftMenuItem" parameterType="String" resultType="cn.smartcandy.common.purview.MenuItem">
+		SELECT
+			m.*
+		FROM
+			c_rm rm,
+			c_menu m
+		WHERE
+			m.m_sequence = rm.m_sequence
+		AND rm.ro_sequence = #{_parameter}
+		AND m.m_display = '0'
+		ORDER BY
+			m_level ASC,
+			m_order ASC
+	</select>
+	
+	<!-- 添加用户权限组到c_role表-->
+	<insert id="insertUserGroup" parameterType="map">
+		INSERT INTO c_role (
+			ro_sequence,
+			ro_name,
+			ro_dept_type,
+			ro_banktype,
+			ro_desc,
+			ro_crt_oper,
+			ro_crt_date
+		)
+		VALUES
+			(
+				#{ro_sequence},
+				#{ro_name},
+				#{ro_dept_type},
+				#{ro_banktype},
+				#{ro_desc},
+				#{ro_crt_oper},
+				#{ro_crt_date}
+			)
+	</insert>
+	
+	<!-- 向权限表c_rm添加权限-->
+	<insert id="insertMenu" parameterType="map">
+		INSERT INTO c_rm 
+		(
+			ro_sequence, 
+			m_sequence
+		)
+		VALUES
+			(
+			#{ro_sequence},
+			#{m_sequence}
+			)
+	</insert>
+	
+	<!-- 查询一条需要修改的用户权限组记录 -->
+	<select id="selectUserGroupBySequence" parameterType="String" resultType="HashMap">
+		SELECT
+			*
+		FROM
+			c_role
+		<where>
+			<if test="null != _parameter">ro_sequence = #{_parameter}</if>
+		</where>
+	</select>
+	
+	<!-- 根据ro_sequence查询权限组对照表信息 -->
+	<select id="queryRolesInCrr" parameterType="String" resultType="HashMap">
+		SELECT
+			*
+		FROM
+			c_rr
+		<where>
+			<if test="null != _parameter">ro_sequence = #{_parameter}</if>
+		</where>
+	</select>
+	
+	<!-- 查询权限组下的用户 -->
+	<select id="queryUsersInRole" parameterType="String" resultType="HashMap">
+		SELECT * FROM c_user WHERE ro_sequence = #{_parameter}
+	</select>
+	
+	<!-- 修改一条用户权限组记录 -->
+	<update id="updateUserGroup" parameterType="HashMap">
+		UPDATE c_role
+		<set>
+			<if test="null != ro_name">ro_name = #{ro_name},</if>
+			<if test="null != ro_dept_type">ro_dept_type = #{ro_dept_type},</if>
+			<if test="null != ro_banktype">ro_banktype = #{ro_banktype},</if>
+			<if test="null != ro_desc">ro_desc = #{ro_desc},</if>
+			<if test="null != ro_crt_oper">ro_crt_oper = #{ro_crt_oper},</if>
+			<if test="null != ro_crt_date">ro_crt_date = #{ro_crt_date}</if>
+		</set>
+		WHERE ro_sequence = #{ro_sequence}
+	</update>
+	
+	<!-- 删除一条用户权限组中的菜单项 -->
+	<delete id="deltMenu" parameterType="string">
+		DELETE FROM c_rm WHERE ro_sequence = #{_parameter}
+	</delete>
+	
+	<!-- 根据ro_dept_type删除角色与授权部门对照表(c_rr)中的记录 -->
+	<delete id="delCrr" parameterType="string">
+		DELETE FROM c_rr WHERE ro_sequence = #{_parameter}
+	</delete>
+	
+	<!-- 删除一条用户权限组信息 -->
+	<delete id="delUserGroup" parameterType="string">
+		DELETE FROM c_role WHERE ro_sequence = #{_parameter}
+	</delete>
+	
+	<!-- 删除一条用户权限组关联的菜单信息 -->
+	<delete id="delMenuItem" parameterType="string">
+		DELETE FROM c_rm WHERE ro_sequence = #{_parameter}
+	</delete>
+</mapper> 

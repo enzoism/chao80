@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="businessSort">
+
+	<resultMap id="businessSortBean" type="cn.smartcandy.common.commonbean.BusinessSort">
+		<result property="cbs_sequence" column="cbs_sequence" jdbcType="VARCHAR" />
+		<result property="cbs_code" column="cbs_code" jdbcType="VARCHAR" />
+		<result property="cbs_name" column="cbs_name" jdbcType="VARCHAR" />
+		<result property="cbs_bizType" column="cbs_bizType" jdbcType="VARCHAR" />
+		<result property="cbs_auditType" column="cbs_auditType" jdbcType="VARCHAR" />
+		<result property="cbs_auditGrade" column="cbs_auditGrade" jdbcType="VARCHAR" />
+		<result property="cbs_property" column="cbs_property" jdbcType="VARCHAR" />
+		<result property="cbs_finalStatus" column="cbs_finalStatus" jdbcType="VARCHAR" />
+	</resultMap>
+	<cache />
+
+	<select id="query" resultMap="businessSortBean">
+		SELECT
+			*
+		FROM
+			c_bs
+		ORDER BY
+			SUBSTR(cbs_sequence, 1, 1),
+			SUBSTR(cbs_sequence, 2, 1)
+	</select>
+</mapper> 

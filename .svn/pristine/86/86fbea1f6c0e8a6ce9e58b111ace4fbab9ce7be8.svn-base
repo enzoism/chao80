@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="account">
+	<!-- 查询账户信息 -->
+	<select id="selectAccount" parameterType="HashMap" resultType="cn.smartcandy.common.commonbusi.Account">
+		SELECT
+			*
+		FROM
+			a_a
+		WHERE
+			customerSequence = #{customerSequence}
+		<if test="2!=property">AND	a_property = #{property}</if>
+		<if test="2==property or null != cardSequence">AND cardSequence = #{cardSequence}</if>	
+	</select>
+	
+	<!-- 查询客户所有账户 -->
+	<select id="selectAccounts" parameterType="String" resultType="cn.smartcandy.common.commonbusi.Account">
+		SELECT
+			*
+		FROM
+			a_a
+		WHERE
+			customerSequence = #{_parameter}
+		AND a_status = 'N'
+	</select>
+	
+	<!-- 查询客户卡账户信息 -->
+	<select id="selectCardAccount" parameterType="String" resultType="HashMap">
+		SELECT
+			a.a_amount,
+			a.a_useAmount,
+			ct.*,
+			cr.*
+		FROM
+			a_a a 
+		INNER JOIN a_card cr ON cr.cardNO = a.cardSequence
+		LEFT JOIN a_ct ct ON ct.ctSequence = cr.ctSequence
+		WHERE
+			a.customerSequence = #{_parameter}
+	</select>
+	
+	<!-- 修改账户信息 -->
+	<update id="updateAccount"	parameterType="cn.smartcandy.common.commonbusi.Account">
+		UPDATE
+			a_a
+		SET 
+			a_amount = #{a_amount},
+			a_useAmount = #{a_useAmount}
+		WHERE a_acct = #{a_acct}
+	</update>
+	
+	<!-- 修改客户账户信息 -->
+	<update id="updateAccountStatus" parameterType="cn.smartcandy.common.commonbusi.Account">
+		UPDATE
+			a_a
+		SET 
+			a_status = #{a_status}
+		WHERE a_acct = #{a_acct}
+	</update>
+	
+	<!-- 生成账户信息 -->
+	<insert id="insertAccount" parameterType="cn.smartcandy.common.commonbusi.Account">
+		INSERT INTO a_a(
+			a_acct,
+			cardSequence,
+			customerSequence,
+			a_amount,
+			a_useAmount,
+			a_property,
+			a_status
+		)
+		VALUES(
+			#{a_acct},
+			#{cardSequence},
+			#{customerSequence},
+			#{a_amount},
+			#{a_useAmount},
+			#{a_property},
+			#{a_status}
+		)
+	</insert>
+	
+	<!-- 查询客户的卡片信息 -->
+	<select id="selectCardInfo" parameterType="String" resultType="HashMap">
+		SELECT
+			ct.*
+		FROM
+			a_ct ct
+		INNER JOIN a_card ca ON ct.ctSequence = ca.ctSequence
+		WHERE
+			ca.cardNo = #{_parameter}
+	</select>
+	
+	<!-- 修改客户账户信息（新 划销次卡） -->
+	<update id="swipingTCardAccount" parameterType="HashMap" >
+		UPDATE
+			a_a
+		SET 
+			a_amount = a_amount - #{swipingNum},
+			a_useAmount = a_useAmount - #{swipingNum}
+		WHERE 
+			a_amount >= #{swipingNum}
+			AND customerSequence = #{customerSequence}
+			AND cardSequence = #{cardNO}
+	</update>
+	
+	<!-- 修改客户账户信息（老核销票） //TODO 换了老的核销票之后，删除此代码 -->
+	<update id="verificaTicketAccount" parameterType="HashMap" >
+		UPDATE
+			a_a
+		SET 
+			a_amount = 0,
+			a_useAmount = 0
+		WHERE 
+			a_amount > 0
+			AND customerSequence = #{customerSequence}
+			AND cardSequence = #{cardNO}
+	</update>
+	
+</mapper>

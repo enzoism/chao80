@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--公共功能-->
+<mapper namespace="common">
+	<!--Oracle获取表sequence-->
+	<select id="oracle_tableSequence" parameterType="String" resultType="String" flushCache="true">
+		SELECT
+			SEQ_$ { _parameter }.nextval
+		FROM
+			DUAL
+	</select>
+	
+	<!--MySQL获取表sequence-->
+	<select id="mysql_tableSequence" parameterType="String" resultType="String" flushCache="true">
+		SELECT
+			nextval ('SEQ_${_parameter}')
+		FROM
+			DUAL
+	</select>
+</mapper> 

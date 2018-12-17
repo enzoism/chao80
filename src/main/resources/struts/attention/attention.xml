@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="attention" extends="struts-default">
+		<action name="attention_*" class="cn.smartcandy.application.a.attention.AttentionAction" method="{1}">
+			<result name="success">/success.html</result>
+			<result name="registerSuccess" type="redirect">/admin/index.html</result>
+			<result name="loginSuccess" type="redirect">/admin/index.html</result>
+			<result name="loginOut" type="redirect">/login.html</result>
+		</action>
+	</package>
+</struts>

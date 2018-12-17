@@ -1,0 +1,81 @@
+/**
+ * Created by wenbin.lu on 2017/10/12.
+ */
+"use strict";
+Chao.util={
+    throttle:function(fn, delay, mustRunDelay){
+        var timer = null;
+        var t_start;
+        return function(){
+            var context = this, args = arguments, t_curr = +new Date();
+            clearTimeout(timer);
+            if (!t_start) {
+                t_start = t_curr;
+            }
+            if (t_curr - t_start >= mustRunDelay) {
+                fn.apply(context, args);
+                t_start = t_curr;
+            } else {
+                timer = setTimeout(function() {
+                    fn.apply(context, args);
+                }, delay);
+            }
+        }
+    },
+    check:{
+        mobile:function (i) {
+            var reg = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1}))+\d{8})$/,r=true;
+            if(!reg.test(i)) {
+                r=false;
+            }
+            return r;
+        },
+        email:function (i) {
+            var reg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/,r=true;
+            if(!reg.test(i)) {
+                r=false;
+            }
+            return r;
+        }
+    },
+    random : function(s){
+        var o = $.extend({
+            len    : 1,//长度
+            repeat : false
+        });
+        var a=[],no;
+        var r = function(){return s[Math.round(Math.random()*(s.length-1))];};
+        while(a.length!=o.len){
+            no = r();
+            if(!o.repeat && a.indexOf(no)!=-1)continue;
+            a.push(no);
+        }
+        return a;
+    },
+    getHash:function(argName){
+        if(!argName){return false;}
+        var args = {},query = location.hash.substring(1),pairs = query.split("&");
+        for(var i = 0; i < pairs.length; i++) {
+            var pos = pairs[i].indexOf('=');
+            if (pos == -1) continue;
+            var argname = pairs[i].substring(0,pos),value = pairs[i].substring(pos+1);
+            value = decodeURIComponent(value);
+            if(argName==argname){
+                return value;
+            }
+        }
+    },
+    getSearch:function(argName){
+        if(!argName){return false;}
+        var args = {},query = location.search.substring(1),pairs = query.split("&");
+        for(var i = 0; i < pairs.length; i++) {
+            var pos = pairs[i].indexOf('=');
+            if (pos == -1) continue;
+            var argname = pairs[i].substring(0,pos),value = pairs[i].substring(pos+1);
+            value = decodeURIComponent(value);
+            if(argName==argname){
+                return value;
+            }
+        }
+    }
+};

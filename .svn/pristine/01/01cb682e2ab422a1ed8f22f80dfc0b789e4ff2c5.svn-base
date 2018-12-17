@@ -1,0 +1,673 @@
+.museum {
+  overflow: hidden;
+  padding-top: 40px;
+}
+
+.museum .aside {
+  width: 240px;
+  float: left;
+}
+
+.museum .aside .nav {
+  height: 40px;
+}
+
+.museum .aside .nav a {
+  height: 31px;
+  line-height: 31px;
+  font-size: 14px;
+  color: #727171;
+  margin: 0 21px;
+  float: left;
+  width: 50px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.museum .aside .nav a.pl0 {
+  margin-left: 0px;
+}
+
+.museum .aside .nav .cur {
+  border-bottom: 3px #fbd71d solid;
+}
+
+.museum .aside .nav span {
+  width: 1px;
+  height: 14px;
+  float: left;
+  margin-top: 7px;
+  background: #313131;
+}
+
+.museum .aside dl {
+  margin: 0;
+  padding: 0;
+}
+
+.museum .aside dl dt {
+  width: 126px;
+  height: 126px;
+  border: 2px #1b1b1b solid;
+  display: block;
+  background: #000 url(../../image/eye.png) 50% 50% no-repeat;
+}
+
+.museum .aside dl dd {
+  padding-top: 20px;
+  margin: 0;
+}
+
+.museum .aside dl dd a {
+  height: 34px;
+  line-height: 34px;
+  color: #727171;
+  font-size: 18px;
+  display: block;
+  width:150px;
+  position: relative;
+  margin-bottom: 12px;
+  padding-left: 20px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.museum .aside dl dd .cur {
+  background: #fbd71d;
+  color: #000;
+}
+
+.museum .aside dl dd .cur:after {
+  content: "";
+  position: absolute;
+  background-color: #fbd71d;
+  width: 24px;
+  height: 34px;
+  position: absolute;
+  right: -12px;
+  bottom: 0;
+  -webkit-transform: skewX(-15deg);
+  transform: skewX(-15deg);
+}
+
+.museum .content {
+  width: 960px;
+  float: left;
+}
+
+.museum .content .search {
+  width: 720px;
+  height: 37px;
+  background: #1b1b1b;
+}
+
+.museum .content .search a {
+  width: 80px;
+  height: 37px;
+  float: left;
+  background: url(../../image/search.png) 50% 50% no-repeat;
+  cursor: pointer;
+}
+
+.museum .content .search input {
+  width: 640px;
+  height: 37px;
+  border: none;
+  outline: none;
+  background: none;
+  color: #ffffff;
+}
+
+.museum .content .masonry {
+  overflow: hidden;
+  padding-top:3px;
+}
+
+.museum .content .masonry .item {
+  width:238px;
+  height:130px;
+  border:1px transparent solid;
+  padding-bottom: 390px;
+  position: relative;
+  float: left;
+  z-index: 1;
+}
+
+.museum .content .masonry .item:hover:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  border: 2px #fbd71d solid;
+  border-radius: 2px;
+  -webkit-transition: 0.2s;
+  -moz-transition: 0.2s;
+  -ms-transition: 0.2s;
+  -o-transition: 0.2s;
+  transition: 0.2s;
+  z-index: 2;
+}
+
+.museum .content .masonry .item .image {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 391px;
+  background: rgba(255, 255, 255, .5);
+  overflow: hidden;
+}
+.museum .content .masonry .item .image img{
+  position: absolute;
+  /*width: 100%;*/
+  height:100%;
+  left:50%;
+  top:50%;
+  left:0\9;
+  top:0\9;
+  transform:translate(-50%,-50%);
+  -webkit-transform:translate(-50%,-50%);
+  -ms-transform:translate(-50%,-50%);
+  -moz-transform:translate(-50%,-50%);
+  -o-transform:translate(-50%,-50%);
+}
+.museum .content .masonry .item .summary {
+  position: absolute;
+  padding: 14px;
+  height: 346px;
+  overflow: hidden;
+  background: #101010;
+  left: 2px;
+  right:2px;
+  bottom: 2px;
+  z-index:10;
+}
+
+.museum .content .masonry .item .summary h2 {
+  font-size: 35px;
+  line-height: 1.2;
+  max-height: 84px;
+  overflow: hidden;
+  color: #ffffff;
+}
+
+.museum .content .masonry .item .summary h3 {
+  font-size: 8px;
+  color: #c9caca;
+}
+
+.museum .content .masonry .item .summary p {
+  color: #727171;
+  font-size: 12px;
+  line-height: 2;
+  padding-top: 25px;
+  height: 96px;
+  overflow: hidden;
+}
+
+.museum .content .masonry .item .summary div {
+  height: 50px;
+  border-bottom: 1px #313131 solid;
+  line-height: 50px;
+  color: #727171;
+}
+
+.museum .content .masonry .item .summary div b {
+  color: #ffffff;
+  font-size: 22px;
+}
+
+.museum .content .masonry .item .summary section {
+  display: block;
+  z-index: 4;
+}
+
+.museum .content .masonry .item .summary section a {
+  width: 80px;
+  height: 25px;
+  background: #fbd71d;
+  text-align: center;
+  line-height: 25px;
+  color: #000;
+  font-size: 14px;
+  font-style: italic;
+  float: left;
+  border-radius: 2px;
+  margin-top: 17px;
+  text-transform: Uppercase;
+  font-weight: bold;
+  position: relative;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.museum .content .masonry .item .summary section b {
+  width: 16px;
+  height: 15px;
+  background: url(../../image/fav.png) left 50% no-repeat;
+  position: absolute;
+  right: 5px;
+  top: 21px;
+  text-indent: -1000px;
+  cursor: pointer;
+}
+.museum .content .masonry .item .summary section b.cur,
+.museum .content .masonry .item .summary section b:hover{
+  background-image:url(../../image/fav_.png);
+}
+
+.museum .content .masonry .item_1_1 {
+  width: 238px;
+  height: 128px;
+}
+
+.museum .content .masonry .item_1_2 {
+  width: 238px;
+  height: 258px;
+}
+
+.museum .content .masonry .item_1_3 {
+  width: 238px;
+  height: 388px;
+}
+
+.museum .content .masonry .item_2_1 {
+  width: 478px;
+  height: 128px;
+}
+
+.museum .content .masonry .item_2_2 {
+  width: 478px;
+  height: 258px;
+}
+
+.museum .content .masonry .item_2_3 {
+  width: 478px;
+  height: 388px;
+}
+
+.museum .content .masonry .item_1_1 .summary section,
+.museum .content .masonry .item_1_2 .summary section,
+.museum .content .masonry .item_1_3 .summary section {
+  position: relative;
+}
+
+.museum .content .masonry .item_2_1 .summary section b,
+.museum .content .masonry .item_2_2 .summary section b,
+.museum .content .masonry .item_2_3 .summary section b {
+  right: 30px;
+  top: 27px;
+  padding-left: 42px;
+  text-indent: 0;
+  width: auto;
+  height: 21px;
+  line-height: 21px;
+  font-size: 24px;
+  color: #fff;
+  background: url(../../image/fav@2.png) left 50% no-repeat;
+  font-weight: bold;
+}
+
+.museum .content .masonry .item_2_1 .summary section b.cur,
+.museum .content .masonry .item_2_1 .summary section b:hover,
+.museum .content .masonry .item_2_2 .summary section b.cur,
+.museum .content .masonry .item_2_2 .summary section b:hover,
+.museum .content .masonry .item_2_3 .summary section b.cur,
+.museum .content .masonry .item_2_3 .summary section b:hover {
+  background-image:url(../../image/fav@2_.png);
+}
+
+.museum .content .masonry .item_2_1 .summary h2,
+.museum .content .masonry .item_2_2 .summary h2,
+.museum .content .masonry .item_2_3 .summary h2 {
+  margin-right: 130px;
+}
+
+.museum .content .collectors{
+  padding-top:5px;
+  overflow: hidden;
+}
+.museum .content .collectors .item {
+  width: 234px;
+  margin-right:2px;
+  margin-left:2px;
+  border: 1px transparent solid;
+  height: 511px;
+  margin-bottom: 7px;
+  position: relative;
+  float: left;
+  z-index: 1;
+  background: #313131;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+.museum .content .collectors .item .user-info{
+  height:230px;
+  position: relative;
+}
+.museum .content .collectors .item .user-info .head{
+  padding-top:25px;
+  height:80px;
+}
+.museum .content .collectors .item .user-info .head img{
+  width:80px;
+  height:80px;
+  border-radius: 50%;
+  display:block;
+  margin: 0 auto;
+}
+.museum .content .collectors .item .user-info .name{
+  font-size: 14px;
+  color:#fff;
+  text-align: center;
+  height:26px;
+  line-height:26px;
+  padding-top:8px;
+}
+.museum .content .collectors .item .user-info .summary{
+  font-size: 12px;
+  color:#c9caca;
+  text-align: center;
+  height:38px;
+  line-height:24px;
+  position: relative;
+}
+.museum .content .collectors .item .user-info .summary:after{
+  width:20px;
+  height:5px;
+  position: absolute;
+  left: 50%;
+  bottom:0;
+  margin-left:-10px;
+  content:'';
+  background: #ffffff;
+}
+.museum .content .collectors .item .user-info .tags{
+  height: 28px;
+  overflow: hidden;
+  padding:0 10px;
+  margin-top:15px;
+  text-align: center;
+}
+.museum .content .collectors .item .user-info .tags a{
+  height:23px;
+  padding:0 12px;
+  line-height: 22px;
+  border-radius:12px;
+  border:1px #fff solid;
+  color: #ffffff;
+  text-transform: uppercase;
+  margin: 0 5px;
+}
+.museum .content .collectors .item .user-info .btn{
+  width:54px;
+  height:25px;
+  line-height:25px;
+  text-align: center;
+  background: #fbd71d;
+  position: absolute;
+  font-size: 12px;
+  color: #000;
+  border-radius: 3px;
+  top:10px;
+  right:10px;
+  cursor: pointer;
+}
+.museum .content .collectors .item .user-info .btn:hover{
+  box-shadow: 1px 1px 1px 1px rgba(255,255,255,.2);
+}
+.museum .content .collectors .item .imgs{
+  height:280px;
+  overflow: hidden;
+  position: relative;
+}
+.museum .content .collectors .item .imgs .img{
+  position: absolute;
+  width:76px;
+  background: #000;
+  overflow: hidden;
+}
+.museum .content .collectors .item .imgs .img img{
+  max-width:100%;
+  max-height:100%;
+}
+.museum .content .collectors .item .imgs .img1{
+  height:110px;
+  left:1px;
+  top:0;
+}
+.museum .content .collectors .item .imgs .img2{
+  height:156px;
+  left:50%;
+  margin-left:-38px;
+  top:0;
+}
+.museum .content .collectors .item .imgs .img3{
+  height:110px;
+  right:1px;
+  top:0;
+}
+.museum .content .collectors .item .imgs .img4{
+  height:168px;
+  left:1px;
+  top:112px;
+}
+.museum .content .collectors .item .imgs .img5{
+  height:122px;
+  left:50%;
+  margin-left:-38px;
+  top:160px;
+}
+.museum .content .collectors .item .imgs .img6{
+  height:168px;
+  right:1px;
+  top:112px;
+}
+
+.museum #end,
+.museum #lock {
+  width: 100%;
+  height: 100px;
+  display: none;
+  background: url(../../image/lock.png) 50% 50% no-repeat;
+}
+
+.museum #end {
+  background: none;
+}
+
+#museum_preview {
+  position: fixed;
+  width: 1170px;
+  height: 610px;
+  background: #1b1b1b;
+  border: 15px #1b1b1b solid;
+  left: 50%;
+  top: 50%;
+  margin-top:-320px;
+  margin-left: -600px;
+  z-index: 5;
+  display: none;
+  border-radius:5px;
+}
+#museum_preview:before{
+   content: '';
+   position: fixed;
+   left:0;
+   right:0;
+   top:0;
+   bottom:0;z-index: 0;
+   background:rgba(0,0,0,.5);
+ }
+#museum_preview:after{
+  content: '';
+  position: absolute;
+  left:-15px;
+  right:-15px;
+  top:-15px;
+  bottom:-15px;
+  z-index:1;
+  background:#1b1b1b;
+  border-radius:5px;
+}
+#museum_preview i.close {
+  width: 35px;
+  height: 35px;
+  position: absolute;
+  background: url(../../image/close.png) 0 0 no-repeat;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  z-index: 3;
+}
+
+#museum_preview .image {
+  width:610px;
+  height: 610px;
+  float: left;
+  margin-right:30px;
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+}
+#museum_preview .image img{
+
+}
+#museum_preview .content {
+  width:530px;
+  height:610px;
+  float: left;
+  position: relative;
+  overflow: hidden;
+  z-index: 2;
+}
+
+#museum_preview .content .user {
+  height:30px;
+  width:100%;
+  padding-top:20px;
+  padding-bottom:12px;
+}
+#museum_preview .content .user img{
+  width:20px;
+  height:20px;
+  float: left;
+  border-radius: 50%;
+}
+#museum_preview .content .user span{
+  color: #ffffff;
+  font-size:14px;
+  line-height:20px;
+  float: left;
+  padding-left: 8px;
+  text-transform: Uppercase;
+}
+#museum_preview .content .time {
+  height:25px;
+  line-height:25px;
+  color: #727171;
+  font-size: 12px;
+}
+#museum_preview .content .name {
+  color: #ffffff;
+  width:380px;
+  font-size: 40px;
+  line-height:1.2;
+  text-transform: Uppercase;
+}
+
+#museum_preview .content .fave {
+  position: absolute;
+  right: 10px;
+  top: 100px;
+  padding-left: 42px;
+  height: 21px;
+  line-height: 21px;
+  font-size: 24px;
+  color: #fff;
+  background: url(../../image/fav@2.png) left 50% no-repeat;
+  font-weight: bold;
+  cursor: pointer;
+}
+#museum_preview .content .fave:hover,
+#museum_preview .content .fave.cur{
+  background-image: url(../../image/fav@2_.png);
+}
+#museum_preview .content .section {
+  margin-top:20px;
+  font-size:14px;
+  color: #727171;
+  line-height:24px;
+  margin-bottom:10px;
+  margin-right:10px;
+  height:168px;
+  overflow: hidden;
+  text-align: justify;
+}
+
+#museum_preview .content .price {
+  font-size: 12px;
+  color: #727171;
+}
+
+#museum_preview .content .price b {
+  font-size: 30px;
+  color: #ffffff;
+  font-weight:normal;
+}
+
+#museum_preview .content .view {
+  width: 148px;
+  height: 38px;
+  text-align: center;
+  line-height:38px;
+  border-radius: 2px;
+  border:1px #ffffff solid;
+  background: #313131;
+  float: right;
+  font-size:14px;
+  margin-right: 10px;
+  color:#fff;
+  transition: 0.3s;
+}
+#museum_preview .content .view:hover{
+  background: #fbd71d;
+}
+#museum_preview .content .imgs {
+  width:530px;
+  height:125px;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+#museum_preview .content .imgs div {
+  width: 125px;
+  height:125px;
+  float: left;
+  margin-right:10px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+#museum .user{
+
+}
+#museum_preview .content .imgs img,
+#museum_preview .image img
+{
+  position: absolute;
+  height:100%;
+  left:50%;
+  top:50%;
+  left:0\9;
+  top:0\9;
+  transform:translate(-50%,-50%);
+  -webkit-transform:translate(-50%,-50%);
+  -ms-transform:translate(-50%,-50%);
+  -moz-transform:translate(-50%,-50%);
+  -o-transform:translate(-50%,-50%);
+}

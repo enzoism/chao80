@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="parameter">
+	<!-- 查询参数结构信息 -->
+	<select id="selectPM" parameterType="String" resultType="cn.smartcandy.common.parameter.ParameterMappingBean">
+		SELECT
+			*
+		FROM
+			a_pm t
+		WHERE
+			t.pmSequence = #{parameter}
+	</select>
+
+	<!-- 查询参数结构信息列表 -->
+	<select id="selectPMList" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			*
+		FROM
+			a_pm t
+		<where>
+			<if test="null != pmCode">AND t.pmCode = #{pmCode}</if>
+			<if test="null != pmName">AND t.pmName = #{pmName}</if>
+		</where>
+		ORDER BY t.pmCode ASC
+	</select>
+
+	<!-- 查询下一个结构代码 -->
+	<select id="selectNextCode" resultType="int">
+		SELECT
+			IFNULL(MAX(t.pmCode), 0) + 1
+		FROM
+			a_pm t
+		WHERE
+			t.pmCode REGEXP '^[0-9]+$'
+	</select>
+
+	<!-- 新增参数结构信息 -->
+	<insert id="insertPM" parameterType="cn.smartcandy.common.parameter.ParameterMappingBean">
+		INSERT INTO a_pm (
+			pmSequence,
+			pmCode,
+			pmName,
+			pmDescribe,
+			pmOrder,
+			pmIsDeletable,
+			pmIsRevisable,
+			pmFlag
+		)
+		VALUES
+			(
+				#{pmSequence},
+				#{pmCode},
+				#{pmName},
+				#{pmDescribe},
+				#{pmOrder},
+				#{pmIsDeletable},
+				#{pmIsRevisable},
+				#{pmFlag}
+			)
+	</insert>
+	
+	<!-- 修改参数结构信息 -->
+	<update id="updatePM" parameterType="cn.smartcandy.common.parameter.ParameterMappingBean" >
+		UPDATE a_pm
+		<set>
+			<if test="null != pmCode">pmCode = #{pmCode},</if>
+			<if test="null != pmName">pmName = #{pmName},</if>
+			<if test="null != pmDescribe">pmDescribe = #{pmDescribe},</if>
+			<if test="null != pmOrder">pmOrder = #{pmOrder},</if>
+			<if test="null != pmIsDeletable">pmIsDeletable = #{pmIsDeletable},</if>
+			<if test="null != pmIsRevisable">pmIsRevisable = #{pmIsRevisable},</if>
+			<if test="null != pmFlag">pmFlag = #{pmFlag},</if>
+		</set>
+		WHERE pmSequence = #{pmSequence}
+	</update>
+
+	<!-- 删除参数结构信息 -->
+	<delete id="deletePM" parameterType="string">
+		DELETE
+		FROM
+			a_pm
+		WHERE
+			pmSequence = #{parameter}
+	</delete>
+
+	<!-- 查询参数字典信息 -->
+	<select id="selectPDList" parameterType="HashMap" resultType="cn.smartcandy.common.parameter.ParameterDictionaryBean">
+		SELECT
+			*
+		FROM
+			a_pd t
+		<where>
+			<if test="null != pdCode">AND t.pdCode = #{pdCode}</if>
+			<if test="null != pmSequence">AND t.pmSequence = #{pmSequence}</if>
+		</where>
+		ORDER BY t.pmSequence ASC, t.pdOrder ASC
+	</select>
+
+	<!-- 新增参数字典信息 -->
+	<insert id="insertPD" parameterType="cn.smartcandy.common.parameter.ParameterDictionaryBean">
+		INSERT INTO a_pd (
+			pdSequence,
+			pdCode,
+			pdName,
+			pmSequence,
+			pdOrder,
+			pdIsDeletable,
+			pdIsRevisable,
+			pdFlag
+		)
+		VALUES
+			(
+				#{pdSequence},
+				#{pdCode},
+				#{pdName},
+				#{pmSequence},
+				#{pdOrder},
+				#{pdIsDeletable},
+				#{pdIsRevisable},
+				#{pdFlag}
+			)
+	</insert>
+	
+	<!-- 更新参数字典信息 -->
+	<update id="updatePD" parameterType="cn.smartcandy.common.parameter.ParameterDictionaryBean" >
+		UPDATE a_pd
+		<set>
+			<if test="null != pdCode">pdCode = #{pdCode},</if>
+			<if test="null != pdName">pdName = #{pdName},</if>
+			<if test="null != pdOrder">pdOrder = #{pdOrder},</if>
+			<if test="null != pdIsDeletable">pdIsDeletable = #{pdIsDeletable},</if>
+			<if test="null != pdIsRevisable">pdIsRevisable = #{pdIsRevisable},</if>
+			<if test="null != pdFlag">pdFlag = #{pdFlag},</if>
+		</set>
+		WHERE
+			pdSequence = #{pdSequence}
+		AND pmSequence = #{pmSequence}
+	</update>
+
+	<!-- 删除参数字典信息 -->
+	<delete id="deletePD" parameterType="string">
+		DELETE
+		FROM
+			a_pd
+		WHERE
+			pdSequence = #{parameter}
+	</delete>
+
+	<!-- 查询参数门店-参数字典信息 -->
+	<select id="selectPDPMList" resultType="HashMap">
+		SELECT
+			*
+		FROM
+			a_pd pd RIGHT JOIN a_pm pm
+		ON 	pd.pmSequence = pm.pmSequence
+		ORDER BY pm.pmSequence ASC, pd.pdOrder ASC
+	</select>
+</mapper> 

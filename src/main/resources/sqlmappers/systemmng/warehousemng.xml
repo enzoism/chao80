@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="warehouseMng">
+
+	<sql id="manageBranch">branchSequence IN <foreach collection="userManageBranch" item="id" open="(" separator="," close=")">#{id}</foreach>
+	</sql>
+		
+	<!--根据门店sequence查询门店信息 -->
+	<select id="selectBranchBySequence" parameterType="String" resultType="int">
+		SELECT count(*) FROM a_branch 
+		WHERE branchSequence = #{_parameter} 
+	</select>
+	
+	<!-- 查询所有仓库信息 -->
+	<select id="selectWarehousesList" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			w.branchSequence,
+			w.whSequence,
+			w.whCode,
+			w.whName,
+			w.whType,
+			b.branchName,
+			b.branchCompany
+		FROM
+			a_wh w,
+			a_branch b
+		WHERE
+			w.branchSequence = b.branchSequence
+		AND	w.whFlag = #{whFlag} 
+		<if test="null != whCode">AND w.whCode LIKE '%${whCode}%'</if>
+		<if test="null != whName">AND w.whName LIKE '%${whName}%'</if>
+		<if test="null != whType">AND w.whType = #{whType}</if>
+		<if test="null != branchName">AND w.branchSequence = #{branchName}</if>
+		<trim>
+			<if test="null == branchSequence and null != userManageBranch">AND w.<include refid="manageBranch"/></if>
+		</trim >
+		
+		ORDER BY w.whCode
+	</select>
+	
+	<!-- 根据门店Sequence查找库管信息 -->
+	<select id="selectEmployeeByBranch" parameterType="String" resultType="HashMap">
+		SELECT 
+			employeeCode,
+			employeeName,
+			employeePhone,
+			employeeStatus
+		FROM 
+			a_employees
+		WHERE employeeLevel = '8'
+		AND branchSequence = #{branchSequence}
+	</select>
+	
+	<!--修改仓库信息使用 -->
+	<select id="selectWarehouses" parameterType="HashMap" resultType="cn.smartcandy.application.a.commonbean.Warehouse">
+		SELECT 
+			* 
+		FROM 
+			a_wh 
+			<where>
+			whFlag='N'
+			<!-- <if test="null != #{_parameter}" >AND whSequence = #{_parameter} </if>	 -->
+			<if test="null != whSequence">AND whSequence = #{whSequence} </if>		
+			</where>
+	</select>
+	<!--查询仓库信息 -->
+	<select id="selectALLWarehouses" parameterType="String" resultType="cn.smartcandy.application.a.commonbean.Warehouse">
+		SELECT 
+			* 
+		FROM 
+			a_wh 
+		WHERE
+			whFlag='N'
+	</select>
+	
+	<select id="selectWhSequence" parameterType="HashMap" resultType="HashMap">
+			SELECT
+				*
+			FROM
+				a_wh
+			WHERE
+				branchSequence = #{branchSequence}
+			AND	whFlag = #{whFlag}
+	</select>
+	
+	<!-- 新增仓库信息 -->
+	<insert id="insertWarehouse" parameterType="cn.smartcandy.application.a.commonbean.Warehouse" >
+		INSERT INTO a_wh (
+			whSequence,
+			whCode,
+			whName,
+			branchSequence,
+			whType,
+			whRemark,
+			whFlag
+		)
+		VALUES(
+			#{whSequence},
+			#{whCode},
+			#{whName},
+			#{branchSequence},
+			#{whType},
+			#{whRemark},
+			#{whFlag}
+		)
+	</insert>
+	 
+	<!-- 根据seq修改仓库信息 -->
+	<update id="updateWarehouse" parameterType="cn.smartcandy.application.a.commonbean.Warehouse" >
+		UPDATE a_wh
+	    SET 
+	        whCode = #{whCode},
+	        whName= #{whName},
+	        branchSequence = #{branchSequence},
+	        whType = #{whType},
+	        whRemark = #{whRemark},
+	        whFlag = #{whFlag}
+	    WHERE whSequence = #{whSequence}
+	</update>
+	 
+	 <!-- 根据pspCode删除仓库信息(物理删除) -->
+	 <delete id="deleteWarehouse" parameterType="String" >
+	    DELETE FROM a_wh 
+	    WHERE whSequence = #{_parameter}
+	 </delete>
+	 
+	<!-- 根据pspCode修改仓库标记是否为删除(逻辑删除) -->
+	<update id="updateWarehouseFlag" parameterType="HashMap" >
+		UPDATE a_wh
+   		SET 
+           	whFlag = #{whFlag}
+   		WHERE whSequence = #{whSequence}
+	</update>
+	
+	<!-- 根据机构序号和仓库类型查询仓库序号 -->
+	<select id="selectWHInFo" parameterType="HashMap" resultType="String">
+		SELECT
+			whSequence
+		FROM
+			a_wh
+		WHERE
+			whFlag = 'N'
+		AND
+			branchSequence = #{branchSequence}
+		AND
+			whType = #{whType}
+			
+	</select>
+	
+	<!-- 根据仓库编号查询仓库类型 -->
+	<select id="selectWhType" parameterType="String" resultType="String">
+		SELECT
+			whType
+		FROM
+			a_wh
+		WHERE
+			whSequence = #{whSequence}
+	</select>
+	
+	<!-- 查询仓库标记 -->
+	<select id="selectWHFlag" parameterType="String" resultType="String">
+		SELECT
+			whFlag
+		FROM
+			a_wh
+		WHERE
+			whSequence = #{whSequence}
+	</select>
+	
+</mapper> 	

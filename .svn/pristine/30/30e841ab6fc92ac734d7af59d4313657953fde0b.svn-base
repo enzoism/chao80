@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="area">
+
+	<!-- 查询中国行政区划信息-->
+	<select id="selectAreaChinaList" parameterType="HashMap" resultType="cn.smartcandy.framework.base.area.AreaChina">
+		SELECT
+			*
+		FROM
+			c_area
+		ORDER BY orderBy ASC
+	</select>
+	
+	<!-- 查询世界各国和地区名称代码-->
+	<select id="selectCountryList" parameterType="HashMap" resultType="cn.smartcandy.framework.base.area.Country">
+		SELECT
+			*
+		FROM
+			c_country
+		ORDER BY orderBy DESC
+	</select>
+	
+	<!--  查询民族-->
+	<select id="selectNationList" parameterType="HashMap" resultType="cn.smartcandy.framework.base.area.Nation">
+		SELECT
+			*
+		FROM
+			c_nation
+		ORDER BY nationCode ASC
+	</select>
+</mapper>

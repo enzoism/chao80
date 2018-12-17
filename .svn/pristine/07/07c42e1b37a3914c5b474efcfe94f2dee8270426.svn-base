@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="tag">
+	<!-- 添加类别 -->
+	<insert id="insertTagTypeMsg" parameterType="Map">
+		INSERT INTO a_collection_tag_type (
+			typeSequence,
+			typeName,
+			typeStatus,
+			cateSequence
+		)VALUES(
+			#{typeSequence},
+			#{typeName},
+			#{typeStatus},
+			#{cateSequence}
+		)
+	</insert>
+	
+	<!-- 添加类别 -->
+	<insert id="insertTagMsg" parameterType="Map">
+		INSERT INTO a_collection_tag (
+			tagSequence,
+			tagName,
+			tagStatus,
+			tagDate,
+			typeSequence
+		)VALUES(
+			#{tagSequence},
+			#{tagName},
+			#{tagStatus},
+			#{tagDate},
+			#{typeSequence}
+		)
+	</insert>
+	<!-- 查询TagType是否存在 -->
+	<select id="selectTagTypeMsg" parameterType="Map" resultType="int">
+		SELECT
+			COUNT(tagType.typeSequence)
+		FROM
+			a_collection_tag_type  tagType
+		WHERE tagType.typeName = #{typeName}
+		AND tagType.cateSequence = #{cateSequence}
+		AND tagType.typeStatus = #{typeStatus}
+	</select>
+
+	<!-- 查询TagTypeList -->
+	<select id="selectTypeDataList" parameterType="Map" resultType="Map">
+		SELECT
+			typeSequence 
+		FROM
+			a_collection_tag_type
+		WHERE typeStatus = 'N'
+		    <if test="null != cateSequence">AND cateSequence = #{cateSequence}</if>
+	</select>
+
+	<!-- 查询TagList-->
+	<select id="selectTagList" parameterType="Map" resultType="Map">
+		SELECT
+			tagType.typeSequence,
+			tagType.typeName,
+			tag.tagSequence,
+			tag.tagName,
+			tagType.cateSequence
+		FROM
+			a_collection_tag_type AS tagType
+		INNER JOIN a_collection_tag AS tag ON tagType.typeSequence = tag.typeSequence
+		WHERE tag.tagStatus = 'N'
+		AND tagType.typeStatus = 'N'
+		AND tagType.typeSequence in <foreach collection="typeList" item="typeSequence" open="(" separator="," close=")">#{typeSequence}</foreach>
+	</select>
+
+	<!-- 删除tagType -->
+	<update id="updateTagTypeMsg" parameterType="Map">
+		UPDATE a_collection_tag_type 
+		SET	
+			typeStatus = #{typeStatus}
+		WHERE
+			typeSequence = #{typeSequence}
+	</update>
+	
+</mapper>

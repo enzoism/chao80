@@ -1,0 +1,25 @@
+<div style="margin: 15px;">
+	<form class="layui-form" action="/release_addCategaryMsg.action" method="post" url='/release_addNewsCategary.action'>
+		<div class="layui-form-item">
+			<label class="layui-form-label">种类名称</label>
+			<div class="layui-input-block">
+				<input type="text" name="cateName" placeholder="请输入种类名称..." autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">种类简介</label>
+			<div class="layui-input-block">
+				<input type="text" name="cateBrief" placeholder="请输入种类简介..." autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">种类备注</label>
+			<div class="layui-input-block">
+				<input type="text" name="cateRemark" placeholder="请输入种类备注..." autocomplete="off" class="layui-input">
+			</div>
+		</div>	
+		<!-- <button lay-filter="edit" lay-submit style="display: none;"></button> -->
+		<button class="layui-btn" lay-submit style="display: none;" lay-filter="edit">立即提交</button>
+		
+	</form>
+</div>

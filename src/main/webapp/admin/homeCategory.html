@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>类别管理</title>
+		<link rel="stylesheet" href="/admin/plugins/layui/css/layui.css" media="all" />
+		<link rel="stylesheet" href="/admin/css/global.css" media="all">
+		<link rel="stylesheet" href="/admin/plugins/font-awesome/css/font-awesome.min.css">
+		<link rel="stylesheet" href="/admin/css/table.css" />
+		<script type="text/javascript" src="/admin/js/jquery.js"></script>
+		<script type="text/javascript" src="/admin/plugins/layui/layui.js"></script>
+	</head>
+	<body>
+		<div class="admin-main">
+			<blockquote class="layui-elem-quote">
+				<button class="layui-btn" id="refresh"><i class="layui-icon">刷新</i></button>
+				<button class="layui-btn " id="addNewBanner"><i class="layui-icon">添加新类别</i></button>
+			</blockquote>
+
+			<fieldset class="layui-elem-field">
+				<legend>类别列表</legend>
+				<div class="layui-field-box layui-form">
+					<table class="layui-table admin-table" >
+						<thead>
+							<tr>
+								<th>类别名称</th>
+								<th>类别简介</th>
+								<th>类别详情</th>
+								<th>创建时间</th>
+								<th style="width: 130px;">操作</th>
+							</tr>
+						</thead>
+						<tbody id="content">
+						</tbody>
+					</table>
+				</div>
+			</fieldset>
+			
+			<div class="admin-table-page">
+				<div id="paged" class="page">
+				</div>
+			</div>
+		</div>
+		<!--模板-->
+		<script type="text/html" id="tpl">
+			{{# layui.each(d.categaryList, function(index, item){ }}
+			<tr>
+				<td>{{ item.cateName }}</td>
+				<td>{{ item.cateBrief }}</td>
+				<td>{{ item.cateContent }}</td>
+				<td>{{ item.cateDate }}</td>
+				<td>
+					<a href="javascript:;" data-id="{{ item.cateSequence }}" data-name="{{ item.cateName }}" data-opt="del" class="layui-btn layui-btn-danger layui-btn-mini">删除</a>
+					<a href="javascript:;" data-id="{{ item.cateSequence }}" data-name="{{ item.cateName }}" data-opt="edit" class="layui-btn layui-btn-mini">编辑</a>
+					<a href="javascript:;" data-id="{{ item.cateSequence }}" data-name="{{ item.cateName }}" data-opt="tag" class="layui-btn layui-btn-normal layui-btn-mini">标签</a>
+				</td>
+			</tr>
+			{{# }); }}
+		</script>
+		<script>
+			// 初始化视图
+			var layer;layui.config({ base: 'js/' });
+			layui.use(['paging', 'form'], function() {
+				var $ = layui.jquery,
+					paging = layui.paging(),
+					layerTips = parent.layer === undefined ? layui.layer : parent.layer, //获取父窗口的layer对象
+					layer = layui.layer,
+					form2 = layui.form(); //获取当前窗口的layer对象
+				// 分页数据
+				pagingRefresh(paging,layerTips,form2,layer);
+					
+				// 添加新Banner
+				var addBoxIndex = -1;
+				$('#addNewBanner').on('click', function() {
+					if(addBoxIndex !== -1){
+						return;
+					}else{
+						$.post('/admin/form/categoryFormAdd.html', null, function(form) {
+							addBoxIndex = layer.open({
+								type: 1,
+								title: '添加新种类',
+								content: form,
+								btn: ['保存', '取消'],
+								shade: false,
+								offset: ['100px', '30%'],
+								area: ['600px', '300px'],
+								zIndex: 100,
+								maxmin: true,
+								yes: function(index) {
+									//触发表单的提交事件
+									$('form.layui-form').find('button[lay-filter=edit]').click();
+								},
+								full: function(elem) {
+									var win = window.top === window.self ? window : parent.window;
+									$(win).on('resize', function() {
+										var $this = $(this);
+										elem.width($this.width()).height($this.height()).css({
+											top: 0,
+											left: 0
+										});
+										elem.children('div.layui-layer-content').height($this.height() - 95);
+									});
+								},
+								success: function(layero, index) {
+									var form = layui.form();
+									form.render();
+									form.on('submit(edit)', function(data) {
+										console.log("22222222");
+										uploadFormData();
+										return false;
+									});
+									return true;
+								},
+								error:function(xhr,textStatus){
+							    },
+								end: function() {
+									addBoxIndex = -1;
+								}
+							});
+						});
+					}
+				});
+			});
+			
+			$('#refresh').on('click', function() {
+				location.reload();
+			});
+			// 提交form表单
+			function uploadFormData(){
+				layer.confirm('添加种类将影响原有布局，是否继续添加?', { icon: 3, title: '系统提示' }, function (index) {
+					$.ajax({
+		                cache: true,
+		                type: "POST",
+		                url:"/jsonAction/release_addCategaryMsg.action?v=" + new Date().getTime(),
+		                data:$('#newCategoryForm').serialize(),// 你的formid
+		                async: false,
+		                error: function(request) {
+		                	layer.msg("添加类别失败！");
+		                },
+		                success: function(data) {
+		                	layer.msg("添加类别成功！");
+							layer.close(index);
+							location.reload(); //刷新
+		                }
+		            });
+	            });
+
+			}
+			
+			// 删除当前Banner
+			function deleteCategoryMsg(cateSeq){
+				$.ajax({
+					cache : true,
+					type : "POST",
+					url : '/jsonAction/release_deleteCategaryMsg.action?v=' + new Date().getTime(),
+					data : {cateSequence:cateSeq}, // 你的formid
+					async : false,
+					error : function(request) {
+						layer.msg("删除类别失败!");
+					},
+					success : function(data) {
+						layer.msg("删除类别成功!");
+						location.reload(); //刷新
+					}
+				});
+			}
+
+			// 刷新当前页面数据
+			function pagingRefresh(paging,layerTips,form,layer){
+				paging.init({
+                    openWait: true,
+                    url: '/jsonAction/release_queryCategaryList.action?v=' + new Date().getTime(), //地址
+					elem: '#content', //内容容器
+					params: {},
+					type: 'GET',
+					tempElem: '#tpl', //模块容器
+					pageConfig: { //分页参数配置
+						elem: '#paged', //分页容器
+						pageSize: 10 //分页大小
+					},
+					success: function() { //渲染成功的回调
+						//alert('渲染成功');
+					},
+					fail: function(msg) { //获取数据失败的回调
+						//alert('获取数据失败')
+					},
+					complate: function() { //完成的回调
+						//重新渲染复选框
+						form.render('checkbox');
+						form.on('checkbox(allselector)', function(data) {
+							var elem = data.elem;
+							$('#content').children('tr').each(function() {
+								var $that = $(this);
+								//全选或反选
+								$that.children('td').eq(0).children('input[type=checkbox]')[0].checked = elem.checked;
+								form.render('checkbox');
+							});
+						});
+						//绑定所有编辑按钮事件						
+						$('#content').children('tr').each(function() {
+							var $that = $(this);
+							$that.children('td:last-child').children('a[data-opt=edit]').on('click', function() {
+								window.location.href='/admin/homeCategoryEditor.html?cateSequence='+$(this).data('id');
+							});
+							$that.children('td:last-child').children('a[data-opt=tag]').on('click', function() {
+								window.location.href='/admin/collectionTag.html?cateSequence='+$(this).data('id');
+							});
+							$that.children('td:last-child').children('a[data-opt=del]').on('click', function() {
+								var cateSeq = $(this).data('id');
+								layer.confirm('删除该类别将导致所有该类别信息不再展示，是否继续删除?', { icon: 3, title: '系统提示' }, function (index) {
+									deleteCategoryMsg(cateSeq);
+								});
+							});
+						});
+
+					},
+				});
+			}
+		</script>
+	</body>
+
+</html>

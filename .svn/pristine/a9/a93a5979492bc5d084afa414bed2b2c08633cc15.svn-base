@@ -1,0 +1,212 @@
+/**
+ * Created by wenbin.lu on 2017/10/12.
+ */
+Chao.index = {
+    init: function () {
+        $('.main_nav a').eq(0).addClass('cur');
+        this.loadBanner();
+        this.loadNewsCate();
+        this.loadVideo();
+        this.loadTop();
+    },
+    loadBanner: function () {
+        $.get(Chao.APP.DATA + 'release_queryBannerList.action',function (rs) {
+            if(rs.statusCode=="200"){
+                var i=0,d=rs.bannerList,len=d.length,h=[];
+                for(i;i<len;i++){
+                    h.push('<li>');
+                        h.push('<img src="'+d[i].relThumbImage+'" alt="">');
+                        // h.push('<section>');
+                        //     h.push('<h2>'+d[i].relTitle+'</h2>');
+                        //     h.push('<div>'+d[i].relContent+'</div>');
+                        // h.push('</section>');
+                    h.push('</li>');
+                }
+                $('#banner').html(h.join(''));
+                $('#banner').bxSlider({
+                    mode: 'horizontal',
+                    controls:false,
+                    auto:true,
+                    stopAutoOnClick:true,
+                    pause:5000,
+                    autoHover:true,
+                    moveSlides: 1,
+                    slideMargin: 0,
+                    infiniteLoop: true,
+                    speed: 800
+                });
+            }
+        });
+    },
+    loadNewsCate: function () {
+        var that=this;
+        $.ajax({
+            url:Chao.APP.DATA+'release_queryCategaryList.action',
+            beforeSend:function () {},
+            success:function (rs) {
+                if(rs.statusCode=="200"){
+                    $('#news').show();
+                    var i=0,d=rs.categaryList,len=d.length,h=[];
+                    for(i;i<len;i++){
+                        h.push('<a onclick="Chao.index.loadNews('+d[i].cateSequence+',this)">'+d[i].cateName+'</a>');
+                    }
+                    $('#news_tab').html(h.join(''));
+                    $('#news_tab a').eq(0).addClass('cur');
+                    that.loadNews(d[0].cateSequence);
+                }
+            },
+            error:function(r){Chao.err.ajax(r);}
+        });
+    },
+    loadNewsLock:false,
+    loadNews: function (relSequence,o) {
+        if(this.loadNewsLock){
+            return false;
+        }
+        this.loadNewsLock=true;
+        var that=this;
+        if(o){
+            $(o).siblings().removeClass('cur').end().addClass('cur');
+        }
+        $.ajax({
+            url:Chao.APP.DATA+'release_queryNewsList.action',
+            data:{"relSequence":relSequence},
+            beforeSend:function () {},
+            success:function (rs) {
+                that.loadNewsLock=false;
+                if(rs.statusCode=="200"){
+                    var i=0,d=rs.newsList,len=d.length,h=[];
+                    if(len>3){
+                        h.push('<div id="index_news_prev" onclick="Chao.index.newsPrev();"><span></span></div><div id="index_news_next" onclick="Chao.index.newsNext();"><span></span></div>')
+                    }
+                    h.push('<ul id="index_news_content">');
+                    for(i;i<len;i++){
+                        h.push('<li>');
+                            h.push('<div class="img"><img src="'+d[i].relThumbImage+'" alt="" /></div>');
+                            h.push('<div class="section">');
+                                h.push('<h2>'+d[i].relTitle+'</h2>');
+                                h.push('<h3>'+d[i].relSubTitle+'</h3>');
+                                h.push('<p>by '+d[i].relAuthName+'</p>');
+                            h.push('</div>');
+                        h.push('</li>');
+                    }
+                    h.push('</ul>');
+                    $('#news_content').html(h.join(''));
+                    $('#news_content ul').width(len*330).attr({"data":len*330});
+                }
+            },
+            error:function(r){
+                that.loadNewsLock=false;
+                Chao.err.ajax(r);
+            }
+        })
+    },
+    newsPrev:function(){
+        $('#index_news_content').animate({
+            left:0
+        },300,function(){
+            $('#index_news_prev').fadeOut();
+            $('#index_news_next').fadeIn();
+        });
+    },
+    newsNext:function(){
+        var len=$('#index_news_content').attr('data')-1200-20;
+        $('#index_news_content').animate({
+            left:-len
+        },300,function(){
+            $('#index_news_prev').fadeIn();
+            $('#index_news_next').fadeOut();
+        });
+    },
+    loadVideo: function () {
+        $.ajax({
+            url: Chao.APP.DATA + 'release_queryVideoList.action',
+            beforeSend: function () {},
+            success: function (rs) {
+                if (rs.statusCode == "200") {
+                    $('#video').show();
+                    var i=0,d=rs.videoList,len=d.length,h=[];
+                    for(i;i<len;i++){
+                        h.push('<li data_video="'+d[i].relVideo+'"  data_poster="'+d[i].relThumbImage+'" >');
+                            h.push('<div class="img"><img src="'+d[i].relThumbImage+'" /></div>');
+                            h.push('<h2>'+d[i].relTitle+'</h2>');
+                            h.push('<h3>'+d[i].relSubTitle+'</h3>');
+                            h.push('<p>'+d[i].relBrief+'</p>');
+                        h.push('</li>');
+                    }
+                    $('#video_content').html('<video poster="'+d[0].relThumbImage+'" src="'+d[0].relVideo+'" controls="controls" preload="preload"></video>');
+                    $('#index_video_nav').html(h.join(''));
+                    $('#index_video_nav li').click(function(){
+                        var poster=$(this).attr('data_poster'),
+                            src=$(this).attr('data_video');
+                        $('#video_content').html('<video poster="'+poster+'" src="'+src+'" controls="controls" preload="preload"></video>');
+                    });
+                }
+            },
+            error:function(r){Chao.err.ajax(r);}
+        });
+    },
+    loadTop: function () {
+        $.ajax({
+            url: Chao.APP.DATA + 'account_queryTopUserList.action',
+            data:{"topSize":10,"colCount":10},
+            beforeSend: function () {},
+            success: function (rs) {
+                if (rs.statusCode == "200") {
+                    $('#top').show();
+                    var i=0,d=rs.userList,len=d.length,h=[],j=0,e='',jlen=0,disc='';
+                    for(i;i<len;i++){
+                        h.push('<li>');
+                            h.push('<div class="nav">');
+                                h.push('<em>No.'+(i+1)+'</em>');
+                                h.push('<div class="image"><img src="'+d[i].userImageURL+'"/></div>');
+                                h.push('<div class="desc">');
+                                    h.push('<h3>'+d[i].userName+'</h3>');
+                                    h.push('<p>收藏 '+d[i].attentCount+'  粉丝 '+d[i].fansCount+'  关注 '+d[i].likeCount+'</p>');
+                                    h.push('<div class="start"></div>');
+                                h.push('</div>');
+                                h.push('<div class="num">');
+                                    h.push('<h4>藏品</h4>');
+                                    h.push('<p>'+d[i].colCount+'</p>');
+                                h.push('</div>');
+                                h.push('<div class="area">');
+                                    h.push('<h4>领域</h4>');
+                                    h.push('<p>JORDAN/SUPREME</p>');
+                                h.push('</div>');
+                            h.push('</div>');
+                            h.push('<div class="content">');
+                                h.push('<div class="slimScroll">');
+                                    j=0;
+                                    e=d[i].colList;
+                                    jlen=e.length;
+                                    if(jlen>0){
+                                        disc=e[0].colContent;
+                                    }else{
+                                        disc='';
+                                    }
+                                    h.push('<div class="disc">'+disc+'</div>');
+                                    h.push('<div class="imgs">');
+                                    for(j;j<jlen;j++){
+                                        h.push('<img src="'+e[j].colThumb+'" alt="">');
+                                    }
+                                    h.push('</div>');
+                                h.push('</div>');
+                            h.push('</div>');
+                        h.push('</li>');
+                    }
+                    $('#index_top').html(h.join(''));
+                    $('#index_top li').eq(0).addClass('cur');
+                    $('#index_top li').mouseenter(function () {
+                        $(this).siblings().removeClass('cur').end().addClass('cur')
+                    });
+                    $('#top .content .slimScroll').slimScroll({
+                        alwaysVisible: true,
+                        railVisible: true,
+                        height:$('#top .content').height()
+                    });
+                }
+            },error:function(r){Chao.err.ajax(r);}
+        });
+    }
+};
+Chao.index.init();

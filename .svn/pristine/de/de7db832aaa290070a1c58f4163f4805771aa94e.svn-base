@@ -1,0 +1,61 @@
+<div style="margin: 0px; margin-right: 15px; margin-top: 10px;">
+	<form class="layui-form" action="/release_addCategaryMsg.action" method="post" url='/release_addCategaryMsg.action'>
+		<div class="layui-form-item">
+			<label class="layui-form-label">类型名称</label>
+			<div class="layui-input-block">
+				<input type="text" name="cateName" placeholder="请输入" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">类型简介</label>
+			<div class="layui-input-block">
+				<input type="text" name="cateBrief" placeholder="请输入" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item ">
+    		<label class="layui-form-label">类型详情</label>
+    		<div class="layui-input-block">
+     	 		<textarea placeholder="请输入内容" class="layui-textarea" name="cateContent"></textarea>
+    		</div>
+  		</div>
+  		<div class="layui-form-item">
+			<label class="layui-form-label">所属类型</label>
+			<div class="layui-input-block" id="newsCategery">
+				<input type="radio" name="cateSequence" value="100" title="SUBCREW" >
+				<input type="radio" name="cateSequence" value="200" title="JackJones" checked="checked">
+				<input type="radio" name="cateSequence" value="300" title="SUPREME" >
+				<input type="radio" name="cateSequence" value="400" title="MO&CO">
+			</div>
+		</div>
+		<button lay-filter="edit" lay-submit style="display: none;"></button>
+	</form>
+</div>
+<script type="text/javascript" src="/admin/js/jquery.js"></script>
+<script>
+	$.ajax({
+	    url:'/jsonAction/release_queryAdminCategaryList.action?v=' + new Date().getTime(),
+	    type:'POST', 		//GET
+	    async:false,   		//或false,是否异步
+	    data:{cateRelType:'1'},
+	    timeout:5000,    	//超时时间
+	    dataType:'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+	    success:function(data,textStatus,xhr){
+	    	if(data && data.statusCode == 200){
+	    		var i = 0,len = data.categaryList.length,html=[],item;
+	    		for(i;i<len;i++){
+	    			item = data.categaryList[i];
+	    			if(i==0){
+		    			html.push('<input type="radio" name="cateSequence" value="'+item.cateSequence+'" title="'+item.cateName+'" checked="checked">')
+	    			}else{
+		    			html.push('<input type="radio" name="cateSequence" value="'+item.cateSequence+'" title="'+item.cateName+'">')
+	    			}
+	    		}
+				$('#newsCategery').html(html.join(""));
+	    	}
+	    },
+	    error:function(xhr,textStatus){
+	    },
+	    complete:function(){
+	    }
+	});
+</script>

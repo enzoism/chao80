@@ -1,0 +1,132 @@
+Chao.detail = {
+    init:function () {
+        var id=Chao.util.getSearch('id');
+        $.ajax({
+            url:Chao.APP.DATA+'collection_queryCollectionMsg.action',
+            data:{colSequence:id},
+            beforeSend:function(){
+                Chao.dialog.loading();
+            },
+            success:function(r){
+                Chao.dialog.unloading();
+                if(r.statusCode=="200"){
+                    var d=r.collection,i=0,len=d.imageList.length,j=0,jlen=0,h=[],img='';
+                    if(len>0){
+                        img='<img src="'+d.imageList[0].imgURL+'" >';
+                    }
+                    h.push('<div class="summary">');
+                    h.push('<time>'+d.colDate+'</time>');
+                    h.push('<h2>'+d.colTitle+'</h2>');
+                    h.push('<p>by '+d.userName+'</p>');
+                    h.push('<span></span>');
+                    h.push('<div class="slimScroll"><div id="slimScroll">'+d.colContent+'</div></div>');
+                    h.push('</div>');
+                    h.push('<div class="gallery">');
+                    h.push('<div class="booth" id="booth">'+img+'</div>');
+                    h.push('<div class="thumb-warp">');
+                    h.push('<div class="thumb-content">');
+                    h.push('<ul class="thumb" id="thumb">');
+                    j=0;
+                    jlen=d.imageList.length;
+                    for(j;j<jlen;j++){
+                        h.push('<li><img src="'+d.imageList[j].imgURL+'"></li>');
+                        h.push('<li><img src="'+d.imageList[j].imgURL+'"></li>');
+                    }
+                    jlen*=2;
+                    h.push('</ul>');
+                    h.push('</div>');
+                    if(jlen>4){
+                        h.push('<a class="to_top" id="to_top"></a>');
+                        h.push('<a class="to_bottom" id="to_bottom"></a>');
+                    }
+                    h.push('</div>');
+                    h.push('</div>')
+                    $('#collection').html(h.join(''));
+                    if(jlen>1){
+                        $('#to_top').click(function(){
+                            if(Chao.detail._lockscrollnav){
+                                return false;
+                            }
+                            Chao.detail._lockscrollnav=true;
+                            var cssTop=-parseInt($('#thumb').css('top'));
+                            if(cssTop>0){
+                                $('#thumb').animate({"top":-(cssTop-130)},300,function(){
+                                    Chao.detail._lockscrollnav=false;
+                                });
+                            }else{
+                                Chao.detail._lockscrollnav=false;
+                            }
+                        });
+                        $('#to_bottom').click(function(){
+                            if(Chao.detail._lockscrollnav){
+                                return false;
+                            }
+                            Chao.detail._lockscrollnav=true;
+                            var cssTop=-parseInt($('#thumb').css('top')),topMax=(jlen-4)*130;
+                            if(topMax>cssTop){
+                                $('#thumb').animate({"top":-(cssTop+130)},300,function(){
+                                    Chao.detail._lockscrollnav=false;
+                                });
+                            }else{
+                                Chao.detail._lockscrollnav=false;
+                            }
+                        });
+                    }
+                    $('#thumb li').eq(0).addClass('cur');
+                    $('#thumb li').click(function () {
+                        $(this).siblings().removeClass('cur').end().addClass('cur');
+                        $('#booth').html($(this).html());
+                    });
+
+                    $('#slimScroll').slimScroll({
+                        alwaysVisible: true,
+                        railVisible: true,
+                        distance:'-20px',
+                        railColor: '#101010',
+                        color: '#1b1b1b',
+                        height:320
+                    });
+
+                    $('#to_top').click(function () {});
+
+                }
+            },
+            error:function(r){
+                Chao.dialog.unloading();
+                Chao.err.ajax(r);
+            }
+        });
+        this.photo(id);
+    },
+    photo:function(id){
+        $.ajax({
+            url: Chao.APP.DATA + 'release_queryPhotoList.action',
+            data: {colSequence: id,pageNo:1,pageSize:100},
+            beforeSend: function () {
+                Chao.dialog.loading();
+            },
+            success: function (r) {
+                Chao.dialog.unloading();
+                if (r.statusCode == "200") {
+                    var i=0,d=r.photoList,len=d.length,h=[];
+                    for(i;i<len;i++){
+                        h.push('<div class="item">');
+                        h.push('<div class="img"><img src="'+d[i].photoURL+'" alt=""></div>');
+                        h.push('<div class="summary"><h2>'+d[i].photoTitle+'</h2><h3>'+d[i].photoBrief+'</h3></div>');
+                        h.push('</div>');
+                    }
+                    $('#collection_masonry').html(h.join(''));
+                    $('#collection_masonry').imagesLoaded(function () {
+                        $('#collection_masonry').masonry({
+                            itemSelector:".item",
+                            columnWidth:350,
+                            gutter:25
+                        });
+                    });
+                }
+            },
+            error:function(r){Chao.err.ajax(r);}
+        });
+    }
+};
+Chao.detail.init();

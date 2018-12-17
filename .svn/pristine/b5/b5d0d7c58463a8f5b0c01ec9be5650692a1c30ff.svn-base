@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+<meta charset="UTF-8">
+<title>藏家-巢天下</title>
+<link rel="stylesheet" type="text/css" href="http://test.vr.wenyiit.com/chao80/res/bower_components/toastr/toastr.min.css">
+<link rel="stylesheet" type="text/css" href="http://test.vr.wenyiit.com/chao80/res/bower_components/ladda/ladda-themeless.min.css">
+<link rel="stylesheet" type="text/css" href="http://test.vr.wenyiit.com/chao80/res/bower_components/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="http://test.vr.wenyiit.com/chao80/res/css/dev/common.css">
+<link rel="stylesheet" type="text/css" href="http://test.vr.wenyiit.com/chao80/res/css/dev/collectors.css">
+<link rel="shortcut icon" href="http://test.vr.wenyiit.com/chao80/res/image/favicon.ico" />
+</head>
+<body class="body ">
+<header class="top">
+    <div class="center">
+        <h1 class="logo"><a href="/"></a></h1>
+        <nav class="main_nav">
+            <a href="index.html"><span>home</span></a>
+            <a href="museum.html"><span>museum</span></a>
+            <a href="aboutus.html"><span>about us</span></a>
+            <div id="main_nav"></div>
+        </nav>
+    </div>
+</header>
+
+<div class="center collectors">
+    <div class="header">
+        <div class="categorys" >
+            <div id="categorys"></div>
+            <div id="user_info"></div>
+        </div>
+    </div>
+    <div class="content" id="content_warp">
+        <div class="w w1"></div>
+        <div class="w w2"></div>
+        <div class="w w3"></div>
+        <div class="w w4"></div>
+        <div class="w w5"></div>
+        <div class="h h1"></div>
+        <div class="h h2"></div>
+        <div class="h h3"></div>
+        <div class="h h4"></div>
+        <div class="h h5"></div>
+        <div class="h h6"></div>
+        <div class="h h7"></div>
+        <div class="h h8"></div>
+        <div class="h h9"></div>
+        <div id="content" class="s"></div>
+        <div id="detail" class="detail">
+            <div class="prev_btn" id="prev_btn" onclick="Chao.collectors.prev()"></div>
+            <div class="next_btn" id="next_btn" onclick="Chao.collectors.next()"></div>
+            <div class="prev prev_img"></div>
+            <div class="img show_img"></div>
+            <div class="next next_img"></div>
+            <a class="view" id="view_btn" href="detail.html">view more</a>
+        </div>
+        <div class="pages">
+            <div id="page"></div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+<script src="http://test.vr.wenyiit.com/chao80/res/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/bower_components/jquery-mousewheel/jquery.mousewheel.min.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/bower_components/ladda/ladda.jquery.min.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/bower_components/toastr/toastr.min.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/js/dev/base.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/js/dev/util.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/js/dev/dialog.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/js/dev/user.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/js/dev/collectors.js"></script>
+</body>
+</html>

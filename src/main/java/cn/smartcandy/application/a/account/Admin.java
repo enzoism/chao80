@@ -1,0 +1,112 @@
+package cn.smartcandy.application.a.account;
+
+import java.io.Serializable;
+
+public class Admin implements Serializable{
+	
+	private static final long serialVersionUID = 7662729346947004251L;
+	// 状态
+	public static final String STATUS_NORMAL = "N";					//正常
+	public static final String STATUS_BLACK = "B";					//黑名单
+	public static final String STATUS_DELETE = "D";					//注销
+	
+	// 性别
+	public static final String SEX_F = "F";							//女性
+	public static final String SEX_M = "M";							//男性
+	
+	// 等级
+	public static final String LEVEL_SUPER = "1";					//超级管理员
+	public static final String LEVEL_ADMIN = "2";					//普通管理员
+
+	
+	// 备注
+	public static final String REMARK_REGISTER = "普通注册";					//普通注册会员
+
+	private String adminSequence;			// 序号
+	private String adminName;				// 昵称
+	private String adminPwd;					// 密码
+	private String adminEmail;				// 邮箱
+	private String adminPhone;				// 电话
+	private String adminStatus;				// 用户状态N：正常  D：注销  B:黑名单  
+	private String adminCreatDate;			// 用户创建时间
+	private String adminRemark;				// 备注
+	private String adminSex;					// 性别F:女性  M：男性
+	private String adminImageURL;			// 头像
+	private String adminLevel;				// 等级
+	
+	
+	public String getAdminLevel() {
+		return adminLevel;
+	}
+	public void setAdminLevel(String adminLevel) {
+		this.adminLevel = adminLevel;
+	}
+	public String getAdminSequence() {
+		return adminSequence;
+	}
+	public void setAdminSequence(String adminSequence) {
+		this.adminSequence = adminSequence;
+	}
+	public String getAdminName() {
+		return adminName;
+	}
+	public void setAdminName(String adminName) {
+		this.adminName = adminName;
+	}
+	public String getAdminPwd() {
+		return adminPwd;
+	}
+	public void setAdminPwd(String adminPwd) {
+		this.adminPwd = adminPwd;
+	}
+	public String getAdminEmail() {
+		return adminEmail;
+	}
+	public void setAdminEmail(String adminEmail) {
+		this.adminEmail = adminEmail;
+	}
+	public String getAdminPhone() {
+		return adminPhone;
+	}
+	public void setAdminPhone(String adminPhone) {
+		this.adminPhone = adminPhone;
+	}
+	public String getAdminStatus() {
+		return adminStatus;
+	}
+	public void setAdminStatus(String adminStatus) {
+		this.adminStatus = adminStatus;
+	}
+	public String getAdminCreatDate() {
+		return adminCreatDate;
+	}
+	public void setAdminCreatDate(String adminCreatDate) {
+		this.adminCreatDate = adminCreatDate;
+	}
+	public String getAdminRemark() {
+		return adminRemark;
+	}
+	public void setAdminRemark(String adminRemark) {
+		this.adminRemark = adminRemark;
+	}
+	public String getAdminSex() {
+		return adminSex;
+	}
+	public void setAdminSex(String adminSex) {
+		this.adminSex = adminSex;
+	}
+	public String getAdminImageURL() {
+		return adminImageURL;
+	}
+	public void setAdminImageURL(String adminImageURL) {
+		this.adminImageURL = adminImageURL;
+	}
+	@Override
+	public String toString() {
+		return "Admin [adminSequence=" + adminSequence + ", adminName=" + adminName + ", adminPwd=" + adminPwd
+				+ ", adminEmail=" + adminEmail + ", adminPhone=" + adminPhone + ", adminStatus=" + adminStatus
+				+ ", adminCreatDate=" + adminCreatDate + ", adminRemark=" + adminRemark + ", adminSex=" + adminSex
+				+ ", adminImageURL=" + adminImageURL + ", adminLevel=" + adminLevel + "]";
+	}
+
+}

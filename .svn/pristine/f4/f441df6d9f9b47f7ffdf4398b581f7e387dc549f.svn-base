@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+	<head>
+    	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">  
+		<title>登录</title>
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="format-detection" content="telephone=no">
+		<meta http-equiv="Pragma" content= "no-cache" /> 
+		<meta http-equiv="Cache-Control" content= "no-cache" /> 
+		<meta http-equiv="Expires" content= "0" /> 
+
+		<link rel="stylesheet" href="/admin/plugins/layui/css/layui.css" media="all" />
+		<link rel="stylesheet" href="/admin/css/login.css" />
+		<link rel="stylesheet" href="/admin/plugins/font-awesome/css/font-awesome.min.css">
+  		<link rel="stylesheet" href="/admin/plugins/layui2/css/layui.css"  media="all">
+		<script type="text/javascript" src="/admin/plugins/layui2/layui.js" charset="utf-8"></script>
+		<script type="text/javascript" src="/admin/js/jquery.js"></script>
+		<script type="text/javascript" src="http://test.vr.wenyiit.com/chao80/res/js/dev/base.js"></script>
+		<script type="text/javascript" src="http://test.vr.wenyiit.com/chao80/res/js/dev/util.js"></script>
+	</head>
+	<body class="beg-login-bg">
+		<div class="beg-login-box">
+			<header>
+				<h1>chao80后台登录</h1>
+			</header>
+			<div class="beg-login-main">
+				<form action="/jsonAction/account_adminLogin.action" autocomplete="off" class="layui-form" method="post" id="uploadForm"><input name="__RequestVerificationToken" type="hidden" value="fkfh8D89BFqTdrE2iiSdG_L781RSRtdWOH411poVUWhxzA5MzI8es07g6KPYQh9Log-xf84pIR2RIAEkOokZL3Ee3UKmX0Jc8bW8jOdhqo81" />
+					<div class="layui-form-item">
+						<label class="beg-login-icon">
+                        <i class="layui-icon">&#xe612;</i>
+                    </label>
+						<input type="text" name="adminPhone" lay-verify="required|phone" autocomplete="off" placeholder="这里输入登录名" class="layui-input">
+					</div>
+					<div class="layui-form-item">
+						<label class="beg-login-icon">
+                        <i class="layui-icon">&#xe642;</i>
+                    </label>
+						<input type="password" name="adminPwd" lay-verify="required" autocomplete="off" placeholder="这里输入密码" class="layui-input">
+					</div>
+					<div class="layui-form-item">
+						<div class="beg-pull-left beg-login-remember">
+							<label>记住帐号？</label>
+							<input type="checkbox" name="rememberMe" value="true" lay-skin="switch" checked title="记住帐号">
+						</div>
+						<div class="beg-pull-right">
+							<button class="layui-btn layui-btn-primary" lay-submit lay-filter="*">
+                            <i class="layui-icon">&#xe650;</i> 登录
+                        </button>
+						</div>
+						<div class="beg-clear"></div>
+					</div>
+				</form>
+			</div>
+			<footer>
+				<p>© 巢天下--收藏家</p>
+			</footer>
+		</div>
+		<script>
+			layui.use(['layer', 'form'], function() {
+				var layer = layui.layer,
+					$ = layui.jquery,
+					form = layui.form;
+				// 监控form提交
+				form.on('submit(*)', function(data){
+					uploadFormData();
+					return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+				});
+			});
+			// 提交表单数据
+			function uploadFormData(){
+				$.ajax({
+	                cache: true,
+	                type: "POST",
+	                url:"/jsonAction/account_adminLogin.action?v=" + new Date().getTime(),
+	                data:$('#uploadForm').serialize(),// 你的formid
+	                async: false,
+	                error: function(request) {
+	                	layer.confirm('管理员登录失败，是否继续登录?', { icon: 2, title: '系统提示' }, function (index) {
+							layer.close(index);
+							window.location.href='/admin/login.html';
+			            });
+	                },
+	                success: function(data) {
+						window.location.href='/admin/index.html';
+						//layer.msg("登录成功");
+	                }
+	            });
+			}
+		</script>
+	</body>
+
+</html>

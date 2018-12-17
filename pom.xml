@@ -1,0 +1,457 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>collection</groupId>
+	<artifactId>collection</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
+
+	<name>collection</name>
+	<url>http://maven.apache.org</url>
+	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.apache.solr</groupId>
+			<artifactId>solr-solrj</artifactId>
+			<version>5.3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.7</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.apache.struts</groupId>
+			<artifactId>struts2-core</artifactId>
+			<version>2.2.3</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-lang</artifactId>
+					<groupId>commons-lang</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
+		<dependency>
+			<groupId>net.sf.ezmorph</groupId>
+   			<artifactId>ezmorph</artifactId>
+   			<version>1.0.6</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+   			<artifactId>xstream</artifactId>
+    		<version>1.3.1</version>
+		</dependency>
+		
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.9.3</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sf.barcode4j</groupId>
+			<artifactId>barcode4j</artifactId>
+			<version>2.1</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
+            </exclusions>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.17</version>
+		</dependency>
+
+		<dependency>
+			<groupId>p6spy</groupId>
+			<artifactId>p6spy</artifactId>
+			<!-- <version>3.0.0-rc2</version> -->
+			<version>1.4.1-local</version>
+		</dependency>
+
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.32</version>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+			<!-- <version>3.4.1</version> -->
+			<version>3.2.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>opensymphony</groupId>
+			<artifactId>oscache</artifactId>
+			<version>2.4.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.jms</groupId>
+			<artifactId>jms</artifactId>
+			<version>1.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.ws.commons.axiom</groupId>
+			<artifactId>axiom-api</artifactId>
+			<version>1.2.19</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.ws.commons.axiom</groupId>
+			<artifactId>axiom-impl</artifactId>
+			<version>1.2.19</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.2</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.sitemesh/sitemesh -->
+		<dependency>
+		    <groupId>org.sitemesh</groupId>
+		    <artifactId>sitemesh</artifactId>
+		    <version>3.0.1</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>cn.smartcandy.framework</groupId>
+			<artifactId>cn-smartcandy-framework</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>activation</artifactId>
+					<groupId>javax.activation</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>activation</artifactId>
+					<groupId>javax.activation</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/commons-httpclient/commons-httpclient -->
+		<dependency>
+		    <groupId>commons-httpclient</groupId>
+		    <artifactId>commons-httpclient</artifactId>
+		    <version>3.1</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
+		<dependency>
+		    <groupId>org.apache.httpcomponents</groupId>
+		    <artifactId>httpclient</artifactId>
+		    <version>4.5.2</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>commons-logging</artifactId>
+					<groupId>commons-logging</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore -->
+		<dependency>
+		    <groupId>org.apache.httpcomponents</groupId>
+		    <artifactId>httpcore</artifactId>
+		    <version>4.4.5</version>
+		</dependency>
+		
+		<!-- 腾讯互联SDK2.0   使用QQ登录系统 -->
+		<!-- https://mvnrepository.com/artifact/net.gplatform/Sdk4J -->
+		<dependency>
+		    <groupId>net.gplatform</groupId>
+		    <artifactId>Sdk4J</artifactId>
+		    <version>2.0</version>
+		</dependency>
+		<!-- 新浪微博 weibo4j SDK -->
+		<dependency>
+			<groupId>weibo4j-oauth2</groupId>
+			<artifactId>weibo4j-oauth2</artifactId>
+			<version>beta3.1.1</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1.3</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.jdom</groupId>
+			<artifactId>org.jdom</artifactId>
+			<version>1.1.3</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/com.google.zxing/core -->
+		<dependency>
+		    <groupId>com.google.zxing</groupId>
+		    <artifactId>core</artifactId>
+		    <version>3.2.1</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/com.google.zxing/javase -->
+		<dependency>
+		    <groupId>com.google.zxing</groupId>
+		    <artifactId>javase</artifactId>
+		    <version>3.2.1</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/net.coobird/thumbnailator -->
+		<dependency>
+		    <groupId>net.coobird</groupId>
+		    <artifactId>thumbnailator</artifactId>
+		    <version>0.4.8</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+		    <groupId>org.json</groupId>
+		    <artifactId>json</artifactId>
+		    <version>20170516</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/com.aliyun/aliyun-java-sdk-core -->
+		<dependency>
+		    <groupId>com.aliyun</groupId>
+		    <artifactId>aliyun-java-sdk-core</artifactId>
+		    <version>3.2.9</version>
+		</dependency>
+				
+		<dependency>
+		    <groupId>com.aliyun</groupId>
+		    <artifactId>aliyun-java-sdk-dysmsapi</artifactId>
+		    <version>1.0.0-SNAPSHOT</version>
+		</dependency>
+				
+		<dependency>
+		    <groupId>com.baidu</groupId>
+		    <artifactId>com.baidu.ueditor</artifactId>
+		    <version>1.1.1.1</version>
+		</dependency>
+	</dependencies>
+
+
+	<!--配置不同环境参数-->
+	<profiles>
+		<profile>
+	        <id>local</id>
+	        <properties>
+	            <package.environment>local-dev</package.environment>
+	            <!--输出日志参数 -->
+	            <log.home>D:/logs</log.home>
+	            <sys.code>zmjm</sys.code>
+	            <log.level>DEBUG</log.level>
+	            <!--第三方登录id、key、回调url  -->
+	            <qq.app.id>101402759</qq.app.id>
+	            <qq.app.key>e2a80997f7950a9efa5cab53211f16e4</qq.app.key>
+	            <qq.redirect.uri>http://test.c.wenyiit.com/qqLogin_login.action</qq.redirect.uri>
+	            <weibo.client.id>2688697890</weibo.client.id>
+	            <weibo.client.key>ee1df6722cec2a1dea2db29044b00171</weibo.client.key>
+	            <weibo.redirect.uri>http://wenyi.51vip.biz/weiboLogin_login.action</weibo.redirect.uri>
+	        </properties>
+	        <activation>
+	            <activeByDefault>true</activeByDefault>
+	        </activation>
+	    </profile>
+	    <profile>
+	        <id>st</id>
+	        <properties>
+	            <package.environment>deploy-saas-test</package.environment>
+	            <!--输出日志参数 -->
+	            <log.home>/backup/logs/saas/app</log.home>
+	            <sys.code>saas</sys.code>
+	            <log.level>INFO</log.level>
+	            <!--第三方登录id、key、回调url  -->
+	            <qq.app.id>101402757</qq.app.id>
+	            <qq.app.key>98433a4a7606a2b158a7f90ac98c811b</qq.app.key>
+	            <qq.redirect.uri>http://test.c.wenyiit.com/qqLogin_login.action</qq.redirect.uri>
+	            <weibo.client.id>2277920206</weibo.client.id>
+	            <weibo.client.key>174f80182bde3962ca65edb762cd4fc5</weibo.client.key>
+	            <weibo.redirect.uri>http://test.c.wenyiit.com/weiboLogin_login.action</weibo.redirect.uri>
+	        </properties>
+	    </profile>
+	    <profile>
+	        <id>sp</id>
+	        <properties>
+	            <package.environment>deploy-saas-product</package.environment>
+	            <!--输出日志参数 -->
+	            <log.home>/backup/logs/applogs/saas</log.home>
+	            <sys.code>saas</sys.code>
+	            <log.level>INFO</log.level>
+	            <!--第三方登录id、key、回调url  -->
+	            <qq.app.id>101360569</qq.app.id>
+	            <qq.app.key>e9e9a0767303d0ff66a799bba5034fdc</qq.app.key>
+	            <qq.redirect.uri>http://c.smartcandy.cn/qqLogin_login.action</qq.redirect.uri>
+	            <weibo.client.id>3282623930</weibo.client.id>
+	            <weibo.client.key>f4ed8639f189c7edaa0b91764e810135</weibo.client.key>
+	            <weibo.redirect.uri>http://c.smartcandy.cn/weiboLogin_login.action</weibo.redirect.uri>
+	        </properties>
+	    </profile>
+	    <profile>
+	        <id>ss</id>
+	        <properties>
+	            <package.environment>deploy-saas-show</package.environment>
+	            <!--输出日志参数 -->
+	            <log.home>/backup/logs/saas</log.home>
+	            <sys.code>saas</sys.code>
+	            <log.level>INFO</log.level>
+	            <!--第三方登录id、key、回调url  -->
+	            <qq.app.id>101407652</qq.app.id>
+	            <qq.app.key>3a7d0ed0382b61b19ccda7309eda2123</qq.app.key>
+	            <qq.redirect.uri>http://demo.c.wenyiit.com/qqLogin_login.action</qq.redirect.uri>
+	            <weibo.client.id>1731841301</weibo.client.id>
+	            <weibo.client.key>4ae553a42662c85229da2f9a89c9ebe4</weibo.client.key>
+	            <weibo.redirect.uri>http://demo.c.wenyiit.com/weiboLogin_login.action</weibo.redirect.uri>
+	        </properties>
+	    </profile>
+	    <profile>
+	        <id>zt</id>
+	        <properties>
+	            <package.environment>deploy-zmjm-test</package.environment>
+	            <!--输出日志参数 -->
+	            <log.home>/home/logs/collection</log.home>
+	            <sys.code>zmjm</sys.code>
+	            <log.level>INFO</log.level>
+	            <!--第三方登录id、key、回调url  -->
+	            <qq.app.id>101360569</qq.app.id>
+	            <qq.app.key>e9e9a0767303d0ff66a799bba5034fdc</qq.app.key>
+	            <qq.redirect.uri>http://collection.annjema.com/qqLogin_login.action</qq.redirect.uri>
+	            <weibo.client.id>3282623930</weibo.client.id>
+	            <weibo.client.key>f4ed8639f189c7edaa0b91764e810135</weibo.client.key>
+	            <weibo.redirect.uri>http://collection.annjema.com/weiboLogin_login.action</weibo.redirect.uri>
+	        </properties>
+	    </profile>
+	    <profile>
+	        <id>zp</id>
+	        <properties>
+	            <package.environment>deploy-zmjm-product</package.environment>
+	            <!--输出日志参数 -->
+	            <log.home>/disk-app/logs/collection/app</log.home>
+	            <sys.code>zmjm</sys.code>
+	            <log.level>INFO</log.level>
+	            <!--第三方登录id、key、回调url  -->
+	            <qq.app.id>101360569</qq.app.id>
+	            <qq.app.key>e9e9a0767303d0ff66a799bba5034fdc</qq.app.key>
+	            <qq.redirect.uri>http://collection.annjema.com/qqLogin_login.action</qq.redirect.uri>
+	            <weibo.client.id>3282623930</weibo.client.id>
+	            <weibo.client.key>f4ed8639f189c7edaa0b91764e810135</weibo.client.key>
+	            <weibo.redirect.uri>http://collection.annjema.com/weiboLogin_login.action</weibo.redirect.uri>
+	        </properties>
+	    </profile>
+	</profiles> 
+	<build>
+		<finalName>saas</finalName>
+		<resources>
+			<resource>
+				<directory>${project.basedir}/src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>${project.basedir}/src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.properties</include>
+					<include>**/*.xml</include>
+				</includes>
+			</resource>
+			<resource>
+	            <directory>src/main/resources</directory>
+	            <filtering>true</filtering>
+	            <excludes>
+	            	<exclude>local-dev/*</exclude>
+	                <exclude>deploy-saas-product/*</exclude>
+	                <exclude>deploy-saas-show/*</exclude>
+	                <exclude>deploy-saas-test/*</exclude>
+	                <exclude>deploy-zmjm-product/*</exclude>
+	                <exclude>deploy-zmjm-test/*</exclude>
+	            </excludes>
+       		</resource>
+		</resources>
+	  <!-- war打包插件, 设定war包名称不带版本号 -->
+	  <plugins>
+		    <plugin>
+		        <groupId>org.apache.maven.plugins</groupId>
+		        <artifactId>maven-war-plugin</artifactId>
+		        <version>2.3</version>
+		        <configuration>
+		            <warName>collection</warName>
+		            <webResources>
+		                <!--动态指定配置文件-->
+		                <resource>
+		                    <directory>src/main/resources/${package.environment}</directory>
+		                    <targetPath>WEB-INF/classes</targetPath>
+		                    <filtering>true</filtering>
+		                </resource>
+		            </webResources>
+		        </configuration>
+		    </plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+	    </plugins>
+	</build>
+
+</project>

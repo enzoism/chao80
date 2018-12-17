@@ -1,0 +1,1378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="productsMng">
+
+<sql id="manageBranch">branchSequence IN <foreach collection="userManageBranch" item="id" open="(" separator="," close=")">#{id}</foreach></sql>
+	
+	<sql id="topBranchSequence">
+		topBranchSequence = #{topBranchSequence}
+	</sql>
+	
+	<sql id="pspAllColumn">
+		DISTINCT psp.pspSequence,
+		psp.pspCode,
+		psp.pspName,
+		psp.pspType,
+		psp.branchSequence,
+		psp.cateSequence,
+		psp.brandSequence,
+		psp.topBranchSequence,
+		psp.brandName,
+		psp.pspSpecifications,
+		psp.pspClass,
+		psp.pspCostPrice,
+		psp.pspProposedPrice,
+		psp.pspServiceTime,
+		psp.pspServiceUnit,
+		psp.pspSaleLimit,
+		psp.pspDetail,
+		psp.pspScope,
+		psp.pspStatus,
+		psp.pspTag,
+		psp.pspRemark,
+		psp.pspFlag,
+		psp.pspSize,
+		psp.pspColor,
+		psp.pspColorRGB,
+		psp.pspIsShow,
+		psp.pspIsRecommended,
+		psp.pspAddTime,
+		psp.prcsSequence,
+		psp.piSequence,
+		psp.cateSequence_1,
+		psp.cateSequence_2,
+		psp.cateSequence_3,
+		psp.cateSequence_4,
+		psp.pspBarCode,
+		psp.isWXShow,
+		psp.isSale,
+		psp.isSalePoints,
+		psp.exchangePoints,
+		psp.pspPresentation,
+		psp.isMemberDiscount,
+		psp.isCardDiscount
+	</sql>
+	
+	<sql id="pspFullColumn">
+		psp.pspSequence,
+		psp.pspCode,
+		psp.pspName,
+		psp.pspType,
+		psp.branchSequence,
+		psp.cateSequence,
+		psp.cateName,
+		psp.brandSequence,
+		psp.topBranchSequence,
+		psp.brandName,
+		psp.pspSpecifications,
+		psp.pspClass,
+		psp.pspCostPrice,
+		psp.pspProposedPrice,
+		psp.pspServiceTime,
+		psp.pspServiceUnit,
+		psp.pspSaleLimit,
+		psp.pspDetail,
+		psp.pspScope,
+		psp.pspStatus,
+		psp.pspTag,
+		psp.pspRemark,
+		psp.pspFlag,
+		psp.pspSize,
+		psp.pspColor,
+		psp.pspColorRGB,
+		psp.pspIsShow,
+		psp.pspIsRecommended,
+		psp.pspAddTime,
+		psp.prcsSequence,
+		psp.piSequence,
+		psp.cateSequence_1,
+		psp.cateSequence_2,
+		psp.cateSequence_3,
+		psp.cateSequence_4,
+		psp.pspBarCode,
+		psp.isWXShow,
+		psp.isSale,
+		psp.isSalePoints,
+		psp.exchangePoints,
+		psp.pspPresentation,
+		psp.isMemberDiscount,
+		psp.isCardDiscount
+	</sql>
+	
+	<!-- 根据条件查询产品/服务/套餐/卡/优惠促销列表 -->
+	<select id="selectPSPCPList" parameterType="HashMap" resultType="HashMap">
+		SELECT *
+		FROM (
+			SELECT
+				NULL pType,
+				NULL pClass,
+				NULL pClassL2,
+				NULL pSequence,
+				NULL pCode,
+				NULL pName,
+				NULL pPrice,
+				NULL pExplain,
+				NULL pCateName
+			FROM DUAL
+			WHERE 1 = 0
+			
+			<!-- 产品、服务、套餐 -->
+			<if test='((pType == "0" || pType == "1") and (null == consumeType || consumeType == "1")) || ((pType == "0" || pType == "2") and (null == consumeType || consumeType == "2")) || ((pType == "0" || pType == "3") and (null == consumeType || consumeType == "3"))'>
+			UNION
+			SELECT
+				psp.pspType pType,
+				psp.pspClass pClass,
+				NULL pClassL2,
+				psp.pspSequence pSequence,
+				psp.pspCode pCode,
+				psp.pspName pName,
+				psp.pspProposedPrice pPrice,
+				psp.pspSpecifications pExplain,
+				psp.cateName pCateName
+			FROM
+				a_psp psp
+			INNER JOIN a_pspbr pb
+				ON psp.pspSequence = pb.pspSequence
+				AND pb.branchSequence = #{branchSequence}
+			WHERE
+				psp.pspFlag = 'N'
+				AND psp.pspStatus = 'N'
+				AND psp.pspType = #{pType}
+				<if test='productScope == "1"'>
+					<if test='(pType == "0" || pType == "1") and (null == consumeType || consumeType == "1")'>AND psp.isSale = 'Y'</if>
+				</if>
+				<if test="null != pCode">AND psp.pspCode LIKE '%${pCode}%'</if>
+				<if test="null != pName">AND psp.pspName LIKE '%${pName}%'</if>
+				<if test='((pType == "0" || pType == "1") and (null == consumeType || consumeType == "1")) || ((pType == "0" || pType == "2") and (null == consumeType || consumeType == "2"))'>
+					<if test="null != cateSequence">AND psp.cateSequence = #{cateSequence}</if><!-- 产品、服务分类 -->
+				</if>
+				<if test='(pType == "0" || pType == "3") and (null == consumeType || consumeType == "3")'>
+					<if test="null != pClass">AND psp.pspClass = #{pClass}</if><!-- 套餐类型 -->
+				</if>
+				<!-- <if test="null != branchSequence">AND (
+					psp.pspScope = '0'
+					OR EXISTS (
+						SELECT 1
+						FROM a_pspbr pspbr
+						WHERE
+							pspbr.pspSequence = psp.pspSequence
+						AND pspbr.branchSequence = #{branchSequence}
+					)
+				)</if> -->
+				<trim>	
+					<if test="null != topBranchSequence">AND psp.<include refid="topBranchSequence"/></if>
+				</trim>
+			</if>
+			
+			<!-- 卡种信息 -->
+			<if test='(pType == "0" || pType == "4") and (null == consumeType || consumeType == "4")'>
+			UNION
+			SELECT
+				'4' pType,
+				ct.ctType pClass,
+				ct.ctClass pClassL2,
+				ct.ctSequence pSequence,
+				ct.ctCode pCode,
+				ct.ctName pName,
+				ct.ctPrice pPrice,
+				null pExplain,
+				null pCateName
+			FROM a_ct ct
+			LEFT JOIN a_cabr cbr
+				ON ct.ctSequence = cbr.ctSequence
+			<where>
+				 ct.ctStatus = 'N'
+			AND cbr.branchSequence = #{branchSequence}
+				<if test="null != pCode">AND ct.ctCode LIKE '%${pCode}%'</if>
+				<if test="null != pName">AND ct.ctName LIKE '%${pName}%'</if>
+				<if test="null != pClass">AND ct.ctType = #{pClass}</if>
+				<if test="null != pClassL2">AND ct.ctClass = #{pClassL2}</if>
+				<!-- <if test="null != branchSequence">AND (
+					EXISTS (
+						SELECT
+							1
+						FROM
+							a_card card
+						WHERE
+							card.ctSequence = ct.ctSequence
+						AND card.cardStatus = 'A'
+						AND card.branchSequence = #{branchSequence}
+					)
+				)</if> -->
+				<trim>	
+					<if test="null != topBranchSequence">AND ct.<include refid="topBranchSequence"/></if>
+				</trim>
+			</where>
+			</if>
+			
+			<!-- 优惠促销 -->
+			<!-- <if test='(pType == "0" || pType == "5") and (null == consumeType || consumeType == "5")'>
+			UNION
+			SELECT
+				'5' pType,
+				NULL pClass,
+				NULL pClassL2,
+				p.promotionSequence pSequence,
+				p.promotionCode pCode,
+				p.promotionName pName,
+				p.promotionProposedPrice pPrice,
+				p.promotionDetail pExplain,
+				NULL pCateName
+			FROM a_promotion p
+			WHERE
+				p.promotionFlag = 'N'
+			AND p.promotionStatus = 'N'
+			<if test="null != pCode">AND p.promotionCode LIKE '%${pCode}%'</if>
+			<if test="null != pName">AND p.promotionName LIKE '%${pName}%'</if>
+			<if test="null != branchSequence">AND (
+				p.promotionScope = '0'
+				OR EXISTS (
+					SELECT 1
+					FROM a_pbr pbr
+					WHERE
+						pbr.promotionSequence = p.promotionSequence
+					AND pbr.branchSequence = #{branchSequence}
+				)
+			)</if>
+			<trim>	
+				<if test="null != topBranchSequence">AND p.<include refid="topBranchSequence"/></if>
+			</trim>
+			</if> -->
+			) t
+		ORDER BY t.pType, t.pClass, t.pCode
+	</select>
+	
+	<!-- 查询单个产品信息 -->
+	<select id="selectProduct" parameterType="String" resultType="HashMap" >
+		SELECT * FROM a_psp 
+		WHERE pspSequence = #{pspSequence} 
+	</select>
+	
+	<!-- 查询所有商品信息 -->
+	<select id="selectProductsList" parameterType="HashMap" resultType="HashMap" >
+	
+		<!-- 适用机构包含用户管理范围机构的商品 -->
+		SELECT
+			<include refid="pspAllColumn"/>,
+			cate.cgName AS cateName,
+			pi.piImageURL
+		FROM
+			a_pspbr pb
+		INNER JOIN c_unb unb
+			ON 
+				pb.branchSequence = unb.branchSequence
+			AND 
+				unbStatus = 'N'
+			AND userSequence = #{userSequence}
+		INNER JOIN a_psp psp 
+			ON psp.pspSequence = pb.pspSequence
+		LEFT JOIN a_pimage pi 
+			ON psp.piSequence = pi.piSequence
+		LEFT JOIN a_category cate
+			ON psp.cateSequence = cate.cgSequence
+		<where>
+			 pspType = #{pspType} 
+			<if test="null != productCode">AND pspCode= #{productCode}</if>
+			<if test="null != productName">AND pspName LIKE '%${productName}%'</if>
+			<if test="null != pspcecateSequence">AND cateSequence = #{pspcecateSequence}</if>
+			<if test="null != brandName">AND brandName LIKE '%${brandName}%'</if>
+			<if test="null != pspFlag">AND pspFlag= #{pspFlag}</if>
+			<if test="null != productStatus">AND pspStatus = #{productStatus}</if>
+			<if test="null != productType">AND pspClass = #{productType}</if>
+			<if test="null != isSalePoints">AND isSalePoints = #{isSalePoints}</if>
+			<trim>	
+				<if test="null != topBranchSequence">AND psp.<include refid="topBranchSequence"/></if>
+			</trim>
+		</where>
+		
+		<!-- 管理范围机构创建的商品 -->
+		UNION 
+		SELECT
+			<include refid="pspAllColumn"/>,
+			cate.cgName AS cateName,
+			pi.piImageURL
+		FROM
+			a_psp psp
+		INNER JOIN c_unb unb
+			ON 
+				psp.branchSequence = unb.branchSequence
+			AND 
+				unbStatus = 'N'
+			AND userSequence = #{userSequence}
+		LEFT JOIN a_pimage pi 
+			ON psp.piSequence = pi.piSequence
+		LEFT JOIN a_category cate
+			ON psp.cateSequence = cate.cgSequence
+		<where>
+			 pspType = #{pspType} 
+			<if test="null != productCode">AND pspCode= #{productCode}</if>
+			<if test="null != productName">AND pspName LIKE '%${productName}%'</if>
+			<if test="null != pspcecateSequence">AND cateSequence = #{pspcecateSequence}</if>
+			<if test="null != brandName">AND brandName LIKE '%${brandName}%'</if>
+			<if test="null != pspFlag">AND pspFlag= #{pspFlag}</if>
+			<if test="null != productStatus">AND pspStatus = #{productStatus}</if>
+			<if test="null != productType">AND pspClass = #{productType}</if>
+			<trim>	
+				<if test="null != topBranchSequence">AND psp.<include refid="topBranchSequence"/></if>
+			</trim>
+		</where>
+		
+		<!-- 上级创建商品，适用机构包含用户当前机构的商品（目前用户的管理范围包含了自己的所在机构，则此处可以不加入） -->
+		<!-- UNION 
+		SELECT
+			<include refid="pspAllColumn"/>,
+			psp.cateName,
+			pi.piImageURL
+		FROM
+			a_pspbr pb
+		LEFT JOIN a_psp psp 
+			ON psp.pspSequence = pb.pspSequence
+		LEFT JOIN a_pimage pi 
+			ON psp.piSequence = pi.piSequence
+		<where>
+			 pspType = #{pspType} 
+			<if test="null != userDeptSequence">AND pb.branchSequence = #{userDeptSequence}</if>
+			<if test="null != productCode">AND pspCode= #{productCode}</if>
+			<if test="null != productName">AND pspName LIKE '%${productName}%'</if>
+			<if test="null != pspcecateSequence">AND cateSequence = #{pspcecateSequence}</if>
+			<if test="null != brandName">AND brandName LIKE '%${brandName}%'</if>
+			<if test="null != pspFlag">AND pspFlag= #{pspFlag}</if>
+			<if test="null != productStatus">AND pspStatus = #{productStatus}</if>
+			<if test="null != productType">AND pspClass = #{productType}</if>
+			<trim>	
+				<if test="null != topBranchSequence">AND psp.<include refid="topBranchSequence"/></if>
+			</trim>
+		</where> -->
+
+		GROUP BY pspSequence
+		ORDER BY 
+			cateSequence ASC, pspSequence DESC, pspFlag DESC, pspCode
+	</select>
+	
+	<!-- 查询所有产品分类 -->
+	<select id="selectProductsClass" parameterType="String" resultType="HashMap">
+		SELECT
+			psp.pspClass,
+			pd.pdName
+		FROM
+			a_psp psp
+		LEFT JOIN a_pd pd ON psp.pspClass = pd.pdCode
+		WHERE
+			psp.pspClass LIKE '1%'
+			<trim>	
+				<if test="null != topBranchSequence">AND psp.<include refid="topBranchSequence"/></if>
+			</trim>
+		GROUP BY
+			psp.pspClass
+	</select>
+	
+	<!-- 查询所有套餐信息关联包含套餐 -->
+	<select id="selectPackagesList" parameterType="String" resultType="HashMap" >
+		SELECT ps.*,pp.pspcNum 
+		FROM a_psp ps LEFT JOIN a_ppsr pp
+		ON ps.pspSequence = pp.pspcSequence
+		WHERE pp.packageSequence = #{packageSequence} 
+		GROUP BY pspSequence
+		ORDER BY ps.pspCode
+	</select>
+	
+	<!-- 新增产品信息 -->
+	<insert id="insertProducts" parameterType="cn.smartcandy.application.a.commonbean.PSP" >
+		INSERT INTO a_psp (
+			pspSequence,
+			pspCode,
+			pspName,
+			pspType,
+			branchSequence,
+			pspSpecifications,
+			pspClass,
+			pspCostPrice,
+			pspServiceTime,
+			pspServiceUnit,
+			pspSaleLimit,
+			pspDetail,
+			pspScope,
+			pspStatus,
+			pspRemark,
+			pspFlag,
+			pspColorRGB,
+			pspColor,
+			pspSize,
+			pspProposedPrice,
+			cateSequence,
+			cateName,
+			prcsSequence,	
+			piSequence,
+			pspIsRecommended,
+			cateSequence_1,
+			cateSequence_2,
+			cateSequence_3,
+			cateSequence_4,
+			pspAddTime,
+			pspTag,
+			brandSequence,
+			brandName,
+			pspBarCode,
+			topBranchSequence,
+			isWXShow,
+			isSale,
+			isSalePoints,
+			exchangePoints,
+			pspPresentation,
+			wxRecommended,
+			saleRecommended,
+			pointsRecommended,
+			isBooking,
+			isMemberDiscount,
+			isCardDiscount
+		)
+		VALUES(
+			#{pspSequence},
+			#{pspCode},
+			#{pspName},
+			#{pspType},
+			#{branchSequence},
+			#{pspSpecifications},
+			#{pspClass},
+			#{pspCostPrice},
+			#{pspServiceTime},
+			#{pspServiceUnit},
+			#{pspSaleLimit},
+			#{pspDetail},
+			#{pspScope},
+			#{pspStatus},
+			#{pspRemark},
+			#{pspFlag},
+			#{pspColorRGB},
+			#{pspColor},
+			#{pspSize},
+			#{pspProposedPrice},
+			#{cateSequence},
+			#{cateName},
+			'0',	
+			#{piSequence},
+			#{pspIsRecommended},
+			#{cateSequence_1},
+			#{cateSequence_2},
+			#{cateSequence_3},
+			#{cateSequence_4},
+			'',
+			'',
+			#{brandSequence},
+			#{brandName},
+			#{pspBarCode},
+			#{topBranchSequence},
+			#{isWXShow},
+			#{isSale},
+			#{isSalePoints},
+			#{exchangePoints},
+			#{pspPresentation},
+			#{wxRecommended},
+			#{saleRecommended},
+			#{pointsRecommended},
+			#{isBooking},
+			#{isMemberDiscount},
+			#{isCardDiscount}
+		)
+	</insert>
+	
+	 <!-- 根据产品信息的seq查询产品-->
+	<select id="getPspByID" parameterType="String" resultType="cn.smartcandy.application.a.commonbean.PSP" >
+		SELECT * FROM a_psp 
+		WHERE pspSequence = #{_parameter}
+	</select>
+	
+	<select id="selecetPimage" parameterType="String" resultType="HasHmap">
+		SELECT * FROM a_pimage
+		WHERE pspSequence = #{_parameter}
+	</select>
+	
+	<!-- 插入销售门店关联表 -->
+	<insert id="insertBranchs" parameterType="HashMap" >
+		INSERT INTO a_pspbr (
+			 pspSequence,
+			 branchSequence
+			) 
+		VALUES(
+			#{pspSequence},
+   		 	#{branchSequence}
+   		)
+	</insert>
+	<!-- 插入分类门店关联表 -->
+	<insert id="insertCateBranchs" parameterType="HashMap" >
+		INSERT INTO a_catebr (
+			 cgSequence,
+			 branchSequence
+			) 
+		VALUES(
+			#{cgSequence},
+   		 	#{branchSequence}
+   		)
+	</insert>
+	
+	<!-- 产品与图片关联表插入数据 -->
+	<insert id="insertPimage" parameterType="HashMap">
+		INSERT INTO a_pimage
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="piSequence != null">piSequence,</if>
+			<if test="pspSequence != null">pspSequence,</if>
+			<if test="ctSequence != null">ctSequence,</if>
+			<if test="piImageURL != null">piImageURL,</if>
+			<if test="piThumbURL != null">piThumbURL,</if>
+			<if test="piOrder != null">piOrder,</if>
+			<if test="piFlag != null">piFlag</if>
+		</trim>
+		VALUES 
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="piSequence != null">#{piSequence},</if>
+			<if test="pspSequence != null">#{pspSequence},</if>
+			<if test="ctSequence != null">#{ctSequence},</if>
+			<if test="piImageURL != null">#{piImageURL},</if>
+			<if test="piThumbURL != null">#{piThumbURL},</if>
+			<if test="piOrder != null">#{piOrder},</if>
+			<if test="piFlag != null">#{piFlag}</if>
+		</trim>
+	</insert>
+	
+	
+	<!-- 删除产品图片关联表 -->
+	<delete id="deletePimage" parameterType="String" >
+		DELETE FROM a_pimage 
+		WHERE pspSequence = #{_parameter}
+	</delete>
+	
+	<!-- 删除销售门店关联表 -->
+	<delete id="deleteBranchs" parameterType="String" >
+		DELETE FROM a_pspbr 
+		WHERE pspSequence = #{_parameter}
+	</delete>
+	
+	<!-- 删除分类门店关联表 -->
+	<delete id="deleteCateBranchs" parameterType="String" >
+		DELETE FROM a_catebr 
+		WHERE cgSequence = #{_parameter}
+	</delete>
+	
+	<!-- 查询销售门店关联表 -->
+	<select id="selectBranchs" parameterType="String" resultType="String" >
+		SELECT ps.branchSequence 
+		FROM a_pspbr ps
+	 	WHERE ps.pspSequence = #{_parameter}
+	</select>
+	
+	<!-- 查询分类门店关联表 -->
+	<select id="selectCateBranchs" parameterType="String" resultType="String" >
+		SELECT cb.branchSequence 
+		FROM a_catebr cb
+	 	WHERE cb.cgSequence = #{_parameter}
+	</select>
+	
+	<!-- 插入套餐关联表 -->
+	<insert id="insertPSPRelation" parameterType="HashMap" >
+		INSERT INTO a_ppsr (
+			 packageSequence,
+			 pspcSequence,
+			 pspcType,
+			 pspCode,
+			 pspcNum,
+			 ppsrPeriodType,
+			 ppsrServiceTotalTimes
+			) 
+		VALUES(
+			#{packageSequence},
+   		 	#{pspcSequence},
+   		 	#{pspcType},
+   		 	#{pspCode},
+   		 	#{pspcNum},
+   		 	#{ppsrPeriodType},
+   		 	#{ppsrServiceTotalTimes}
+   		)
+	</insert>
+	
+	<!-- 删除套餐关联表 -->
+	<delete id="deletePSPRelation" parameterType="String" >
+		DELETE FROM a_ppsr 
+		WHERE packageSequence = #{_parameter}
+	</delete>
+	
+	<!-- 查询套餐关联表 -->
+	<select id="selectPSPRelation" parameterType="String" resultType="HashMap" >
+		SELECT 
+			pp.*,
+			ps.pspName,
+			ps.pspClass,
+			ps.pspProposedPrice,
+			ps.pspSpecifications
+		FROM
+			a_ppsr pp LEFT JOIN a_psp ps
+		ON 
+			pp.pspcSequence = ps.pspSequence
+		WHERE 
+			pp.packageSequence = #{_parameter}
+	</select>
+	
+	<!-- 根据seq修改产品信息 -->
+	<update id="updateProducts" parameterType="cn.smartcandy.application.a.commonbean.PSP" >
+		UPDATE
+			a_psp
+	    SET 
+			pspCode = #{pspCode},
+			pspName = #{pspName},
+			pspType = #{pspType},
+			pspSpecifications = #{pspSpecifications},
+			pspClass = #{pspClass},
+			pspCostPrice = #{pspCostPrice},
+			pspProposedPrice = #{pspProposedPrice},
+			pspServiceTime = #{pspServiceTime},
+			pspServiceUnit = #{pspServiceUnit},
+			pspSaleLimit = #{pspSaleLimit},
+			pspDetail = #{pspDetail},
+			pspScope = #{pspScope},
+			pspRemark = #{pspRemark},
+			pspFlag = #{pspFlag},
+			cateName = #{cateName},
+			cateSequence = #{cateSequence},
+			pspIsRecommended = #{pspIsRecommended},
+			brandName = #{brandName},
+			brandSequence = #{brandSequence},
+			cateSequence_1 = #{cateSequence_1},
+			cateSequence_2 = #{cateSequence_2},
+			cateSequence_3 = #{cateSequence_3},
+			cateSequence_4 = #{cateSequence_4},
+			pspColor = #{pspColor},
+			pspColorRGB = #{pspColorRGB},
+			pspSize = #{pspSize},
+			piSequence = #{piSequence},
+			isWXShow = #{isWXShow},
+			isSale = #{isSale},
+			isSalePoints = #{isSalePoints},
+			exchangePoints = #{exchangePoints},
+			pspPresentation = #{pspPresentation},
+			isBooking = #{isBooking},
+			isMemberDiscount=#{isMemberDiscount},
+			isCardDiscount=#{isCardDiscount}
+		WHERE 
+			pspSequence = #{pspSequence}
+	</update>
+	 
+	 <!-- 根据pspCode删除产品信息(物理删除) -->
+	 <delete id="deleteProducts" parameterType="String" >
+	    DELETE FROM a_psp 
+	    WHERE pspSequence = #{_parameter}
+	 </delete>
+	 
+	<!-- 根据pspCode修改产品标记是否为删除(逻辑删除) -->
+	<update id="updateProductsFlag" parameterType="HashMap" >
+		UPDATE a_psp
+   		SET 
+           	pspFlag = #{pspFlag}
+   		WHERE pspSequence = #{pspSequence}
+	</update>
+	
+	<!-- 根据pspSeq查询套餐关联表 -->
+	<select id="selectPSPRelationCountByPspSeq" parameterType="String" resultType="int" >
+		SELECT count(*) as count_value 
+		FROM a_ppsr 
+	 	WHERE pspcSequence = #{_parameter}
+	</select>
+	
+	<!-- 根据pspSeq查询销售门店关联表 -->
+	<select id="selectBranchsCountByPspSeq" parameterType="String" resultType="int" >
+		SELECT count(*) as count_value 
+		FROM a_pspbr 
+	 	WHERE pspSequence = #{_parameter}
+	</select>
+	
+	<!-- 根据pspSeq查询库存表 -->
+	<select id="selectPSPStocksCountByPspSeq" parameterType="String" resultType="int" >
+		SELECT count(*) AS count_value
+		FROM a_stocks 
+		WHERE 
+			leftQuantity = 0 
+		AND debtQuantity = 0 
+		AND pspSequence = #{_parameter}
+	</select>
+	
+	<!-- 根据pspSeq查询订单明细未结算表 -->
+	<select id="select*****CountByPspSeq" parameterType="String" resultType="int" >
+		SELECT count(*) AS count_value 
+		FROM  
+	 	WHERE pspSequence = #{_parameter}
+	</select>
+	
+	<!-- 根据产品/服务Seq 查询套餐Seq-->
+	<select id="selectPackageSequence" parameterType="String" resultType="String">
+		SELECT packageSequence
+		FROM a_ppsr
+		WHERE pspcSequence = #{_parameter}
+	</select>
+	
+	<!-- 根据产品/服务Seq 查询套餐Seq-->
+	<select id="upadtePackageDetail" parameterType="HashMap" resultType="String">
+		UPDATE a_psp SET 
+		pspDetail = #{pspDetail}
+		WHERE pspSequence = #{pspSequence}
+	</select>
+	
+	
+	
+	<!-- 分类信息查询 -->
+	<select id="selectCategoryList" parameterType="HashMap" resultType="HashMap">
+		<!-- 用户管理范围机构为适用机构的分类 -->
+		SELECT
+			 DISTINCT cg.cgSequence,
+			 cg.cgCode,
+			 cg.cgName,
+			 cg.cgParentSeq,
+			 cg.branchSequence,
+			 cg.cgParentBrSeqPath,
+			 cg.cgFlag,
+			 cg.cgType
+		FROM
+			a_catebr cb
+		INNER JOIN c_unb unb
+			ON 
+				cb.branchSequence = unb.branchSequence
+			AND 
+				unbStatus = 'N'
+			AND userSequence = #{userSequence}
+		INNER JOIN a_category cg 
+			ON cg.cgSequence = cb.cgSequence
+		 <where>
+		 	<if test="categoryCode != null &amp; categoryCode != ''">AND cg.cgCode = #{categoryCode}</if>
+			<if test="categoryName != null &amp; categoryName != ''">AND cg.cgName like '%${categoryName}%'</if>
+			<if test="cgFlag!=null">AND cg.cgFlag = #{cgFlag}</if>
+			<if test="cgType!=null">AND cg.cgType = #{cgType}</if>
+			<trim>	
+				<if test="null != topBranchSequence">AND cg.<include refid="topBranchSequence"/></if>
+			</trim>
+		 </where>
+		<!-- 用户管理范围机构创建的分类 -->
+		UNION
+		SELECT
+			 cg.cgSequence,
+			 cg.cgCode,
+			 cg.cgName,
+			 cg.cgParentSeq,
+			 cg.branchSequence,
+			 cg.cgParentBrSeqPath,
+			 cg.cgFlag,
+			 cg.cgType
+		FROM
+			a_category cg 
+		INNER JOIN c_unb unb
+			ON 
+				cg.branchSequence = unb.branchSequence
+			AND 
+				unbStatus = 'N'
+			AND userSequence = #{userSequence}
+		 <where>
+		 	<if test="categoryCode != null &amp; categoryCode != ''">AND cg.cgCode = #{categoryCode}</if>
+			<if test="categoryName != null &amp; categoryName != ''">AND cg.cgName like '%${categoryName}%'</if>
+			<if test="cgFlag!=null">AND cg.cgFlag = #{cgFlag}</if>
+			<if test="cgType!=null">AND cg.cgType = #{cgType}</if>
+			<trim>	
+				<if test="null != topBranchSequence">AND cg.<include refid="topBranchSequence"/></if>
+			</trim>
+		 </where>
+		 ORDER BY cgSequence ASC, cgName
+	</select>
+	
+	<!-- 分类信息查询 -->
+	<select id="selectCategoryListAll" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			 cgSequence,
+			 cgCode,
+			 cgName,
+			 cgParentSeq,
+			 branchSequence,
+			 cgParentBrSeqPath,
+			 cgFlag,
+			 cgType
+		FROM
+			a_category
+		 <where>
+			<if test="cgFlag != null">AND cgFlag = #{cgFlag}</if>
+			<if test="cgType != null">AND cgType = #{cgType}</if>
+		 </where>
+	</select>
+	
+	<!-- 查询积分商城的商品的分类的信息 -->
+	<select id="selectCategoryListForPoint" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			 DISTINCT cate.cgSequence,
+			 cate.cgCode,
+			 cate.cgName,
+			 cate.cgParentSeq,
+			 cate.branchSequence,
+			 cate.cgParentBrSeqPath,
+			 cate.cgFlag,
+			 cate.cgType
+		FROM
+			a_category cate
+		INNER JOIN a_psp psp ON psp.cateSequence = cate.cgSequence 
+		 	AND psp.isSalePoints = 'Y'
+		 	AND psp.pspFlag = 'N'
+		 	AND psp.pspStatus = 'N'
+		 <where>
+			<if test="cgFlag != null">AND cate.cgFlag = #{cgFlag}</if>
+			<if test="cgType != null">AND cate.cgType = #{cgType}</if>
+			<if test="topBranchSequence != null">AND cate.topBranchSequence = #{topBranchSequence}</if>
+		 </where>
+		 ORDER BY cgSequence ASC
+	</select>
+	
+	<!-- 查询可以预约的服务的分类信息列表 -->
+	<select id="selectCategoryListForBookingSev" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			 DISTINCT cate.cgSequence,
+			 cate.cgCode,
+			 cate.cgName,
+			 cate.cgParentSeq,
+			 cate.branchSequence,
+			 cate.cgParentBrSeqPath,
+			 cate.cgFlag,
+			 cate.cgType
+		FROM
+			a_category cate
+		INNER JOIN a_psp psp ON psp.cateSequence = cate.cgSequence 
+		 	AND psp.pspFlag = 'N'
+		 	AND psp.pspStatus = 'N'
+		 <where>
+		 	<if test="isBooking != null">AND psp.isBooking = #{isBooking}</if>
+			<if test="topBranchSequence != null">AND psp.topBranchSequence = #{topBranchSequence}</if>
+			<if test="cgFlag != null">AND cate.cgFlag = #{cgFlag}</if>
+			<if test="cgType != null">AND cate.cgType = #{cgType}</if>
+		 </where>
+		 ORDER BY cate.cgSequence ASC
+	</select>
+	
+	 <!-- 根据参数字典pmseq信息的seq查询分类-->
+	<select id="selectPgOrCdCgInfo" parameterType="String" resultType="HashMap" >
+		SELECT
+		pdSequence;
+		pdName
+		
+		FROM a_pd 
+		WHERE pmSequence = #{_parameter}
+	</select>
+	
+	
+	<insert id="insertCategoryBranchs" parameterType="HashMap">
+		INSERT INTO a_pcr (
+			pspSequence,
+			cgSequence,
+			branchSequence
+		)
+		VALUES(
+			#{pspSequence},
+			#{cgSequence},
+			#{branchSequence}
+		)
+	</insert>
+	
+	<insert id="addCategory" parameterType="cn.smartcandy.application.a.commonbean.Category" >
+		INSERT INTO a_category (
+			cgSequence,
+			cgCode,
+			cgName,
+			cgParentSeq,
+			branchSequence,
+			cgParentBrSeqPath,
+			cgFlag,
+			cgType,
+			cgScope,
+			topBranchSequence
+		)
+		VALUES(
+			#{cgSequence},
+			#{cgCode},
+			#{cgName},
+			#{cgParentSeq},
+			#{branchSequence},
+			#{cgParentBrSeqPath},
+			'N',
+			#{cgType},
+			#{cgScope},
+			#{topBranchSequence}
+		)
+	</insert>
+	
+	<select id="queryCategory" parameterType="String" resultType="cn.smartcandy.application.a.commonbean.Category">
+		SELECT 
+			cgSequence,
+			cgCode,
+			cgName,
+			cgParentSeq,
+			branchSequence,
+			cgFlag,
+			cgType,
+			cgScope
+		FROM 
+			a_category
+		WHERE
+			cgSequence = #{cgSequence}
+	</select>
+	
+	<update id="modifyCategoryCommit" parameterType="cn.smartcandy.application.a.commonbean.Category">
+		UPDATE
+	    	a_category
+	    SET 
+			cgCode = #{cgCode},
+			cgName = #{cgName},
+			cgParentSeq = #{cgParentSeq},
+			cgParentBrSeqPath = #{cgParentBrSeqPath},
+			cgFlag = #{cgFlag},
+			cgType = #{cgType},
+			cgScope = #{cgScope}
+		WHERE 
+			cgSequence = #{cgSequence}
+	</update>
+	
+	<!-- 修改分类信息状态 -->
+	<update id="removeCategory" parameterType="String">
+		UPDATE
+	    	a_category
+	    SET 
+			cgFlag = 'D'
+		WHERE 
+			cgSequence = #{_parameter}
+	</update>
+	
+	<!-- 根据cgSequence查询产品/服务/套餐信息 -->
+	<select id="selectPSPBycgSequence" parameterType="String" resultType="HashMap">
+		SELECT
+			COUNT(pspSequence)
+		FROM
+			a_psp 
+		WHERE
+			pspFlag = 'N'
+		AND
+			cateSequence = #{_parameter}
+	</select>
+	
+	<!-- 根据cgSequence查询产品/服务/套餐信息 -->
+	<select id="selectCountCtBycgSequence" parameterType="String" resultType="HashMap">
+		SELECT
+			COUNT(pspSequence)
+		FROM
+			a_ct 
+		WHERE
+			ctStatus = 'N'
+		AND
+			ctCateSequence = #{_parameter}
+	</select>
+	
+	<!-- 根据上级路径查询分类信息 -->
+	<select id="selectBycgParentBrSeqPath" parameterType="String" resultType="cn.smartcandy.application.a.commonbean.Category">
+		SELECT
+			*
+		FROM
+			a_category
+		WHERE
+			cgParentBrSeqPath LIKE '%${_parameter}%'
+		AND cgFlag = 'N'
+	</select>
+	
+	<!-- 根据cgParentSeq查询分类信息 -->
+	<select id="selectBycgParentBrSeqPathOriginal" parameterType="String" resultType="cn.smartcandy.application.a.commonbean.Category">
+		SELECT
+			*
+		FROM
+			a_category
+		WHERE
+			cgSequence = ${_parameter}
+	</select>
+		
+	<select id="selectBrandList" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			brandSequence,
+			brandName,
+			brandNameSpell,
+			brandNameAbbr,
+			brandNameAbbrSpell,
+			brandEnglishName,
+			brandEnglishNameSpell,
+			branchSequence,
+			brandLogoURL,
+			brandTag,
+			brandFlag
+		FROM
+			a_brand
+		 <where>
+		 	<if test="brandName != null">AND brandName like '%${brandName}%'</if>
+		 	<if test="brandNameAbbr != null">AND brandNameAbbr like '%${brandNameAbbr}%'</if>
+		 	<if test="brandEnglishName != null">AND brandEnglishName like '%${brandEnglishName}%'</if>
+		 	<if test="brandTag != null">AND brandTag like '%${brandTag}%'</if>
+			<if test="brandFlag != null">AND brandFlag = #{brandFlag}</if>
+			<!-- <if test="userDeptSequence != null"> AND branchSequence like CONCAT(#{userDeptSequence}, '%') </if>	 -->	
+			<trim>
+ 			 	<if test="null != topBranchSequence">AND a_brand.<include refid="topBranchSequence"/></if>
+			</trim>
+		 </where>
+	
+	</select>
+	
+	<select id="queryBrand" parameterType="String" resultType="cn.smartcandy.application.a.commonbean.Brand">
+		SELECT 
+			brandSequence,
+			brandName,
+			brandNameSpell,
+			brandNameAbbr,
+			brandNameAbbrSpell,
+			brandEnglishName,
+			brandEnglishNameSpell,
+			branchSequence,
+			brandLogoURL,
+			brandTag,
+			brandFlag
+		FROM 
+			a_brand
+		WHERE
+			brandSequence = #{brandSequence}
+	</select>
+	
+	<update id="modifyBrandCommit" parameterType="cn.smartcandy.application.a.commonbean.Brand">
+		UPDATE
+	    	a_brand
+	    SET 
+			brandName = #{brandName},
+			brandNameSpell = #{brandNameSpell},
+			brandNameAbbr = #{brandNameAbbr},
+			brandNameAbbrSpell = #{brandNameAbbrSpell},
+			brandEnglishName = #{brandEnglishName},
+			brandEnglishNameSpell = #{brandEnglishNameSpell},
+			brandLogoURL = #{brandLogoURL},
+			brandTag = #{brandTag},
+			brandFlag = #{brandFlag}
+		WHERE 
+			brandSequence = #{brandSequence}
+	</update>
+		
+	<update id="removeBrand" parameterType="String">
+		UPDATE
+	    	a_brand
+	    SET 
+	    	brandFlag = 'D'
+	    WHERE 
+	    	brandSequence = #{brandSequence}
+	</update>
+	
+	<insert id="addBrand" parameterType="cn.smartcandy.application.a.commonbean.Brand" >
+		INSERT INTO a_brand (
+			brandSequence,
+			brandName,
+			brandNameSpell,
+			brandNameAbbr,
+			brandNameAbbrSpell,
+			brandEnglishName,
+			brandEnglishNameSpell,
+			branchSequence,
+			brandLogoURL,
+			brandTag,
+			brandFlag,
+			topBranchSequence
+		)
+		VALUES(
+			#{brandSequence},
+			#{brandName},
+			#{brandNameSpell},
+			#{brandNameAbbr},
+			#{brandNameAbbrSpell},
+			#{brandEnglishName},
+			#{brandEnglishNameSpell},
+			#{branchSequence},
+			#{brandLogoURL},
+			#{brandTag},
+			'N',
+			#{topBranchSequence}
+		)
+	</insert>
+	
+	<select id="queryColor" resultType="HashMap">
+		SELECT 
+			pcSequence,
+			pcClass,
+			pcName,
+			pcRGB
+		FROM 
+			a_pcolor
+		WHERE
+			pcClass = '0'
+	</select>
+	
+	<select id="querySonColor"  parameterType="String" resultType="HashMap">
+		SELECT 
+			pcSequence,
+			pcClass,
+			pcName,
+			pcRGB
+		FROM 
+			a_pcolor
+		WHERE
+			pcClass = #{pcSequence}
+	</select>
+	
+	<select id="queryBranch"  parameterType="String" resultType="String">
+		SELECT 
+			parentBrSeqPath
+		FROM 
+			a_branch
+		WHERE
+			branchSequence = #{userDeptSequence}
+	</select>
+	
+	<select id="queryCategoryInfo"  parameterType="HashMap" resultType="HashMap">
+		SELECT
+			ct.cgSequence,
+			ct.cgCode,
+			ct.cgName,
+			ct.cgParentSeq,
+			ct.cgParentBrSeqPath,
+			ct.branchSequence,
+			ct.cgIsShow,
+			ct.cgFlag
+		FROM
+			a_category ct
+		INNER JOIN a_catebr cabr
+			ON ct.cgSequence = cabr.cgSequence
+			AND cabr.branchSequence = #{branchSequence}
+		WHERE
+			cgFlag = 'N'
+			<if test="null != cgType">AND cgType = #{cgType}</if>
+			<trim>
+	 			 <if test="null != topBranchSequence">AND ct.<include refid="topBranchSequence"/></if>
+			</trim>
+	</select>
+	
+	<select id="querySonCategory" parameterType="String" resultType="HashMap">
+		SELECT
+			cgSequence,
+			cgCode,
+			cgName,
+			cgParentSeq,
+			cgParentBrSeqPath,
+			branchSequence,
+			cgIsShow,
+			cgFlag
+		FROM
+			a_category
+		WHERE
+			cgParentBrSeqPath like CONCAT(#{mkName}, '%') 
+			AND cgFlag = 'N'
+	</select>
+	
+	<select id="queryCgParentSeqPath" parameterType="String" resultType="String">
+		SELECT
+			cgParentBrSeqPath
+		FROM
+			a_category
+		WHERE
+			cgSequence = #{cgParentSeq} 
+	</select>
+	
+	<select id="querySonBranch" parameterType="String" resultType="HashMap">
+		SELECT
+			branchSequence
+		FROM
+			a_branch
+		WHERE
+			parentBrSeqPath  LIKE CONCAT(#{userDeptSequence}, '%') 
+		AND branchFlag ='N'
+		 
+	</select>
+	
+	<select id="queryBarscan" parameterType="String" resultType="HashMap">
+		SELECT
+			pspBarCode
+		FROM
+			a_psp
+		WHERE
+			pspBarCode LIKE CONCAT(#{barscan}, '%') 
+	</select>
+	
+	<select id="queryBarcode" parameterType="String" resultType="HashMap">
+		SELECT
+			pspSequence,
+			pspCode,
+			pspProposedPrice,
+			pspName
+		FROM
+			a_psp
+		WHERE
+			pspBarCode = #{barcode} 
+	</select>
+	
+	<select id="selectPbSequence" parameterType="String" resultType="HashMap">
+		SELECT
+			pbSequence
+		FROM
+			a_paiod a
+		WHERE
+			pspSequence = #{pspSequence}
+		AND 
+			pbSequence IN (
+				SELECT
+					pbSequence
+				FROM
+					a_pbsd
+				WHERE
+					pbsdQuantity > 0
+			)
+		AND paiodType = '2'
+	</select>
+	
+	<select id="selectPbName" parameterType="String" resultType="String">
+		SELECT
+			pbName
+		FROM
+			a_pb
+		WHERE
+			pbSequence = #{pbSequence}
+	</select>
+	
+	<select id="selectStockSequence" parameterType="String" resultType="String">
+		SELECT
+			stockSequence
+		FROM
+			a_pbsd
+		WHERE
+			pbSequence = #{pbSequence}
+		
+	</select>
+	
+	<select id="selectLeftQuantity" parameterType="HashMap" resultType="String">
+		SELECT
+			leftQuantity
+		FROM
+			a_stocks a
+		WHERE
+			(
+				a.stockSequence IN (
+					SELECT
+						stockSequence
+					FROM
+						a_pbsd
+					WHERE
+						pbSequence = #{pbSequence}
+				 	AND
+				 		pbsdQuantity > '0'
+				)
+			)
+		AND pspSequence = #{pspSequence}
+	</select>
+	
+	<!--查询所有商品  -->
+	<select id="selectPSPList" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			psp.pspType pType,
+				psp.pspSequence pSequence,
+				psp.pspCode pCode,
+				psp.pspName pName,
+				psp.pspProposedPrice pPrice,
+				psp.pspServiceTime pExplain,
+				psp.cateSequence,
+				psp.cateName pCateName
+		FROM
+			a_psp psp
+		<where>
+			<if test="null != pspCode">AND pspCode = #{code}</if>
+			<if test="null != pspName">AND pspName = #{name}</if>
+		</where>
+	</select>
+	
+	<!--根据商品类型查询商品  -->
+	<select id="selectPSPType" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			<include refid="pspAllColumn"/>,
+			pi.piImageURL,
+			pi.piThumbURL
+		FROM
+			a_psp psp 
+		INNER JOIN a_pspbr pb
+			ON psp.pspSequence = pb.pspSequence
+			AND pb.branchSequence = #{branchSequence}
+		LEFT JOIN a_pimage pi 
+			ON psp.piSequence = pi.piSequence
+		<where>
+			psp.pspStatus = 'N'
+			AND psp.pspFlag = 'N'
+			<if test="null != pspType">AND psp.pspType = #{pspType}</if>
+			<if test="null != cateSequence">AND psp.cateSequence = #{cateSequence}</if>
+			<trim>	
+					<if test="null != topBranchSequence">AND psp.<include refid="topBranchSequence"/></if>
+			</trim>
+		</where>
+	</select>
+	
+	<!--根据条件查询服务名称，为房间预约功能提供接口数据  -->
+	<select id="selectServices" parameterType="HashMap" resultType="HashMap">
+		SELECT			
+			p.*,
+			i.piImageURL,
+			i.piThumbURL
+		FROM
+			a_psp p		
+		LEFT JOIN a_pimage i ON p.piSequence = i.piSequence
+		<where>
+			<if test="null != pspType">AND p.pspType = #{pspType}</if>
+			<if test="null != cateSequence">AND p.cateSequence = #{cateSequence}</if>
+			<if test="null != pspName">AND p.pspName like '%${pspName}%'</if>
+			<if test="null != isSalePoints">AND p.isSalePoints = #{isSalePoints}</if>
+			<if test="null != isBooking">AND p.isBooking = #{isBooking}</if>
+			<if test="null != topBranchSequence">AND p.topBranchSequence = #{topBranchSequence}</if>
+			<if test="null != pspSequences">AND p.pspSequence IN <foreach collection="pspSequences" item="id" open="(" separator="," close=")">#{id}</foreach></if>
+		</where>
+		ORDER BY
+			p.cateSequence ASC,
+			p.pspSequence ASC,
+			p.cateSequence_4,
+			p.cateSequence_3,
+			p.cateSequence_2,
+			p.cateSequence_1
+	</select>
+	
+	<!-- 根据客户序号查询积分兑换的服务的订单序号及服务详情列表 -->
+	<select id="selectServListForPointByCustSeq" parameterType="HashMap" resultType="HashMap">
+		SELECT			
+			<include refid="pspFullColumn"/>,
+			oid.oidSequence,
+			oid.batch_no,
+			img.piImageURL
+		FROM
+			a_oid oid
+		INNER JOIN a_psp psp ON psp.pspSequence = oid.pspcSequence
+		INNER JOIN a_order ord ON oid.batch_no = ord.batch_no
+		LEFT JOIN a_pimage img ON psp.piSequence = img.piSequence
+		WHERE
+			oid.isServiceUsed = '0'
+			AND ord.orderType = '5'
+			AND psp.pspType = '2'
+			<if test="null != customerSequence">AND oid.customerSequence = #{customerSequence}</if>
+			<if test="null != topBranchSequence">AND oid.topBranchSequence = #{topBranchSequence}</if>
+		ORDER BY
+			oid.oidSequence ASC
+	</select>
+	
+	<!-- 按分类查询积分商城商品列表  -->
+	<select id="selectProductListForPoint" parameterType="HashMap" resultType="HashMap">
+		SELECT			
+			<include refid="pspFullColumn"/>,
+			img.piImageURL
+		FROM
+			a_psp psp		
+		LEFT JOIN a_pimage img ON psp.piSequence = img.piSequence
+		<where>
+			psp.pspType = #{pspType}
+			AND psp.isSalePoints = #{isSalePoints}
+			AND psp.pspStatus = 'N'
+			AND psp.pspFlag = 'N'
+			AND psp.topBranchSequence = #{topBranchSequence}
+			<if test="null != cateSequence">AND psp.cateSequence = #{cateSequence}</if>
+		</where>
+		ORDER BY
+			psp.cateSequence ASC, psp.pspSequence ASC
+	</select>
+	
+</mapper> 

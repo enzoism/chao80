@@ -1,0 +1,534 @@
+body, h1, h2, h3, h4, h5, h6, p, ul, ol, figure, textarea, input, button, select {
+  margin: 0;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  -webkit-tap-highlight-color: rgba(255, 255, 255, 0);
+  /*-webkit-user-select: none;*/
+  /*-moz-user-select: none;*/
+  /*-ms-user-select: none;*/
+  -webkit-touch-callout: none;
+  cursor: default;
+  -ms-content-zooming: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+html, body {
+  height: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-size: 100%;
+  font-weight: 400;
+}
+
+address, caption, cite, code, dfn, em, th, del, ins, mark, sup, sub, var {
+  font-style: normal;
+  font-weight: 400;
+  text-decoration: none;
+  background: 0;
+  font-size: 100%;
+  vertical-align: middle;
+}
+
+article, aside, details, figcaption, figure, footer, header, hgroup, main, nav, section, summary {
+  display: block;
+}
+
+ul, ol {
+  padding-left: 0;
+  list-style-type: none;
+}
+
+input, select {
+  vertical-align: middle;
+  user-select: auto;
+}
+
+input {
+  word-break: normal;
+  -webkit-appearance: none;
+  -webkit-border-radius: 0;
+  padding: 0em;
+}
+
+a {
+  outline: 0;
+  text-decoration: none;
+  color: #888;
+}
+
+strong {
+  font-weight: 700;
+}
+
+em {
+  font-style: italic;
+}
+
+small {
+  font-size: 80%;
+}
+
+fieldset, img {
+  border: 0;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+caption, th, td {
+  font-weight: 400;
+  vertical-align: middle;
+}
+
+q, blockquote {
+  quotes: none;
+}
+
+a:link {
+}
+
+a:hover {
+}
+
+a:active {
+}
+
+a:visited {
+  color: #767676;
+}
+
+q:before, q:after, blockquote:before, blockquote:after {
+  content: none;
+}
+
+body {
+  color: #000;
+  background-color: #0d0d0d;
+  background-position: 50% top;
+  background-repeat: repeat;
+  font-family: songti, YaHei, microsoft YaHei, Helvetica, Tahoma, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+body.body1 {
+  background-image: url(../../image/body.png);
+  min-height:1000px;
+}
+
+.center {
+  width: 1200px;
+  margin: 0 auto;
+}
+
+.top {
+  width: 100%;
+  min-width: 1200px;
+  height: 50px;
+  background: rgba(0, 0, 0, .3);
+  z-index: 3;
+  position: relative;
+}
+
+.top .logo {
+  width: 50px;
+  height: 50px;
+  background: url(../../image/logo.png) 50% 50% no-repeat;
+  float: left;
+}
+
+.top nav {
+  height: 50px;
+  float: right;
+}
+
+.top nav a {
+  float: left;
+  padding: 10px 33px 0 33px;
+  position: relative;
+  font-size: 14px;
+  color: #fff;
+  height: 40px;
+  line-height: 40px;
+  cursor: pointer;
+}
+
+.top nav a span {
+  font-weight: bold;
+  position: relative;
+  z-index: 2;
+  text-transform: Uppercase;
+}
+
+.top nav a:hover span,
+.top nav a.cur span {
+  color: #000;
+}
+
+.top nav a:hover:before,
+.top nav a.cur:before {
+  content: '';
+  background-color: #fbd71d;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  -webkit-transform: skewX(-15deg);
+  transform: skewX(-15deg);
+  z-index: 1;
+}
+
+
+.top #main_nav{
+  width:100px;
+  height:50px;
+  float: left;
+  position: relative;
+  margin-left:20px;
+}
+.top #main_nav .signIned{
+  width:30px;
+  height:30px;
+  position: absolute;
+  left:30px;
+  top:10px;
+  cursor:pointer;
+}
+.top #main_nav .signIned img{
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  display: block;
+}
+.top #main_nav .unSignIn{
+  width:30px;
+  height:30px;
+  position: absolute;
+  left:30px;
+  top:10px;
+  cursor:pointer;
+  background:url(../../image/icon_head.png) 50% 50% no-repeat;
+}
+
+.top #main_nav .use_base_info{
+  width:195px;
+  height:156px;
+  background: #313131;
+  border-radius:5px;
+  position: absolute;
+  display: none;
+  top:60px;
+  right:0;
+  z-index: 999;
+}
+.top #main_nav .use_base_info:before{
+  content: '';
+  width:0;
+  height:0;
+  border-width:0 8px 8px;
+  border-style:solid;
+  border-color:transparent transparent #313131;
+  position:absolute;
+  top:-8px;
+  right:45px;
+}
+.top #main_nav .use_base_info .head{padding:15px 10px 0 10px;
+  height:60px;}
+.top #main_nav .use_base_info .head .img{
+  width:65px;
+  height:60px;
+  float: left;
+}
+.top #main_nav .use_base_info .head .img img{
+  width:50px;
+  height:50px;
+  float:left;
+  border-radius:50%;
+}
+.top #main_nav .use_base_info .head .summary{
+  width:105px;
+  height:60px;
+  float: left;
+}
+.top #main_nav .use_base_info .head .summary h2{
+  color: #ffffff;
+  font-size:15px;
+}
+.top #main_nav .use_base_info .head .summary p{
+  font-size:12px;
+  color:#fff;
+}
+.top #main_nav .use_base_info .link{
+  height:40px;
+  line-height: 40px;
+  padding:0;
+  float: none;
+  display: block;
+  text-indent:15px;
+  color:#ffffff;
+}
+.top #main_nav .use_base_info .link:hover{}
+.top #main_nav .use_base_info .link:hover:before{
+  display: none;}
+.top #main_nav .use_base_info .signOut{
+  height:40px;
+  line-height:40px;
+  border-top: 1px #000 solid;
+  color: #ffffff;
+  cursor: pointer;
+  text-indent: 40px;
+  background:url(../../image/icon_head2.png) 15px 50% no-repeat;
+}
+
+
+.bottom {
+  height: 300px;
+}
+
+.bottom .logo {
+  width: 240px;
+  height: 200px;
+  background: url(../../image/logo@2x.png) 100px 16px no-repeat;
+  float: left;
+}
+
+.bottom .bottom_nav {
+  width: 960px;
+  float: left;
+  height: 200px;
+}
+
+.bottom .bottom_nav li {
+  margin-left: 103px;
+  width: 216px;
+  height: 200px;
+  float: left;
+  border-top: 6px #fbd71d solid;
+  padding-top: 26px;
+}
+
+.bottom .bottom_nav li p {
+  width: 50%;
+  float: left;
+  height: 25px;
+  line-height: 25px;
+}
+
+.bottom .bottom_nav li p a {
+  color: #c9caca;
+}
+
+.bottom .bottom_nav li div {
+  color: #fff;
+  line-height: 2.5;
+}
+
+.bottom .bottom_nav li section {
+  width: 50%;
+  height: 40px;
+  float: left;
+}
+
+.bottom .copy {
+  width: 100%;
+  float: left;
+  text-align: center;
+}
+
+.bottom .copy p {
+  color: #727171;
+  line-height: 1.5;
+}
+#WY_loading{
+  position: fixed;
+  left:0;
+  top:0;
+  right:0;
+  bottom:0;
+  background: rgba(0,0,0,0.25);
+}
+#WY_loading a{width:40px;height:40px;background:url(../../image/lock.png);position: fixed;left:50%;top:50%;
+  margin-left:-20px;-moz-animation:loading 2s linear infinite;-webkit-animation:loading 2s linear infinite;-ms-animation:loading 1s linear infinite;-o-animation:loading 2s linear infinite;}
+@-webkit-keyframes loading{0%{-webkit-transform:rotate(0deg);}100%{-webkit-transform:rotate(720deg);}}
+@-o-keyframes loading{0%{-o-transform:rotate(0deg);}100%{-o-transform:rotate(720deg);}}
+@-ms-keyframes loading{0%{-ms-transform:rotate(0deg);}100%{-ms-transform:rotate(720deg);}}
+@-webkit-keyframes loading{from{-webkit-transform:rotate(0deg);}to{-webkit-transform:rotate(360deg);}}
+@-ms-keyframes loading{from{-ms-transform:rotate(0deg)}to{-ms-transform:rotate(360deg);}}
+@-o-keyframes loading{from{-o-transform:rotate(0deg);}to{-o-transform:rotate(360deg);}}
+
+
+.WY_signIn_Up{
+  width:300px;
+  padding:0 85px;
+  position:fixed;
+  left:50%;
+  margin-left: -193px;
+  top:50%;
+  background: #313131;
+  border-radius: 5px;
+  z-index: 999;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+.WY_signIn_Up .title{
+  height:120px;
+  line-height:120px;text-align: center;
+  color: #fff;
+  font-size:26px;
+  letter-spacing: 20px;
+}
+.WY_signIn_Up .title .closeDialog {
+  width: 35px;
+  height:35px;
+  position: absolute;
+  background:url(../../image/close.png) 0 0 no-repeat;
+  top:23px;
+  right: 20px;
+  cursor: pointer;
+}
+.WY_signIn_Up .content .input{
+  height:45px;
+  background:#fff;
+  margin-bottom: 21px;
+  border-radius: 7px;
+  box-shadow: 3px 3px 7px rgba(4,0,0,.1) inset;
+}
+.WY_signIn_Up .content .input.mb0{
+  margin-bottom: 0;
+}
+.WY_signIn_Up .content .input input{
+  border:none;
+  background:none;
+  outline:none;
+  height:45px;
+  text-indent:30px;
+  line-height:45px;
+  font-size:16px;
+  width:100%;
+}
+.WY_signIn_Up  .WY_signIn{
+  height:500px;
+  margin-top:-250px;
+}
+.WY_signIn_Up .recordPassword{
+  height: 14px;
+  padding: 20px 0;
+}
+.WY_signIn_Up .recordPassword #recordPassword{
+  height:14px;
+  line-height:14px;
+  float: right;
+  padding-left:20px;
+  position: relative;
+  font-size: 12px;
+  cursor: pointer;
+}
+.WY_signIn_Up .recordPassword #recordPassword:before{
+  content: '';
+  width:12px;
+  height:12px;
+  position: absolute;
+  left:0;
+  top:1px;
+  background: #ffffff;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+}
+.WY_signIn_Up .recordPassword .cur:after{
+  content: "";
+  width:5px;
+  height:10px;
+  border-right:2px #fbd71d solid;
+  border-bottom:2px #fbd71d solid;
+  transform:rotate(45deg);
+  -moz-transform:rotate(45deg);
+  -webkit-transform:rotate(45deg);
+  position: absolute;
+  left:3px;
+  top:-1px;
+}
+.WY_signIn_Up .btn{
+  height:40px;
+  line-height: 40px;
+  background: #fbd71d;
+  color: #000;
+  font-size:14px;
+  border-radius: 7px;
+  text-align: center;
+  letter-spacing: 5px;
+  cursor: pointer;
+}
+.WY_signIn_Up .tips{
+  height:40px;
+  line-height:40px;
+  text-align:center;
+  font-size:12px;
+  color: #ffffff;
+}
+.WY_signUp .tips{
+  height:60px;
+  line-height:60px;
+}
+.WY_signIn_Up .tips span{
+  color: #fbd71d;
+  cursor: pointer;
+}
+.WY_signIn_Up .other{
+  width:250px;
+  margin: 30px auto 0 auto;
+}
+.WY_signIn_Up .other .t{height:24px;border-top:1px #c9caca solid;position: relative}
+.WY_signIn_Up .other .t span{width: 70px;
+  height:14px;
+  line-height: 14px;
+  text-align: center;
+  font-size:12px;
+  position: absolute;
+  left:50%;
+  margin-left:-35px;
+  top:-7px;
+  background: #313131;
+  color: #fff;
+  letter-spacing: 10px;
+}
+.WY_signIn_Up .other .c{
+  width:210px;
+  height:35px;
+  padding-left:20px;
+}
+.WY_signIn_Up .other .c a{
+  width:70px;
+  height:35px;
+  float: left;
+  background-repeat:no-repeat;
+  background-position: 50% top;
+  cursor: pointer;
+}
+.WY_signIn_Up .other .wechat{background-image: url(../../image/wechat2.png);}
+.WY_signIn_Up .other .wechat:hover{background-image: url(../../image/wechat.png);}
+.WY_signIn_Up .other .weibo{background-image: url(../../image/weibo2.png);}
+.WY_signIn_Up .other .weibo:hover{background-image: url(../../image/weibo.png);}
+.WY_signIn_Up .other .qq{background-image: url(../../image/qq2.png);}
+.WY_signIn_Up .other .qq:hover{background-image: url(../../image/qq.png);}
+
+.WY_signIn{
+  height:500px;
+  margin-top:-250px;
+}
+.WY_signUp{
+  height:560px;
+  margin-top:-280px;
+}
+
+

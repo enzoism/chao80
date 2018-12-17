@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="thirtyLogin" extends="struts-default">
+		<action name="thirtyLogin_*" class="cn.smartcandy.application.a.thirtyLogin.LoginThirdPartyAction" method="{1}">
+			<result name="success">/success.html</result>
+			<result name="loginSuccess" type="redirect">/index.html</result>
+			<result name="wxRegister" type="redirect">/user.html?ueabtype=2</result>
+			<result name="qqRegister" type="redirect">/user.html?ueabtype=1</result>
+		</action>
+	</package>
+</struts>

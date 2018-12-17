@@ -1,0 +1,425 @@
+Chao.home = {
+    _buildPage:function(fn,p,total){
+        var i=0,h=[];
+        if(total>1){
+            for(i;i<total;i++){
+                if(p==(i+1)){
+                    h.push('<span>'+(i+1)+'</span>')
+                }else{
+                    h.push('<a onclick="'+fn+'('+(i+1)+')">'+(i+1)+'</a>');
+                }
+            }
+        }
+        $('#home_page').html(h.join(''));
+    },
+    fave_add:function (e) {
+        //关注用户
+        var userSequence=$(e).attr('data_userSequence');
+        $.ajax({
+            url:Chao.APP.DATA+'attention_addUserAttention.action',
+            data:{userSequence:userSequence},
+            beforeSend:function(){},
+            success:function(r){
+                if(r.statusCode=="200"){
+                    $(e).html('已关注').attr({"onclick":"Chao.home.fave_remove(this)","title":"取消关注"});
+                    var o=$(e).parent().find('.fans');
+                    var n=parseInt(o.html());
+                    o.html(n+1);
+                }
+            },
+            error:function(r){Chao.err.ajax(r,1);}
+        });
+    },
+    fave_remove:function (e) {
+        // 取消关注用户
+        var userSequence=$(e).attr('data_userSequence');
+        $.ajax({
+            url:Chao.APP.DATA+'attention_removeUserAttention.action',
+            data:{userSequence:userSequence},
+            beforeSend:function(){},
+            success:function(r){
+                if(r.statusCode=="200"){
+                    $(e).html('关注').attr({"onclick":"Chao.home.fave_add(this)","title":"点击关注"});
+                    var o=$(e).parent().find('.fans');
+                    var n=parseInt(o.html());
+                    n=n-1>0?(n-1):0;
+                    o.html(n);
+                }
+            },
+            error:function(r){Chao.err.ajax(r,1);}
+        });
+    },
+    init: function () {
+        $.ajax({
+            url:Chao.APP.DATA + 'release_queryReleasedCategaryList.action',
+            success: function (rs) {
+                var h = [];
+                if (rs.userMsg) {
+                    h.push('<a href="home.html" class="edit icon_edit">编辑</a>');
+                    h.push('<div class="headImg"><img src="' + rs.userMsg.userImageURL + '"></div>');
+                    h.push('<div class="summary">');
+                    h.push('<h2 id="u_userName">' + rs.userMsg.userName + '</h2>');
+                    h.push('<div>关注 ' + rs.userMsg.attentCount + '|粉丝' + rs.userMsg.fansCount + '|赞 ' + rs.userMsg.likedCount + '</div>');
+                    h.push('</div>');
+                    $('#info_top').html(h.join(''));
+                    h = [];
+                    h.push('<li><a onclick="Chao.home.info.init()" class="icon_head">个人资料</a></li>');
+                    h.push('<li><a onclick="Chao.home.fans.init()" class="icon_fans">我的粉丝</a></li>');
+                    h.push('<li><a onclick="Chao.home.fav.init()" class="icon_fav">我赞的藏品</a></li>');
+                    var i = 0,
+                        d = rs.categaryList;
+                    for (i; i < d.length; i++) {
+                        h.push('<li><a onclick="Chao.home.fav.init(' + d[i].cateSequence + ')" class="icon_tab icon_tab_' + d[i].cateSequence + '">' + d[i].cateName + '(' + d[i].colCount + ')</a></li>');
+                    }
+                    h.push('<li><a onclick="Chao.home.focus.init()" class="icon_focus">我关注的</a></li>');
+                    h.push('<li><a onclick="Chao.home.msg.init()" class="icon_msg">消息</a></li>');
+                    $('#info_nav').html(h.join(''));
+                    Chao.home.info.init();
+                }
+            },
+            error:function(r){Chao.err.ajax(r,1);}
+        });
+    },
+    info: {
+        init: function () {
+            $('#info_nav li a').removeClass('active');
+            $('#info_nav li').eq(0).children('a').addClass('active');
+            var h=[];
+            h.push('<div class="content_top">个人资料</div>');
+            h.push('<div class="content_body">');
+            h.push('<div class="avatar"><p>头像</p><div>+</div><span>上传头像</span></div>');
+            h.push('<div class="baseInfo">');
+            h.push('<div class="line">');
+            h.push('<label>用户名</label>');
+            var userName=$('#u_userName').html();
+            h.push('<input class="input input-normal" type="text" value="'+userName+'" id="username_edit" />');
+            h.push('</div>');
+            h.push('<div class="line">');
+            h.push('<label>旧密码</label>');
+            h.push('<input class="input input-normal" type="password" id="oldpassword"/>');
+            h.push('</div>');
+            h.push('<div class="line">');
+            h.push('<label>新密码</label>');
+            h.push('<input class="input input-normal" type="password" id="newpassword"/>');
+            h.push('</div>');
+            h.push('<div class="line">');
+            h.push('<label>重复新密码</label>');
+            h.push('<input class="input input-normal" type="password" id="newpassword2"/>');
+            h.push('</div>');
+            h.push('<div class="line">');
+            h.push('<label></label>');
+            h.push('<a class="btn" onclick="Chao.home.info.save()">保存</a>');
+            h.push('</div>');
+            h.push('</div>');
+            h.push('</div>');
+            $('#attention')
+                .removeClass('concemed')
+                .addClass('content_info')
+                .html(h.join(''));
+        },
+        save:function () {
+            var o={
+                oldpassword:$.trim($('#oldpassword').val()),
+                newpassword:$.trim($('#newpassword').val()),
+                newpassword2:$.trim($('#newpassword2').val()),
+                userName:$.trim($('#username_edit').val())
+            };
+            if(o.newpassword || o.oldpassword || o.newpassword2){
+                //修改密码
+                if(!o.oldpassword){
+                    $('#oldpassword').focus();
+                    return toastr.error('旧密码不能为空');
+                }
+                else if(!o.newpassword){
+                    $('#newpassword').focus();
+                    return toastr.error('新密码不能为空');
+                }
+                else if(!o.newpassword2){
+                    $('#newpassword2').focus();
+                    return toastr.error('重复新密码不能为空');
+                }
+                else if(o.newpassword!=o.newpassword2){
+                    $('#newpassword2').focus();
+                    return toastr.error('两次输入的密码不一样');
+                }
+                $.ajax({
+                    url:Chao.APP.DATA+'account_resetUserPwd.action',
+                    data:{'userPwd':o.oldpassword,'newPwd':o.newpassword},
+                    beforeSend:function () {
+                        Chao.dialog.loading();
+                    },
+                    success:function(r){
+                        Chao.dialog.unloading();
+                        if (r.statusCode == "200") {
+                            toastr.success('密码修改成功');
+                            $('#oldpassword').val('');
+                            $('#newpassword').val('');
+                            $('#newpassword2').val('');
+                        }else{
+                            toastr.error(rs.message);
+                        }
+                    },
+                    error:function (r) {
+                        Chao.dialog.unloading();
+                        Chao.err.ajax(r,1);
+                    }
+                });
+            }
+            var old_userName=$.trim($('#u_userName').html());
+            if(o.userName){
+                if(o.userName!=old_userName){
+                    //修改用户名
+                    $.ajax({
+                        url:Chao.APP.DATA+'account_modifyUserMsg.action',
+                        data:{'userName':o.userName},
+                        beforeSend:function () {
+                            Chao.dialog.loading();
+                        },
+                        success:function(r){
+                            Chao.dialog.unloading();
+                            if (r.statusCode == "200") {
+                                toastr.success('用户名修改成功');
+                                $('#u_userName').html(o.userName);
+                            }else{
+                                toastr.error(rs.message);
+                            }
+                        },
+                        error:function (r) {
+                            Chao.dialog.unloading();
+                            Chao.err.ajax(r,1);
+                        }
+                    });
+                }
+            }
+
+
+        }
+    },
+    focus: {
+        init: function () {
+            var h=[];
+            $('#info_nav li a').removeClass('active');
+            $('.icon_focus').addClass('active');
+            h.push('<div class="content_top">关注<div class="search"><a onclick="Chao.home.focus.search()"></a><input type="text" id="focus_search" placeholder="search..."></div></div>');
+            h.push('<div class="content_body"><ul class="focus" id="focus"></ul><div class="page" id="home_page"></div></div>');
+            $('#attention')
+                .removeClass('content_info')
+                .addClass('concemed')
+                .html(h.join(''));
+            this.load();
+        },
+        searchTxt:"",
+        page:1,
+        search:function(){
+            var s=$.trim($('#focus_search').val());
+            if(s){
+                this.searchTxt=s;
+                this.load();
+            }
+        },
+        lock:false,
+        load:function(){
+            if(this.lock){
+                return false;
+            }
+            this.lock=true;
+            var d={
+                pageNo:this.page,
+                pageSize:12
+            };
+            if(this.searchTxt){
+                d.search=this.searchTxt;
+            }
+            var that=this;
+            $.ajax({
+                url:Chao.APP.DATA+'attention_queryAttentionUserDataList.action',
+                data:d,
+                beforeSend:function () {},
+                success:function (rs) {
+                    that.lock=false;
+                    var i=0,h=[],d=rs.userList,len=d.length,j=0,jlen=0,e=[];
+                    for(i;i<len;i++){
+                        h.push('<li>');
+                        h.push('<div class="img"><a href="collectors.html?id='+d[i].userSequence+'" target="_blank"><img src="'+d[i].userImageURL+'"></a></div>');
+                        h.push('<div class="summary">');
+                        h.push('<h2>'+d[i].userName+'</h2>');
+                        h.push('<div>粉丝 <span class="fans">'+d[i].fansCount+'</span><b>|</b>关注 '+d[i].attentCount+'<b>|</b>赞 '+d[i].likedCount+'</div>');
+                        if(d[i].hasAttention && d[i].hasAttention!="false"){
+                            h.push('<a class="cur" onclick="Chao.home.fave_remove(this)" title="取消关注" data_userSequence="'+d[i].userSequence+'">已关注</a>');
+                        }else{
+                            h.push('<a onclick="Chao.home.fave_add(this)" title="点击关注" data_userSequence="'+d[i].userSequence+'">关注</a>');
+                        }
+                        h.push('</div>');
+                        h.push('<div class="imgList">');
+                        try{
+                            j=0;
+                            e=d[i].colImageList;
+                            jlen=e.length;
+                            for(j;j<jlen;j++) {
+                                h.push('<div><img src="'+e[j].imgURL+'"></div>');
+                            }
+                        }catch(e){}
+                        h.push('</div>');
+                        h.push('</li>');
+                        $('#focus').html(h.join(''));
+                    }
+                    Chao.home._buildPage('Chao.home.focus.setPage',rs.pageInfo.currentPageNo,rs.pageInfo.pageCount);
+                },error:function (r) {
+                    that.lock=false;
+                    Chao.err.ajax(r,1);
+                }
+            });
+        },
+        setPage:function(i){
+            this.page=i;
+            this.load();
+        }
+    },
+    fans: {
+        init: function () {
+            var h=[];
+            $('#info_nav li a').removeClass('active');
+            $('.icon_fans').addClass('active');
+            h.push('<div class="content_top">粉丝<div class="search"><a onclick="Chao.home.fans.search()"></a><input type="text" id="fans_search" placeholder="search..."></div></div>');
+            h.push('<div class="content_body"><ul class="focus my_fans" id="my_fans"></ul><div class="page" id="home_page"></div></div>');
+            $('#attention')
+                .removeClass('content_info')
+                .addClass('concemed')
+                .html(h.join(''));
+            this.load();
+        },
+        searchTxt:"",
+        page:1,
+        search:function(){
+            var s=$.trim($('#fans_search').val());
+            if(s){
+                this.searchTxt=s;
+                this.load();
+            }
+        },
+        lock:false,
+        load:function(){
+            if(this.lock){
+                return false;
+            }
+            this.lock=true;
+            var d={
+                pageNo:this.page,
+                pageSize:12
+            };
+            if(this.searchTxt){
+                d.search=this.searchTxt;
+            }
+            var that=this;
+            $.ajax({
+                url:Chao.APP.DATA+'attention_queryFansUserDataList.action',
+                data:d,
+                beforeSend:function () {},
+                success:function (rs) {
+                    that.lock=false;
+                    var i=0,h=[],d=rs.userList,len=d.length;
+                    for(i;i<len;i++){
+                        h.push('<li>');
+                        h.push('<div class="img"><img src="'+d[i].userImageURL+'"></div>');
+                        h.push('<div class="summary">');
+                        h.push('<h2>'+d[i].userName+'</h2>');
+                        h.push('<div>粉丝 <span class="fans">'+d[i].fansCount+'</span><b>|</b>关注 '+d[i].attentCount+'<b>|</b>赞 '+d[i].likeCount+'</div>');
+                        if(d[i].hasAttention && d[i].hasAttention!="false"){
+                            h.push('<a class="" onclick="Chao.home.fave_remove(this)" title="取消关注" data_userSequence="'+d[i].userSequence+'">已关注</a>');
+                        }else{
+                            h.push('<a onclick="Chao.home.fave_add(this)" title="点击关注" data_userSequence="'+d[i].userSequence+'">关注</a>');
+                        }
+                        h.push('</div>');
+                        h.push('</li>');
+                        $('#my_fans').html(h.join(''))
+                    }
+                    Chao.home._buildPage('Chao.home.fans.setPage',rs.pageInfo.currentPageNo,rs.pageInfo.pageCount);
+                },error:function (r) {
+                    that.lock=false;
+                    Chao.err.ajax(r,1);
+                }
+            });
+        },
+        setPage:function(i){
+            this.page=i;
+            this.load();
+        }
+    },
+    fav: {
+        init: function (cateSequence) {
+            if(cateSequence){
+                this.cateSequence=cateSequence;
+            }else{
+                this.cateSequence=false;
+            }
+            var h=[];
+            $('#info_nav li a').removeClass('active');
+            if(this.cateSequence){
+                $('.icon_tab_'+this.cateSequence).addClass('active');
+            }else{
+                $('.icon_fav').addClass('active');
+            }
+            h.push('<div class="content_top">赞<div class="search"><a onclick="Chao.home.fav.search()"></a><input type="text" id="fav_search" placeholder="search..."></div></div>');
+            h.push('<div class="content_body"><div class="praise" id="praise"></div><div class="page" id="home_page"></div></div>');
+            $('#attention')
+                .removeClass('content_info')
+                .addClass('concemed')
+                .html(h.join(''));
+            this.load();
+        },
+        searchTxt:"",
+        page:1,
+        search:function(){
+            var s=$.trim($('#fav_search').val());
+            if(s){
+                this.searchTxt=s;
+                this.load();
+            }
+        },
+        lock:false,
+        load:function(){
+            if(this.lock){
+                return false;
+            }
+            this.lock=true;
+            var d={
+                pageNo:this.page,
+                pageSize:20
+            };
+            if(this.searchTxt){
+                d.search=this.searchTxt;
+            }
+            if(this.cateSequence){
+                d.cateSequence=this.cateSequence;
+            }
+            var that=this;
+            $.ajax({
+                url:Chao.APP.DATA+'attention_queryAttentionCollectionDataList.action',
+                data:d,
+                beforeSend:function () {},
+                success:function (rs) {
+                    that.lock=false;
+                    var i=0,h=[],d=rs.collectionList,len=d.length;
+                    for(i;i<len;i++){
+                        h.push('<div><a href="detail.html?id='+d[i].colSequence+'" target="_blank" ><img src="'+d[i].colThumb+'"></a></div>');
+                    }
+                    $('#praise').html(h.join(''));
+                    Chao.home._buildPage('Chao.home.fav.setPage',rs.pageInfo.currentPageNo,rs.pageInfo.pageCount);
+                },error:function (r) {
+                    that.lock=false;
+                    Chao.err.ajax(r,1);
+                }
+            });
+        },
+        setPage:function(i){
+            this.page=i;
+            this.load();
+        }
+    },
+    msg: {
+        init: function () {
+
+        }
+    }
+};
+Chao.home.init();

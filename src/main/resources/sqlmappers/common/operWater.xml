@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="OperWater">
+	<!-- parameterType:参数类型，可以是JAVABEAN,也可以是HascMap resultMap:返回类型：可以是JAVABEAN,也可以是HascMap 
+		resultType: -->
+
+	<select id="searchOperWaterList" parameterType="HashMap" resultType="HashMap">
+		SELECT * FROM c_ow t
+		<where>
+			<if test="null != cow_sequence">AND cow_sequence = #{cow_sequence} </if>
+			<if test="null != cow_sysType">AND cow_sysType = #{cow_sysType} </if>
+			<if test="null != cow_explain">AND cow_explain = #{cow_explain} </if>
+			<if test="null != cow_date">AND cow_date = #{cow_date} </if>
+			<if test="null != cow_time">AND cow_time = #{cow_time} </if>
+			<if test="null != cbs_sequence">AND cbs_sequence = #{cbs_sequence} </if>
+			<if test="null != cow_operator">AND cow_operator = #{cow_operator} </if>
+			<if test="null != batch_no">AND batch_no = #{batch_no} </if>
+		</where>
+		ORDER BY cow_date
+	</select>
+	
+	<!-- 据申请编号查询流水信息 -->
+	<select id="queryOperWaterByBatchno" parameterType="String" resultType="HashMap">
+		SELECT * FROM c_ow t WHERE batch_no = #{_parameter} ORDER BY cow_date
+	</select>
+
+	<insert id="insertOperWater" parameterType="cn.smartcandy.common.operwater.OperWater">
+		INSERT INTO c_ow (
+			cow_sequence,
+			batch_no,
+			cow_sysType,
+			cbs_sequence,
+			cow_explain,
+			cow_operator,
+			cow_date,
+			cow_time,
+			cow_userAgent
+		)
+		VALUES
+			(
+			#{cow_sequence},
+			#{batch_no},
+			#{cow_sysType},
+			#{cbs_sequence},
+			#{cow_explain},
+			#{cow_operator},
+			#{cow_date},
+			#{cow_time},
+			#{cow_userAgent}
+			)
+	</insert>
+</mapper> 

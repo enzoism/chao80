@@ -1,0 +1,14 @@
+<sitemesh>
+  <mapping path="/redirect.jsp" decorator="/page.html"/>
+  <mapping path="/*.do" decorator="/page.html"/>
+  
+  <mapping path="/index.jsp" exclue="true"/>
+  <mapping path="/login*" exclue="true"/>
+  <mapping path="/*.html" exclue="true"/>
+  
+  <mapping path="/json/*" exclue="true"/>
+  <mapping path="/download/*" exclue="true"/>
+  
+  <mapping path="/themes/*" exclue="true"/>
+  <mapping path="/themes_dwz/*" exclue="true"/>
+</sitemesh>

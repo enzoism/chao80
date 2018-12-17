@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>藏品管理</title>
+		<link rel="stylesheet" href="/admin/plugins/layui/css/layui.css" media="all" />
+		<link rel="stylesheet" href="/admin/css/global.css" media="all">
+		<link rel="stylesheet" href="/admin/plugins/font-awesome/css/font-awesome.min.css">
+		<link rel="stylesheet" href="/admin/css/table.css" />
+		<script type="text/javascript" src="/admin/plugins/layui/layui.js"></script>
+		<script type="text/javascript" src="/admin/js/jquery.js"></script>
+	</head>
+
+	<body>
+		<div class="admin-main">
+			<blockquote class="layui-elem-quote">
+				<button class="layui-btn" id="refresh"><i class="layui-icon">刷新</i></button>
+				<button class="layui-btn layui-btn-danger" id="blackList">删除</button>
+			</blockquote>
+			<fieldset class="layui-elem-field">
+				<legend>藏品列表</legend>
+				<div class="layui-field-box layui-form">
+					<table class="layui-table admin-table" >
+						<thead>
+							<tr>
+								<th style="width: 30px;text-align:center"><input type="checkbox" lay-filter="allselector" lay-skin="primary"></th>
+								<th style="text-align:center">藏品名称</th>
+								<th style="text-align:center">藏品标题</th>
+								<th style="text-align:center">上传时间</th>
+								<th style="max-width: 350px; text-align:center">藏品图片</th>
+								<th style="width: 100px; text-align:center">操        作</th>
+							</tr>
+						</thead>
+						<tbody id="content">
+						</tbody>
+					</table>
+				</div>
+			</fieldset>
+			<div class="admin-table-page">
+				<div id="paged" class="page">
+				</div>
+			</div>
+		</div>
+		<!--模板-->
+		<script type="text/html" id="tpl">
+			{{# layui.each(d.list, function(index, item){ }}
+			<tr>
+				<td><input type="checkbox" lay-skin="primary"></td>
+				<td>{{ item.colTitle }}</td>
+				<td>{{ item.colSubTitle }}</td>
+				<td>{{ item.colDate }}</td>
+				<td class="imgContainer">
+					<img src="/upload{{ item.colThumb }}"  alt="{{ item.cateName }}" style="width:200px;"/>
+				</td>
+				<td style="text-align:center">
+					<a href="javascript:;" data-id="{{ item.colSequence }}" data-name="{{ item.colTitle }}" data-opt="del" class="layui-btn layui-btn-danger layui-btn-normal">删除</a><br/><br/>
+					<a href="javascript:;" data-id="{{ item.colSequence }}" data-name="{{ item.colTitle }}" data-opt="edit" class="layui-btn layui-btn-normal">编辑</a><br/><br/>
+					<a href="javascript:;" data-id="{{ item.colSequence }}" data-name="{{ item.colTitle }}" data-opt="photo" class="layui-btn">生活照</a><br/><br/>
+				</td>
+			</tr>
+			{{# }); }}
+		</script>
+		<script>
+			layui.config({
+				base: 'js/'
+			});
+
+			layui.use(['paging', 'form'], function() {
+				var $ = layui.jquery,
+					paging = layui.paging(),
+					layerTips = parent.layer === undefined ? layui.layer : parent.layer, //获取父窗口的layer对象
+					layer = layui.layer, //获取当前窗口的layer对象
+					form = layui.form();
+				
+                paging.init({
+                    openWait: true,
+                    url: '/jsonAction/collection_queryCollectionDataList.action?v=' + new Date().getTime(), //地址
+					elem: '#content', //内容容器
+					params: { //发送到服务端的参数
+					},
+					type: 'GET',
+					tempElem: '#tpl', //模块容器
+					pageConfig: { //分页参数配置
+						elem: '#paged', //分页容器
+						pageSize: 10 //分页大小
+					},
+					success: function() { //渲染成功的回调
+						//alert('渲染成功');
+					},
+					fail: function(msg) { //获取数据失败的回调
+						//alert('获取数据失败')
+					},
+					complate: function() { //完成的回调
+						//alert('处理完成');
+						//重新渲染复选框
+						form.render('checkbox');
+						form.on('checkbox(allselector)', function(data) {
+							var elem = data.elem;
+							$('#content').children('tr').each(function() {
+								var $that = $(this);
+								//全选或反选
+								$that.children('td').eq(0).children('input[type=checkbox]')[0].checked = elem.checked;
+								form.render('checkbox');
+							});
+						});
+
+						$('#refresh').on('click', function() {
+							location.reload();
+						});
+						
+						//绑定所有编辑按钮事件						
+						$('#content').children('tr').each(function() {
+							var $that = $(this);
+							$that.children('td:last-child').children('a[data-opt=edit]').on('click', function() {
+								window.location.href='/admin/collectionEditor.html?colSequence='+$(this).data('id');
+							});
+							$that.children('td:last-child').children('a[data-opt=photo]').on('click', function() {
+								window.location.href='/admin/collectionPhotoList.html?colSequence='+$(this).data('id');
+							});
+							$that.children('td:last-child').children('a[data-opt=del]').on('click', function() {
+								var colList = [];
+								var colSequence = $(this).data('id');
+								colList.push(colSequence);
+								layer.confirm('删除藏品将不再展示，是否继续删除?', { icon: 3, title: '系统提示' }, function (index) {
+									deleteCollection(colList);
+									layer.close(index);
+								});
+							});
+						});
+					},
+				});
+			});
+			//加入黑名单
+			$('#blackList').on('click', function() {
+				var colList =[];
+				$('#content').children('tr').each(function() {
+					var $that = $(this);
+					var $cbx = $that.children('td').eq(0).children('input[type=checkbox]')[0].checked;
+					if($cbx) {
+						var id = $that.children('td:last-child').children('a[data-opt=edit]').data('id');
+						colList.push(id);
+					}
+				});
+				if(colList.length > 0){
+					layer.confirm('删除藏品将不再展示，是否继续删除?', { icon: 3, title: '系统提示' }, function (index) {
+						deleteCollection(colList);
+						layer.close(index);
+					});
+				}else{
+					layer.msg("请先勾选藏品！");
+				} 
+				
+			});
+			// 删除藏品
+			function deleteCollection(colList){
+				$.ajax({
+				    url:'/jsonAction/collection_deleteCollection.action?v=' + new Date().getTime(),
+				    type:'POST', 					//GET
+				    async:false, 					//或false,是否异步
+					data : { colList : colList },
+					timeout:5000,    				//超时时间
+				    dataType:'json',    			//返回的数据格式：json/xml/html/script/jsonp/text
+				    success:function(data,textStatus,xhr){
+						layer.msg("藏品删除成功！");
+						location.reload(); //刷新
+				    },
+				    error:function(xhr,textStatus){
+						layer.msg("藏品删除失败！");
+				    },
+				    complete:function(data,textStatus,xhr){
+				    }
+				});
+			}
+		</script>
+	</body>
+
+</html>

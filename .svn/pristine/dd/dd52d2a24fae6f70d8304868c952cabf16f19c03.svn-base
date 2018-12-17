@@ -1,0 +1,7 @@
+client_ID=2688697890
+client_SERCRET=ee1df6722cec2a1dea2db29044b00171
+redirect_URI=http://wenyi.51vip.biz/weiboLogin_login.action
+baseURL=https://api.weibo.com/2/
+accessTokenURL=https://api.weibo.com/oauth2/access_token
+authorizeURL=https://api.weibo.com/oauth2/authorize
+rmURL=https://rm.api.weibo.com/2/

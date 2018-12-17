@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>用户黑名单管理</title>
+		<link rel="stylesheet" href="/admin/plugins/layui/css/layui.css" media="all" />
+		<link rel="stylesheet" href="/admin/css/global.css" media="all">
+		<link rel="stylesheet" href="/admin/plugins/font-awesome/css/font-awesome.min.css">
+		<link rel="stylesheet" href="/admin/css/table.css" />
+		<script type="text/javascript" src="/admin/plugins/layui/layui.all.js"></script>
+	</head>
+	<body>
+		<div class="admin-main">
+			<blockquote class="layui-elem-quote">
+				<button class="layui-btn " id="blackList">移出黑名单</button>
+				<button class="layui-btn" id="refresh"><i class="layui-icon">刷新</i></button>
+			</blockquote>
+			<fieldset class="layui-elem-field">
+				<legend>数据列表</legend>
+				<div class="layui-field-box layui-form">
+					<table class="layui-table admin-table">
+						<thead>
+							<tr>
+								<th style="width: 30px;"><input type="checkbox" lay-filter="allselector" lay-skin="primary"></th>
+								<th>姓        名</th>
+								<th>性        别</th>
+								<th>注册时间</th>
+								<th>操        作</th>
+							</tr>
+						</thead>
+						<tbody id="content">
+						</tbody>
+					</table>
+				</div>
+			</fieldset>
+			<div class="admin-table-page">
+				<div id="paged" class="page">
+				</div>
+			</div>
+		</div>
+		<!--模板-->
+		<script type="text/html" id="tpl">
+			{{# layui.each(d.userList, function(index, item){ }}
+			<tr>
+				<td><input type="checkbox" lay-skin="primary"></td>
+				<td>{{ item.userName }}</td>
+				<td>{{ item.userSex }}</td>
+				<td>{{ item.userCreatDate }}</td>
+				<td>
+					<a href="javascript:;" data-id="{{ item.userSequence }}" data-name="{{ item.userName }}" data-opt="edit" class="layui-btn">移出黑名单</a>
+				</td>
+			</tr>
+			{{# }); }}
+		</script>
+		<script type="text/javascript" src="plugins/layui/layui.js"></script>
+		<script>
+			layui.config({base: 'js/'});
+			layui.use(['paging', 'form'], function() {
+				var $ = layui.jquery,
+					paging = layui.paging(),
+					layerTips = parent.layer === undefined ? layui.layer : parent.layer, //获取父窗口的layer对象
+					layer = layui.layer, //获取当前窗口的layer对象
+					form = layui.form();
+                paging.init({
+                    openWait: true,
+                    url: '/jsonAction/account_queryUserDataList.action?v=' + new Date().getTime(), //地址
+					elem: '#content', //内容容器
+					params: { //发送到服务端的参数
+						userStatus:'B'
+					},
+					type: 'GET',
+					tempElem: '#tpl', //模块容器
+					pageConfig: { //分页参数配置
+						elem: '#paged', //分页容器
+						pageSize: 10 //分页大小
+					},
+					success: function() { //渲染成功的回调
+						//alert('渲染成功');
+					},
+					fail: function(msg) { //获取数据失败的回调
+						//alert('获取数据失败')
+					},
+					complate: function() { //完成的回调
+						//重新渲染复选框
+						form.render('checkbox');
+						form.on('checkbox(allselector)', function(data) {
+							var elem = data.elem;
+							$('#content').children('tr').each(function() {
+								var $that = $(this);
+								//全选或反选
+								$that.children('td').eq(0).children('input[type=checkbox]')[0].checked = elem.checked;
+								form.render('checkbox');
+							});
+						});
+						//绑定所有编辑按钮事件						
+						$('#content').children('tr').each(function() {
+							var $that = $(this);
+							$that.children('td:last-child').children('a[data-opt=edit]').on('click', function() {
+								var seqlist =[],nameList=[];
+								seqlist.push($(this).data('id'));
+								nameList.push($(this).data('name'));
+								blackUser(seqlist, nameList);
+							});
+						});
+					},
+				});
+    			$('#refresh').on('click', function() {
+    				location.reload();
+    			});
+    			
+				//加入黑名单
+				$('#blackList').on('click', function() {
+					var seqList =[];
+					var nameList = [];
+					$('#content').children('tr').each(function() {
+						var $that = $(this);
+						var $cbx = $that.children('td').eq(0).children('input[type=checkbox]')[0].checked;
+						if($cbx) {
+							var id = $that.children('td:last-child').children('a[data-opt=edit]').data('id');
+							var name = $that.children('td:last-child').children('a[data-opt=edit]').data('name');
+							seqList.push(id);
+							nameList.push(name);
+						}
+					});
+					if(nameList.length > 0){
+						blackUser(seqList, nameList);
+					}else{
+						layer.msg("请先勾选用户");
+					} 
+				});
+				// 拉黑用户
+				function blackUser(seqList, nameList)
+				{
+					layer.confirm('确定将'+nameList.join("-")+'移出黑名单吗?', { icon: 3, title: '系统提示' }, function (index) {
+						$.ajax({
+							url:'/jsonAction/account_blackUserStatus.action',
+							type:'POST', 		//GET
+							async:false,    	//或false,是否异步
+							data:{userList:seqList, userStatus:'N' },			//表单数据
+							timeout:5000,    	//超时时间
+							dataType:'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+							success:function(data,textStatus,jqXHR){
+								layer.msg('移出黑名单成功');
+								layer.close(index);//关闭页面
+								location.reload(); //刷新
+							},
+							error:function(xhr,textStatus){
+								layer.msg('移除黑名单失败');
+								layer.close(index);//关闭页面
+							},
+							complete:function(){
+								layer.close(index);//关闭页面
+							}
+						})
+					});
+				}
+			});
+		</script>
+	</body>
+
+</html>

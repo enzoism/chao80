@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="branchesMng">
+
+	<sql id="manageBranch">branchSequence IN <foreach collection="userManageBranch" item="id" open="(" separator="," close=")">#{id}</foreach>
+	</sql>
+	<sql id="topBranchSequence">topBranchSequence = #{topBranchSequence}</sql>
+
+	<!--查询当前用户管理范围内（参与门店范围）的所有门店信息-->
+	<select id="selectUserMngBranchListByUserSeq" parameterType="String" resultType="HashMap">
+		SELECT
+			br.branchSequence,
+			branchName,
+			branchRegion,
+			branchType,
+			branchLevel,
+			branchCity
+		FROM
+			a_branch br
+		INNER JOIN c_unb unb
+		ON br.branchSequence = unb.branchSequence
+		<where>
+			unbStatus = 'N'
+			AND branchFlag = 'N'
+			<if test="null != _parameter">AND userSequence = #{_parameter}</if>
+		</where>
+		ORDER BY
+			branchRegion,
+			branchType,
+			branchLevel,
+			branchCity
+    </select>
+
+	<!--查询该机构的下属所有机构（门店） 包括当前用户门店-->
+	<select id="selectSubordinateBeanch" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			branchSequence,
+			branchCode,
+			branchName,
+			branchNameSpell,
+			branchNameAbbr,
+			branchNameAbbrSpell,
+			branchBrandName,
+			branchBrandNameSpell,
+			topBranchSequence,
+			parentBranchSequence,
+			parentBrSeqPath,
+			branchLevel,
+			branchIndustry,
+			branchType,
+			branchCompany,
+			branchRegion,
+			branchCity,
+			branchCounty,
+			branchAddress,
+			branchLongitude,
+			branchLatitude,
+			branchTelephone,
+			branchProperty,
+			branchOpenType,
+			branchOpenPartnerSeq,
+			branchRemark,
+			branchFlag,
+			branchContacts,
+			branchTop,
+			businessHours
+		FROM
+			a_branch
+		<where>
+			<!-- <if test="null != userDeptSequence">AND parentBrSeqPath LIKE CONCAT(IFNULL((select parentBrSeqPath from a_branch where branchSequence = #{userDeptSequence}),''),'%')</if> -->
+			<if test="null != userDeptSequence">AND parentBrSeqPath LIKE '%${userDeptSequence}%' or branchSequence = #{userDeptSequence}</if>
+			<if test="null != topBranchSequence">AND topBranchSequence = #{topBranchSequence}</if>
+			<if test="null != branchFlag">AND branchFlag = #{branchFlag}</if> 
+		</where>
+		ORDER BY
+			branchRegion,
+			branchType,
+			branchLevel,
+			branchCity
+    </select>
+
+	<!-- 查询门店信息 -->
+	<sql id="selectBranchesListCommon">
+		SELECT
+		b.*
+		FROM
+		a_branch b
+		WHERE
+		branchFlag = #{branchFlag}
+		<if test="null != branchProperty">AND b.branchProperty = #{branchProperty}</if>
+		<if test="null != branchRegion">AND b.branchRegion = #{branchRegion}</if>
+		<if test="null != branchCompany">AND b.branchCompany = #{parentBranchSequence}</if>
+		<if test="null != branchName">AND b.branchName LIKE '%${branchName}%'</if>
+		<if test="null != branchCode">AND b.branchCode = #{branchCode}</if>
+		<if test="null != branchLevel">AND b.branchLevel = #{branchLevel}</if>
+		<if test="null != branchCity">AND b.branchCity = #{branchCity}</if>
+		<if test="null != branchIndustry">AND b.branchIndustry = #{branchIndustry}</if>
+		<if test="null != branchType">AND b.branchType = #{branchType}</if>
+		<if test="null != branchhead">AND b.parentBrSeqPath LIKE '${branchhead}%'</if>
+		<trim>
+			<if test="null == branchSequence and null != userManageBranch">AND b.<include refid="manageBranch"/></if>
+		</trim>
+		<trim>
+			<if test="null != topBranchSequence">AND b.<include refid="topBranchSequence"/></if>
+		</trim>
+		ORDER BY
+			branchRegion,
+			branchCity,
+			branchProperty,
+			branchCode
+	</sql>
+	
+	<!-- 查询门店信息 -->
+	<select id="selectBranchesList" parameterType="HashMap" resultType="HashMap">
+		<include refid="selectBranchesListCommon"/>
+	</select>
+	
+	<!-- 查询门店信息 -->
+	<select id="selectBranchList" parameterType="HashMap" resultType="cn.smartcandy.application.a.commonbean.Branch">
+		<include refid="selectBranchesListCommon"/>
+	</select>
+	
+	
+	<!-- 查询门店信息 -->
+	<select id="selectBranches" parameterType="HashMap" resultType="cn.smartcandy.application.a.commonbean.Branch">
+		<include refid="selectBranchesListCommon"/>
+	</select>
+	
+	<!-- 查询所有门店信息 -->
+	<select id="selectBranchesListByMap" parameterType="HashMap" resultType="HashMap">
+		SELECT 
+			b.*,e.employeeName 
+		FROM a_branch b 
+		LEFT JOIN a_employees e 
+			ON b.branchSequence = e.branchSequence 
+			AND e.employeeLevel = #{employeeLevel}
+			AND e.flag = #{branchFlag}
+		WHERE
+			b.branchFlag = #{branchFlag}
+		<if test="null != branchCode">AND b.branchCode = #{branchCode}</if>
+		<if test="null != branchName">AND b.branchName LIKE '%${branchName}%'</if>
+		<if test="null != branchProperty">AND b.branchProperty = #{branchProperty}</if>
+		<if test="null != branchRegion">AND b.branchRegion = #{branchRegion}</if>
+		<if test="null != branchCompany">AND b.branchCompany = #{branchCompany}</if>
+		ORDER BY b.branchCode
+	</select>
+	
+	<!--根据门店sequence查询门店信息 -->
+	<select id="selectBranchByID" parameterType="String" resultType="cn.smartcandy.application.a.commonbean.Branch">
+		SELECT * FROM a_branch 
+		WHERE branchSequence = #{_parameter} 
+	</select>
+	
+	<!--根据门店sequence查询门店信息 -->
+	<select id="selectBranchBySequence" parameterType="String" resultType="HashMap">
+		SELECT * FROM a_branch 
+		WHERE branchSequence = #{_parameter} 
+	</select>
+	
+	<!-- 根据User查询门店信息失败 -->
+	<select id="selectBranchesByUser" parameterType="String" resultType="cn.smartcandy.application.a.commonbean.Branch">
+		SELECT
+			*
+		FROM
+			a_branch
+		WHERE
+			topBranchSequence = #{_parameter}
+		OR	branchSequence = #{_parameter}
+		ORDER BY 
+			branchType
+	</select>
+	
+	<!-- 根据机构树查询机构信息 -->
+	<select id="selectBranchByTree" parameterType="HashMap" resultType="HashMap">
+		SELECT 
+			b.*,e.employeeName 
+		FROM a_branch b 
+		LEFT JOIN a_employees e 
+			ON b.branchSequence = e.branchSequence 
+			AND e.employeeLevel = '0'
+			AND e.flag = 'N'
+		WHERE	
+			b.branchSequence IN
+			<foreach collection="branchSeq" index="index" item="item" open="(" separator="," close=")">
+			     #{item}
+         	</foreach>
+		ORDER BY 
+			b.branchType
+	</select>
+	
+	<!--根据门店sequence查询门店里的会员总数 -->
+	<select id="selectMemberCountOfBranch" parameterType="String" resultType="int">
+		SELECT
+			COUNT(*)
+		FROM
+			a_customer
+		WHERE
+			customerFlag = 'N'
+		AND branchSequence = #{_parameter} 
+	</select>
+	
+	<!-- 根据branchType查询机构信息 -->
+	<select id="selectBranchByType" parameterType="HashMap" resultType="HashMap">
+		SELECT 
+			br.*
+		FROM
+			a_branch br
+		<where>
+			<if test=" 0 == type ">br.branchType = '00'</if>
+			<if test=" 1 == type ">br.branchType = '01'</if>
+			<trim>
+				<if test="null != topBranchSequence">AND br.<include refid="topBranchSequence"/></if>
+			</trim>
+			<if test=" 2 == type ">AND br.branchType = '02' OR br.branchTop = '1'</if>
+			<if test=" 3 == type ">AND br.branchType IN ('00','01','02','03','12') ORDER BY br.branchType</if>
+			<if test=" 4 == type ">AND br.branchType = '03'</if>
+			<if test=" 5 == type ">AND br.branchType = '05' AND br.branchLevel = '1'</if>
+			<if test=" 6 == type ">AND br.branchType = '05' AND br.branchLevel = '2'</if>
+			<if test=" 7 == type ">AND br.branchType = '12'</if>
+			<trim>
+				<if test="null != topBranchSequence">AND br.<include refid="topBranchSequence"/></if>
+			</trim>
+		</where>
+	</select>
+	<!-- 查询门店数量 -->
+	<select id="selectCountBranch" parameterType="String" resultType="int">
+		
+		SELECT COUNT(*) FROM a_branch where branchCode=#{branchCode}
+		
+	</select>
+	
+	<!-- 新增门店信息 -->
+	<insert id="insertBranch" parameterType="cn.smartcandy.application.a.commonbean.Branch" >
+		INSERT INTO a_branch (
+			branchSequence,
+			branchCode,
+			branchName,
+			branchNameSpell,
+			branchNameAbbr,
+			branchNameAbbrSpell,
+			branchBrandName,
+			branchBrandNameSpell,
+			topBranchSequence,
+			parentBranchSequence,
+			parentBrSeqPath,
+			branchRegion,
+			branchCity,
+			branchCounty,
+			branchAddress,
+			branchTelephone,
+			branchIndustry,
+			branchType,
+			branchProperty,
+			branchOpenType,
+			branchOpenPartnerSeq,
+			branchRemark,
+			branchFlag,
+			branchLevel,
+			branchLongitude,
+			branchLatitude,
+			branchContacts,
+			branchTop,
+			businessHours
+		)
+		VALUES(
+			#{branchSequence},
+			#{branchCode},
+			#{branchName},
+			#{branchNameSpell},
+			#{branchNameAbbr},
+			#{branchNameAbbrSpell},
+			#{branchBrandName},
+			#{branchBrandNameSpell},
+			#{topBranchSequence},
+			#{parentBranchSequence},
+			#{parentBrSeqPath},
+			#{branchRegion},
+			#{branchCity},
+			#{branchCounty},
+			#{branchAddress},
+			#{branchTelephone},
+			#{branchIndustry},
+			#{branchType},
+			#{branchProperty},
+			#{branchOpenType},
+			#{branchOpenPartnerSeq},
+			#{branchRemark},
+			#{branchFlag},
+			#{branchLevel},
+			#{branchLongitude},
+			#{branchLatitude},
+			#{branchContacts},
+			#{branchTop},
+			#{businessHours}
+			);
+	</insert>
+	
+	<!-- 新增仓库信息 -->
+	<insert id="insertWarehouse" parameterType="HashMap" >
+		INSERT INTO a_wh (
+			whSequence,
+			whCode,
+			whName,
+			branchSequence,
+			whType,
+			whRemark,
+			whFlag
+		)
+		VALUES(
+			#{whSequence},
+			#{whCode},
+			#{whName},
+			#{branchSequence},
+			#{whType},
+			#{whRemark},
+			#{whFlag}
+		)
+	</insert>
+	 
+	<!-- 根据seq修改产品信息 -->
+	<update id="updateBranch" parameterType="cn.smartcandy.application.a.commonbean.Branch" >
+		UPDATE a_branch
+	    SET 
+	        branchCode = #{branchCode},
+	        branchName= #{branchName},
+	        branchNameSpell = #{branchNameSpell},
+	        branchNameAbbr = #{branchNameAbbr},
+	        branchNameAbbrSpell = #{branchNameAbbrSpell},
+	        branchBrandName = #{branchBrandName},
+			branchBrandNameSpell = #{branchBrandNameSpell},
+			parentBranchSequence = #{parentBranchSequence},
+			parentBrSeqPath = #{parentBrSeqPath},
+	     	branchRegion = #{branchRegion},
+	        branchCity = #{branchCity},
+	        branchCounty = #{branchCounty},
+	        branchAddress = #{branchAddress},
+	        branchTelephone = #{branchTelephone},
+	        branchIndustry = #{branchIndustry},
+	        branchProperty = #{branchProperty},
+	        branchRemark = #{branchRemark},
+	        branchFlag = #{branchFlag},
+	        branchLevel= #{branchLevel},
+	        branchLongitude = #{branchLongitude},
+			branchLatitude = #{branchLatitude},
+			branchContacts = #{branchContacts},
+			branchTop = #{branchTop},
+			businessHours = #{businessHours}
+	    WHERE branchSequence = #{branchSequence}
+	</update>
+	 
+	 <!-- 根据pspCode删除门店信息(物理删除) -->
+	 <delete id="deleteBranch" parameterType="String" >
+	    DELETE FROM a_branch 
+	    WHERE branchSequence = #{_parameter}
+	 </delete>
+	 
+	<!-- 根据pspCode修改门店标记是否为删除(逻辑删除) -->
+	<update id="updateBranchFlag" parameterType="HashMap" >
+		UPDATE a_branch
+   		SET 
+           	branchFlag = #{branchFlag}
+   		WHERE branchSequence = #{branchSequence}
+	</update>
+	
+	<!-- 根据仓库序号查询仓库信息 -->
+	<select id="selectWarehouse" parameterType="String" resultType="cn.smartcandy.application.a.commonbean.Warehouse">
+		SELECT 
+			whName,
+			whSequence 
+		FROM 
+			a_wh 
+		WHERE 
+			branchSequence = #{_parameter}
+		AND
+			whFlag = 'N'
+	</select>
+	
+	<!-- 查询总公司大库和总公司下所有中心库房 -->
+	<select id="selectWH" parameterType="String" resultType="cn.smartcandy.application.a.commonbean.Warehouse">
+		SELECT 
+			w.whName,
+			w.whSequence 
+		FROM 
+			a_branch b
+		JOIN a_wh w ON b.branchSequence = w.branchSequence
+		<where>
+			<if test="null != _parameter">b.topBranchSequence in (SELECT topBranchSequence FROM a_branch WHERE branchSequence = #{_parameter}) </if>
+		AND whFlag = 'N'
+		AND whType = '0'
+		</where>
+	</select>
+	
+</mapper> 	

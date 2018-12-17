@@ -1,0 +1,58 @@
+#log_home=D:/logs
+log_home=/backup/logs
+sys_code=zmjm
+log_level=DEBUG
+#log4j.rootLogger=${log_level}, FILEOUT, STDOUT
+log4j.rootLogger=${log_level}, FILEOUT
+##################################################################################################
+log4j.appender.STDOUT=org.apache.log4j.ConsoleAppender
+log4j.appender.STDOUT.layout=org.apache.log4j.PatternLayout
+log4j.appender.STDOUT.layout.ConversionPattern=Log4j\u4FE1\u606F\uFF1A%n[%5p][%d{yyyy\u5E74MM\u6708dd\u65E5 HH\u65F6mm\u5206ss\u79D2}] - %m%n
+##################################################################################################
+log4j.appender.FILEOUT=org.apache.log4j.DailyRollingFileAppender
+log4j.appender.FILEOUT.encoding=UTF-8
+log4j.appender.FILEOUT.File=${log_home}/${sys_code}_log.log
+log4j.appender.FILEOUT.layout=org.apache.log4j.PatternLayout
+log4j.appender.FILEOUT.layout.ConversionPattern=Log4j\u4FE1\u606F\uFF1A%n[%5p][%d{yyyy\u5E74MM\u6708dd\u65E5 HH\u65F6mm\u5206ss\u79D2}] - %m%n
+log4j.appender.FILEOUT.DatePattern=yyyy-MM-dd-HH'.log'
+# #log4j.appender.FILEOUT.BufferedIO=true
+#Buffer单位为字节，默认是8K
+##log4j.appender.FILEOUT.BufferSize=8192
+##################################################################################################
+log4j.logger.ERROR=error 
+log4j.appender.ERROR=org.apache.log4j.DailyRollingFileAppender 
+log4j.appender.ERROR.encoding=UTF-8
+log4j.appender.ERROR.File=${log_home}/${sys_code}_error_log.log
+log4j.appender.ERROR.layout=org.apache.log4j.PatternLayout
+log4j.appender.ERROR.layout.ConversionPattern=Log4j\u4FE1\u606F\uFF1A%n[%5p][%d{yyyy\u5E74MM\u6708dd\u65E5 HH\u65F6mm\u5206ss\u79D2}] - %m%n
+log4j.appender.ERROR.DatePattern=yyyy-MM-dd-HH'.log'
+log4j.appender.ERROR.Threshold = ERROR  
+log4j.appender.ERROR.append=true
+##################################################################################################
+log4j.logger.org.apache.ibatis=${log_level}
+log4j.logger.java.sql=${log_level}
+#log4j.logger.com.ibatis=INFO
+#log4j.logger.com.ibatis.common.jdbc.SimpleDataSource=INFO
+#log4j.logger.com.ibatis.common.jdbc.ScriptRunner=INFO
+#log4j.logger.com.ibatis.sqlmap.engine.impl.SqlMapClientDelegate=INFO
+#log4j.logger.java.sql.Connection=DEBUG
+#log4j.logger.java.sql.Statement=INFO
+#log4j.logger.java.sql.PreparedStatement=DEBUG
+#log4j.logger.java.sql.ResultSet=INFO
+##################################################################################################
+log4j.logger.com.mdcl.mocha.notice.service=${log_level}
+##################################################################################################
+log4j.logger.com.opensymphony.xwork2=ERROR
+log4j.logger.org.apache.commons=ERROR
+log4j.logger.org.apache.struts=ERROR
+log4j.logger.com.opensymphony.xwork2.util.OgnlUtil=ERROR
+log4j.logger.com.opensymphony.xwork2.ognl.OgnlValueStack=ERROR
+##################################################################################################
+log4j.logger.com.opensymphony.xwork2.interceptor=${log_level}
+#目的是阻止其输出日志后还继续上溯输出
+#log4j.additivity.com.opensymphony.xwork2.interceptor=false
+#\u76ee\u7684\u662f\u963b\u6b62\u5176\u8f93\u51fa\u65e5\u5fd7\u540e\u8fd8\u7ee7\u7eed\u4e0a\u6eaf\u8f93\u51fa
+##################################################################################################
+log4j.logger.cn.smartcandy=DEBUG
+# #目的是阻止其输出日志后还继续上溯输出
+# #log4j.additivity.cn.smartcandy=false

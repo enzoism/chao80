@@ -1,0 +1,292 @@
+sys_code=collection
+log_home=/backup/logs
+#################################################################
+# P6Spy Options File                                            #
+# See documentation for detailed instructions                   #
+#################################################################
+
+#################################################################
+# MODULES                                                       #
+#                                                               #
+# Modules provide the P6Spy functionality. If a module, such    #
+# as module_log is commented out, that functionality will not   #
+# be available. If it is not commented out (if it is active),   #
+# the functionality will be active.                             #
+#                                                               #
+# Values set in Modules cannot be reloaded using the            #
+# reloadproperties variable. Once they are loaded, they remain  #
+# in memory until the application is restarted.                 #
+#                                                               #
+#################################################################
+
+# 用来拦截和记录任务应用程序的 JDBC 语句。若无配置或注释掉则无此功能。 默认值：com.p6spy.engine.logging. P6LogFactory
+module.log=com.p6spy.engine.logging.P6LogFactory
+
+# 检测和记录执行时间比较长的 SQL 语句。若无配置或注释掉则无此功能。 默认值：com.p6spy.engine.outage. P6OutageFactory
+# module.outage=com.p6spy.engine.outage.P6OutageFactory
+
+#################################################################
+# REALDRIVER(s)                                                 #
+#                                                               #
+# In your application server configuration file you replace the #
+# "real driver" name with com.p6spy.engine.P6SpyDriver. This is #
+# where you put the name of your real driver P6Spy can find and #
+# register your real driver to do the database work.            #
+#                                                               #
+# If your application uses several drivers specify them in      #
+# realdriver2, realdriver3. See the documentation for more      #
+# details.                                                      #
+#                                                               #
+# Values set in REALDRIVER(s) cannot be reloaded using the      #
+# reloadproperties variable. Once they are loaded, they remain  #
+# in memory until the application is restarted.                 #
+#                                                               #
+#################################################################
+
+# 真正的应用系统使用的数据库驱动程序名称
+# oracle driver
+# realdriver=oracle.jdbc.driver.OracleDriver
+# 
+# mysql Connector/J driver
+realdriver=com.mysql.jdbc.Driver
+# 
+# informix driver
+# realdriver=com.informix.jdbc.IfxDriver
+# 
+# ibm db2 driver
+# realdriver=COM.ibm.db2.jdbc.net.DB2Driver
+# 
+# the mysql open source driver
+# realdriver=org.gjt.mm.mysql.Driver
+# 
+# 真正的应用系统使用的第二种备用数据库驱动程序名称。
+# specifies another driver to use
+# realdriver2=
+# 
+# 真正的应用系统使用的第三种备用数据库驱动程序名称。
+# specifies a third driver to use
+# realdriver3=
+
+# the DriverManager class sequentially tries every driver that is
+# registered to find the right driver. In some instances, it's possible to
+# load up the realdriver before the p6spy driver, in which case your connections
+# will not get wrapped as the realdriver will "steal" the connection before
+# p6spy sees it. Set the following property to "true" to cause p6spy to
+# explicitily deregister the realdrivers
+
+# 显示地把真正的数据库的驱动程序进行反注册掉。取值 true|false 默认值：false
+deregisterdrivers=true
+
+################################################################
+# P6LOG SPECIFIC PROPERTIES                                    #
+################################################################
+# no properties currently available
+
+################################################################
+# EXECUTION THRESHOLD PROPERTIES                               #
+################################################################
+# This feature applies to the standard logging of P6Spy.       # 
+# While the standard logging logs out every statement          #
+# regardless of its execution time, this feature puts a time   # 
+# condition on that logging. Only statements that have taken   # 
+# longer than the time specified (in milliseconds) will be     #
+# logged. This way it is possible to see only statements that  #
+# have exceeded some high water mark.                          #
+# This time is reloadable.                                     #
+################################################################
+
+# executionthreshold=integer time (milliseconds)
+# P6Log 模块执行时间设置，整数值 (以毫秒为单位)，只有当超过这个时间才进行记录 Log。
+# executionthreshold=
+
+################################################################
+# P6OUTAGE SPECIFIC PROPERTIES                                 #
+################################################################
+# Outage Detection
+# 
+# This feature detects long-running statements that may be indicative of
+# a database outage problem. If this feature is turned on, it will log any
+# statement that surpasses the configurable time boundary during its execution.
+# When this feature is enabled, no other statements are logged except the long
+# running statements. The interval property is the boundary time set in seconds.
+# For example, if this is set to 2, then any statement requiring at least 2 
+# seconds will be logged. Note that the same statement will continue to be logged
+# for as long as it executes. So if the interval is set to 2, and the query takes
+# 11 seconds, it will be logged 5 times (at the 2, 4, 6, 8, 10 second intervals).
+# 
+
+# outagedetection=true|false
+# P6Outage 模块是否记录较长时间运行的语句。取值 true|false 默认值：false
+outagedetection=false
+# outagedetectioninterval=integer time (seconds)
+# P6Outage 模块执行时间设置，整数值 （以秒为单位)），只有当超过这个时间才进行记录 Log。
+# outagedetectioninterval=
+
+################################################################
+# COMMON PROPERTIES                                            #
+################################################################
+
+# filter what is logged
+# 是否过滤 Log，取值 true|false 默认值：false
+filter=false
+
+# comma separated list of tables to include when filtering
+# 过滤 Log 时所包含的表名列表，以逗号分隔。
+# include= 
+# comma separated list of tables to exclude when filtering
+# 过滤 Log 时所排除的表名列表，以逗号分隔。
+# exclude=
+
+# sql expression to evaluate if using regex filtering
+# 过滤 Log 时的 SQL 表达式名称
+# sqlexpression= 
+
+# turn on tracing
+# 是否自动刷新。取值 true|false 默认值：true
+autoflush=true
+
+# sets the date format using Java's SimpleDateFormat routine
+# 设置时间的格式，也就是用 Java 的 SimpleDateFormat 程序。
+dateformat=yyyy-MM-dd'T'HH:mm:ss.SSSZ
+
+# list of categories to explicitly include 
+# 显示指定过滤 Log 时包含的分类列表，取值为 error，info，batch，debug，statement，commit，rollback，result 的各种组合。
+# includecategories=
+
+# list of categories to exclude: error, info, batch, debug, statement,
+# commit, rollback and result are valid values
+# 显示指定过滤 Log 时排队的分类列表，取值同上。
+excludecategories=info,debug,result,batch,resultset
+
+# allows you to use a regex engine or your own matching engine to determine 
+# which statements to log
+# 
+# stringmatcher=com.p6spy.engine.common.GnuRegexMatcher
+# stringmatcher=com.p6spy.engine.common.JakartaRegexMatcher
+# 使用正则表达式来过滤 Log，取值为 com.p6spy.engine.common.GnuRegexMatcher 和 com.p6spy.engine.common.JakartaRegexMatcher
+# stringmatcher=
+
+# prints a stack trace for every statement logged
+# 打印堆栈跟踪信息。取值 true|false 默认值：false
+stacktrace=false
+# if stacktrace=true, specifies the stack trace to print
+# 如果 stacktrace=true，则可以指定具体的类名来进行过滤。
+# stacktraceclass=
+
+# determines if property file should be reloaded
+# 监测属性配置文件是否进行重新加载。取值 true|false 默认值：false
+reloadproperties=false
+# determines how often should be reloaded in seconds
+# 属性配置文件重新加载的时间间隔，以秒为单位。 默认值：60
+reloadpropertiesinterval=60
+
+# if=true then url must be prefixed with p6spy:
+# 是否加上前缀，设置为 true，会加上 p6spy: 作为前缀。取值 true|false 默认值：false
+useprefix=false
+
+# specifies the appender to use for logging
+# 指定 Log 的 appender，与 Log4J 有点同义，取值：
+# com.p6spy.engine.logging.appender.Log4jLogger、
+# com.p6spy.engine.logging.appender.StdoutLogger 和
+# com.p6spy.engine.logging.appender.FileLogger
+appender=com.p6spy.engine.logging.appender.Log4jLogger
+# appender=com.p6spy.engine.logging.appender.StdoutLogger
+# appender=com.p6spy.engine.logging.appender.FileLogger
+
+# name of logfile to use, note Windows users should make sure to use forward slashes in their pathname (e:/test/spy.log) (used for file logger only)
+# 指定 Log 的文件名，任何适于操作系统的文件。
+logfile=${log_home}/${sys_code}_sql.log
+
+# append to the p6spy log file. if this is set to false the
+# log file is truncated every time. (file logger only)
+# 指定是否每次是增加 Log，设置为 false 则每次都会先进行清空。取值 true|false 默认值：true
+# append=true
+
+# The following are for log4j logging only
+# 当 appender 为 log4j 时采用的配置，配置如同 Log4J 的相关配置。
+#log4j.appender.STDOUT=org.apache.log4j.ConsoleAppender
+#log4j.appender.STDOUT.layout=org.apache.log4j.PatternLayout
+#log4j.appender.STDOUT.layout.ConversionPattern=\nP6spy\u4fe1\u606f\uff1a\n[zmjm][%5p][%d{yyyy-MM-dd HH:mm:ss}]: %m%n
+#
+log4j.appender.P6FILEOUT=org.apache.log4j.DailyRollingFileAppender
+log4j.appender.P6FILEOUT.File=${log_home}/${sys_code}_sql.log
+log4j.appender.P6FILEOUT.layout=org.apache.log4j.PatternLayout
+log4j.appender.P6FILEOUT.layout.ConversionPattern=\nP6spy\u4FE1\u606F\uFF1A\n[${sys_code}][%5p][%d{yyyy-MM-dd HH\:mm\:ss}]\: %m%n
+log4j.appender.P6FILEOUT.DatePattern=yyyy-MM-dd-HH'.log'
+#########################################################################
+# log4j.appender.SQLPROFILER_CLIENT=org.apache.log4j.net.SocketAppender #
+# log4j.appender.SQLPROFILER_CLIENT.RemoteHost=localhost                #
+# log4j.appender.SQLPROFILER_CLIENT.Port=4445                           #
+# log4j.appender.SQLPROFILER_CLIENT.LocationInfo=true                   #
+#########################################################################
+
+# log4j.logger.p6spy=INFO,STDOUT
+# Log 级别的设置，取值同 Log4J 的配置 默认值：INFO,STDOUT
+log4j.logger.p6spy=DEBUG, P6FILEOUT
+log4j.additivity.p6spy=false
+
+#################################################################
+# DataSource replacement                                        #
+#                                                               #
+# Replace the real DataSource class in your application server  #
+# configuration with the name com.p6spy.engine.spy.P6DataSource,#
+# then add the JNDI name and class name of the real 		    #
+# DataSource here	 				                            #
+#                                                               #
+# Values set in this item cannot be reloaded using the          #
+# reloadproperties variable. Once it is loaded, it remains      #
+# in memory until the application is restarted.                 #
+#                                                               #
+#################################################################
+# 设置数据源 DataSource 的配置名称。
+# realdatasource=/RealMySqlDS
+# 设置数据源 DataSource 的类的全称。
+# realdatasourceclass=com.mysql.jdbc.jdbc2.optional.MysqlDataSource
+
+#################################################################
+# DataSource properties                                         #
+#                                                               #
+# If you are using the DataSource support to intercept calls    # 
+# to a DataSource that requires properties for proper setup,    #
+# define those properties here. Use name value pairs, separate  #
+# the name and value with a semicolon, and separate the         #
+# pairs with commas.                                            #
+# 					                                            #
+# The example shown here is for mysql 	                        #
+#                                                               #
+#################################################################
+# 设置数据源 DataSource 的属性，以分号分隔。
+# realdatasourceproperties=port;3306,serverName;ibmhost,databaseName;mydb
+
+#################################################################
+# JNDI DataSource lookup                                        #
+#                                                               #
+# If you are using the DataSource support outside of an app     #
+# server, you will probably need to define the JNDI Context     #
+# environment.                                                  #
+#                                                               #
+# If the P6Spy code will be executing inside an app server then #
+# do not use these properties, and the DataSource lookup will   #
+# use the naming context defined by the app server.             #
+#                                                               #
+# The two standard elements of the naming environment are	    #
+# jndicontextfactory and jndicontextproviderurl. If you need    #
+# additional elements, use the jndicontextcustom property.      #
+# You can define multiple properties in jndicontextcustom,      #
+# in name value pairs. Separate the name and value with a       #
+# semicolon, and separate the pairs with commas.                #
+#                                                               #
+# The example shown here is for a standalone program running on #
+# a machine that is also running JBoss, so the JDNI context     #
+# is configured for JBoss (3.0.4).                              #
+#                                                               #
+#################################################################
+# 设置 JNDI 数据源的 NamingContextFactory。
+# jndicontextfactory=org.jnp.interfaces.NamingContextFactory
+# 设置 JNDI 数据源的提供者的 URL。
+# jndicontextproviderurl=localhost:1099
+# 设置 JNDI 数据源的一些定制信息，以分号分隔。
+# jndicontextcustom=java.naming.factory.url.pkgs;org.jboss.nameing:org.jnp.interfaces
+
+# jndicontextfactory=com.ibm.websphere.naming.WsnInitialContextFactory
+# jndicontextproviderurl=iiop://localhost:900

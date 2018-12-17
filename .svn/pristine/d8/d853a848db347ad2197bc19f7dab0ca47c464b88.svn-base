@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>个人资料</title>
+<link rel="stylesheet" href="http://test.vr.wenyiit.com/chao80/res/css/dev/common.css">
+<link rel="stylesheet" href="http://test.vr.wenyiit.com/chao80/res/css/dev/detail.css">
+<link rel="stylesheet" href="http://test.vr.wenyiit.com/chao80/res/bower_components/toastr/toastr.min.css">
+<link rel="stylesheet" href="http://test.vr.wenyiit.com/chao80/res/bower_components/ladda/ladda-themeless.min.css">
+<link rel="stylesheet" href="http://test.vr.wenyiit.com/chao80/res/bower_components/animate/animate.min.css">
+<link rel="stylesheet" type="text/css" href="http://test.vr.wenyiit.com/chao80/res/css/dev/home.css">
+</head>
+<body class="body1">
+<header class="top">
+    <div class="center">
+        <h1 class="logo"></h1>
+        <nav class="main_nav">
+            <a href="index.html"><span>home</span></a>
+            <a href="museum.html"><span>museum</span></a>
+            <a href="aboutus.html"><span>about us</span></a>
+            <div id="main_nav"></div>
+        </nav>
+    </div>
+</header>
+<div class="center fans info">
+    <div class="nav_info">
+        <div class="info_top" id="info_top"></div>
+        <ul class="info_bottom" id="info_nav"></ul>
+    </div>
+    <div class="attention" id="attention" ></div>
+</div>
+
+<script src="http://test.vr.wenyiit.com/chao80/res/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/bower_components/ladda/ladda.jquery.min.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/bower_components/toastr/toastr.min.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/js/dev/base.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/js/dev/util.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/js/dev/dialog.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/js/dev/user.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/js/dev/home.js"></script>
+</body>
+</html>

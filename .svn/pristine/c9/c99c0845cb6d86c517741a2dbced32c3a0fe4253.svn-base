@@ -1,0 +1,80 @@
+package cn.smartcandy.application.a.report;
+
+
+/**
+ * @项目名称：zmjema
+ * @类名称：Report
+ * @类描述：举报Bean
+ * @创建人：tangzhifeng
+ * @创建时间：2017年10月31日 上午11:34:37
+ * @修改人：someOne
+ * @修改时间：2017年10月31日 上午11:34:37 
+ * @Company:SmartCandy (C) 2017
+ * @version 1.0
+ */
+public class Report {
+
+	// 状态
+	public static final String STATUS_IGNORE = "I";					//忽略
+	public static final String STATUS_NORMAL = "N";					//正常
+	public static final String STATUS_BLACK = "R";					//已读
+	public static final String STATUS_DELETE = "D";					//删除
+
+
+	// 类型
+	public static final String TYPE_OTHER = "3";					//删除
+	public static final String TYPE_SEX = "0";					//忽略
+	public static final String TYPE_FORCE = "1";					//正常
+	public static final String TYPE_BLACK = "2";					//已读
+	
+	
+	private String reportSequence;					// 序号
+	private String userName;						// 昵称
+	private String userSequence;					// 用户序号
+	private String colSequence;						// 藏品序号
+	private String reportType;						// 举报类型
+	private String reportContent;					// 举报内容
+	public String getReportSequence() {
+		return reportSequence;
+	}
+	public void setReportSequence(String reportSequence) {
+		this.reportSequence = reportSequence;
+	}
+	public String getUserName() {
+		return userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+	public String getUserSequence() {
+		return userSequence;
+	}
+	public void setUserSequence(String userSequence) {
+		this.userSequence = userSequence;
+	}
+	public String getColSequence() {
+		return colSequence;
+	}
+	public void setColSequence(String colSequence) {
+		this.colSequence = colSequence;
+	}
+	public String getReportType() {
+		return reportType;
+	}
+	public void setReportType(String reportType) {
+		this.reportType = reportType;
+	}
+	public String getReportContent() {
+		return reportContent;
+	}
+	public void setReportContent(String reportContent) {
+		this.reportContent = reportContent;
+	}
+	@Override
+	public String toString() {
+		return "Report [reportSequence=" + reportSequence + ", userName=" + userName + ", userSequence=" + userSequence
+				+ ", colSequence=" + colSequence + ", reportType=" + reportType + ", reportContent=" + reportContent
+				+ "]";
+	}
+	
+}

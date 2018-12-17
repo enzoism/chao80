@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+<head>
+<meta charset="UTF-8">
+<title>detail</title>
+<link rel="stylesheet" href="http://test.vr.wenyiit.com/chao80/res/css/dev/common.css">
+<link rel="stylesheet" href="http://test.vr.wenyiit.com/chao80/res/css/dev/detail.css">
+<link rel="stylesheet" href="http://test.vr.wenyiit.com/chao80/res/bower_components/bxslider/jquery.bxslider.css">
+<link rel="stylesheet" href="http://test.vr.wenyiit.com/chao80/res/bower_components/toastr/toastr.min.css">
+<link rel="stylesheet" href="http://test.vr.wenyiit.com/chao80/res/bower_components/ladda/ladda-themeless.min.css">
+<link rel="stylesheet" href="http://test.vr.wenyiit.com/chao80/res/bower_components/animate/animate.min.css">
+<link rel="shortcut icon" href="http://test.vr.wenyiit.com/chao80/res/image/favicon.ico" />
+</head>
+<body class="body1">
+<header class="top">
+    <div class="center">
+        <h1 class="logo"></h1>
+        <nav class="main_nav">
+            <a href="index.html"><span>home</span></a>
+            <a href="museum.html"><span>museum</span></a>
+            <a href="aboutus.html"><span>about us</span></a>
+            <div id="main_nav"></div>
+        </nav>
+    </div>
+</header>
+
+<div class="center collection" id="collection"></div>
+
+<div class="collection_masonry_warp" >
+    <div class="title">Photos</div>
+    <div class="collection_masonry" id="collection_masonry"></div>
+</div>
+
+<div id="upload_box">
+    <div class="content">
+        <i onclick="Chao.detail.close_upload();"></i>
+        <div class="box">
+            <label for="uploads"></label>
+            <div id="prew"></div>
+            <input type="file" id="uploads"/>
+        </div>
+        <input type="text" id="upload_title" placeholder="标题"/>
+        <textarea id="upload_content" placeholder="输入内容"></textarea>
+        <a onclick="Chao.detail.upload()" class="btn">发表</a>
+    </div>
+</div>
+
+<footer class="center bottom">
+    <h1 class="logo"></h1>
+    <ul class="bottom_nav">
+        <li>
+            <p><a>关于我们</a></p>
+            <p><a>联系我们</a></p>
+            <p><a>关于我们</a></p>
+        </li>
+        <li>
+            <div>
+                Tel: xxx-xxxxxxxx<br/>
+                Address: XXXXXXXXXXXXXXXxxxxx. All rights reserved<br/><br/>
+                京ICP备17049024号-1
+            </div>
+        </li>
+        <li>
+            <section></section>
+            <section></section>
+        </li>
+    </ul>
+    <div class="copy">
+        <p>© 2017 chao80.com. All rights reserved 北京巢天下文化传播有限公司</p>
+        <p>京ICP备17049024号-1</p>
+    </div>
+</footer>
+
+<script src="http://test.vr.wenyiit.com/chao80/res/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/bower_components/imagesloaded/imagesloaded.pkgd.min.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/bower_components/masonry/masonry.pkgd.min.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/bower_components/ladda/ladda.jquery.min.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/bower_components/toastr/toastr.min.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/js/dev/base.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/js/dev/util.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/js/dev/dialog.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/js/dev/user.js"></script>
+<script src="http://test.vr.wenyiit.com/chao80/res/js/dev/detail.js"></script>
+</body>
+</html>

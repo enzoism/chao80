@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 门店复核 -->
+<mapper namespace="Recheck">
+	<!-- parameterType:参数类型，可以是JAVABEAN,也可以是HascMap resultMap:返回类型：可以是JAVABEAN,也可以是HascMap 
+		resultType: -->
+
+	<!-- 插入复核记录 -->
+	<insert id="insertRecheck" parameterType="HashMap">
+		INSERT INTO c_recheck
+		  (cr_sequence,
+		   batch_no,
+		   cbs_sequence,
+		   cr_oper,
+		   cr_deptsequence,
+		   cr_type,
+		   cr_opinion,
+		   cr_explain,
+		   cr_date)
+		VALUES
+		  (#{cr_sequence},
+		   #{batch_no},
+		   #{cbs_sequence},
+		   #{cr_oper},
+		   #{cr_deptsequence},
+		   #{cr_type},
+		   #{cr_opinion},
+		   #{cr_explain},
+		   #{cr_date})
+	</insert>
+
+	<!-- 根据申请编号变更复核记录 -->
+	<update id="updateRecheck" parameterType="HashMap">
+		UPDATE c_recheck
+		   <set>
+		   	   <if test="null != cbs_sequence">cbs_sequence = #{cbs_sequence},</if>
+		       <if test="null != cr_oper">cr_oper = #{cr_oper},</if>
+		       <if test="null != cr_deptsequence">cr_deptsequence = #{cr_deptsequence},</if>
+		       <if test="null != cr_type">cr_type = #{cr_type},</if>
+		       <if test="null != cr_opinion">cr_opinion = #{cr_opinion},</if>
+		       <if test="null != cr_date">cr_date = #{cr_date},</if>
+		   </set>
+		   <where>
+			   batch_no = #{batch_no}
+		   </where>
+	</update>
+
+	<!-- 根据申请编号查询复核记录 -->
+	<select id="selectRecheck" parameterType="String" resultType="HashMap">
+		SELECT t.batch_no,
+		       t.cbs_sequence,
+		       t.cr_oper,
+		       t.cr_deptsequence,
+		       t.cr_type,
+		       t.cr_opinion,
+		       t.cr_date
+		 FROM c_recheck t
+		 WHERE t.batch_no = #{_parameter}
+	</select>
+</mapper>

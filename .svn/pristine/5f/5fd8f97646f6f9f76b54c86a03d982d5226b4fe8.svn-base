@@ -1,0 +1,134 @@
+package cn.smartcandy.application.a.collection;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.struts2.ServletActionContext;
+
+import cn.smartcandy.common.common.BaseAction;
+import cn.smartcandy.common.utils.TSolrUtils;
+import cn.smartcandy.common.utils.TStringUtils;
+import cn.smartcandy.framework.core.data.DataTable;
+
+public class CollectionAction extends BaseAction{
+
+	private static final long serialVersionUID = 8375336401488983886L;
+	private CollectionBiz collectionBiz = new CollectionBiz();
+	protected HttpServletRequest request = ServletActionContext.getRequest();
+	protected HttpServletResponse response = ServletActionContext.getResponse();
+	protected HttpSession session = this.request.getSession();
+	
+	// 添加藏品（OK）
+	public String addCollection()  throws Exception {
+        Map<String, String> param = TStringUtils.getStringMapFromRequest();
+	    TStringUtils.printStringMap(param);
+	    
+	    String[] cateArr = request.getParameterValues("cateSequence"); 
+	    String[] tagArr = request.getParameterValues("searchTag"); 
+		collectionBiz.addCollection(param, cateArr, tagArr, super.getAdmin());
+		return null;
+	}
+	// 修改藏品
+	public String modifyCollection()  throws Exception {
+        Map<String, String> param = TStringUtils.getStringMapFromRequest();
+	    TStringUtils.printStringMap(param);
+	    String[] cateArr = request.getParameterValues("cateSequence"); 
+
+		collectionBiz.modifyCollection(param,cateArr,request,super.getAdmin());
+		return null;
+	}
+	
+	// 修改藏品
+	public String deleteCollection()  throws Exception {
+        Map<String, String> param = TStringUtils.getStringMapFromRequest();
+	    TStringUtils.printStringMap(param);
+	    String[] colList = request.getParameterValues("colList[]"); 
+
+		collectionBiz.deleteCollection(param,colList,request,super.getAdmin());
+		return null;
+	}
+
+	// 查找藏品详情 DONE
+	public void queryCollectionMsg()  throws Exception {
+        Map<String, String> param = TStringUtils.getStringMapFromRequest();
+	    TStringUtils.printStringMap(param);
+		Collection collection= collectionBiz.queryCollectionMsg(param, user);
+		request.setAttribute("collection", collection);
+	}
+	// 查询藏品（分页）（OK）
+	public String queryCollectionDataList()  throws Exception {
+        Map<String, String> param = TStringUtils.getStringMapFromRequest();
+        DataTable dataTable = collectionBiz.queryCollectionDataList(param, super.getPageNo(), super.getPageSize());
+		
+		List<Map<String, Object>> collectionList = TStringUtils.turnDataTableToObjectMapList(dataTable);
+		TStringUtils.printList(collectionList);
+
+		Map<String, String> pageInfo = TStringUtils.turnDataTableToPageInfoMap(dataTable);
+		TStringUtils.printStringMap(pageInfo);
+		request.setAttribute("list", collectionList);
+		request.setAttribute("pageInfo", pageInfo);
+		return null;
+	}
+	// 查询用户藏品（分页）（OK）
+	public String queryUserCollectionDataList()  throws Exception {
+        Map<String, String> param = TStringUtils.getStringMapFromRequest();
+		DataTable dataTable = collectionBiz.queryUserCollectionDataList(param,user,super.getPageNo(),super.getPageSize());
+		
+		// TODO 将每一个藏品的图片全部都列出来
+		List<Map<String, Object>> collectionList = TStringUtils.turnDataTableToObjectMapList(dataTable);
+		TStringUtils.printList(collectionList);
+
+		Map<String, String> pageInfo = TStringUtils.turnDataTableToPageInfoMap(dataTable);
+		TStringUtils.printStringMap(pageInfo);
+		request.setAttribute("list", collectionList);
+		request.setAttribute("pageInfo", pageInfo);
+		return null;
+	}
+
+	// 查询分类藏品信息 DONE
+	public String queryCateCollectionDataList()  throws Exception {
+        Map<String, String> param = TStringUtils.getStringMapFromRequest();
+		DataTable dataTable = collectionBiz.queryCateCollectionDataList(param,super.getPageNo(), super.getPageSize());
+		List<Map<String, String>> collectionList = collectionBiz.selectColAttentionOrNot(dataTable, user);
+		TStringUtils.printList(collectionList);
+		Map<String, String> pageInfo = TStringUtils.turnDataTableToPageInfoMap(dataTable);
+		request.setAttribute("collectionList", collectionList);
+		request.setAttribute("pageInfo", pageInfo);
+		return null;
+	}
+	//---------------------------------------修复数据------------------------------------------//
+	// 修复Collection数据
+	public String repairCollectionData()  throws Exception {
+		collectionBiz.repairCollectionData();
+		return null;
+	}
+	//---------------------------------------搜索藏品------------------------------------------//
+	public String searchCollectionData()  throws Exception {
+        Map<String, String> param = TStringUtils.getStringMapFromRequest();
+		// 查询结果
+		QueryResponse response = collectionBiz.searchCollectionData(param,super.getPageNo(),super.getPageSize());
+		SolrDocumentList solrDocumentList = response.getResults();
+		long resultSize = solrDocumentList.getNumFound();
+		// 对象列表
+		List<Collection> colList = TSolrUtils.turnResponseToColList(response);
+		request.setAttribute("collectionList", colList);
+		// 分页数据
+		Map<String, String> pageInfo = TSolrUtils.getPageInfo(super.getPageNo(), super.getPageSize(), resultSize);
+		request.setAttribute("pageInfo", pageInfo);
+		return null;
+	}
+	//---------------------------------------藏品乱序------------------------------------------//
+	public String reSortCollection()  throws Exception {
+        Map<String, String> param = TStringUtils.getStringMapFromRequest();
+        collectionBiz.updateCollectionSort(param, super.getAdmin());
+		return null;
+	}
+	
+	
+}

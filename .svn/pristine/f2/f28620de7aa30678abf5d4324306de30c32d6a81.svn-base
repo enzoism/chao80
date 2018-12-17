@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="format-detection" content="telephone=no">
+		<title>新闻管理</title>
+		<link rel="stylesheet" href="/admin/plugins/layui/css/layui.css" media="all" />
+		<link rel="stylesheet" href="/admin/css/global.css" media="all">
+		<link rel="stylesheet" href="/admin/plugins/font-awesome/css/font-awesome.min.css">
+		<link rel="stylesheet" href="/admin/css/table.css" />
+		<link rel="stylesheet" href="/admin/plugins/layui2/css/layui.css"  media="all">
+		<script type="text/javascript" src="/admin/js/jquery.js"></script>
+		<script type="text/javascript" src="/admin/plugins/layui/layui.js"></script>
+	</head>
+
+	<body>
+		<div class="admin-main">
+			<blockquote class="layui-elem-quote">
+				<form class="layui-form layui-form-inline" >
+				<a href="#" class="layui-btn layui-btn-large" id="refresh">
+					<i class="fa " aria-hidden="true"></i> 刷新
+				</a> 
+				<a href="#" class="layui-btn layui-btn-large" id="addNewNews">
+					<i class="fa " aria-hidden="true"></i> 添加新News
+				</a> 
+				<a href="#" class="layui-btn layui-btn-warm" id="changeType">切换藏品展示 </a> 
+				<div id="newsCategery">
+					<input type="radio" lay-filter="cate" name="cateSequence" value="1000000001" title="体育周边" >
+					<input type="radio" lay-filter="cate" name="cateSequence" value="1000000002" title="娱乐周边" checked="checked">
+					<input type="radio" lay-filter="cate" name="cateSequence" value="1000000003" title="潮流周边" >
+					<input type="radio" lay-filter="cate" name="cateSequence" value="1000000004" title="动漫周边">
+				</div>
+				</form>
+			</blockquote>
+			<fieldset class="layui-elem-field" id="newsField" style="display: none;">
+				<legend>新闻列表</legend>
+				<div class="layui-field-box layui-form">
+					<table class="layui-table admin-table" >
+						<thead>
+							<tr>
+								<th style="text-align:center">新闻标题</th>
+								<th style="text-align:center">新闻子标题</th>
+								<th style="text-align:center">新闻吧详情</th>
+								<th style="max-width: 350px; text-align:center">缩略图</th>
+								<th style="width: 100px; text-align:center">操        作</th>
+							</tr>
+						</thead>
+						<tbody id="newsContent">
+						</tbody>
+					</table>
+				</div>
+			</fieldset>
+			<fieldset class="layui-elem-field" id="collectionField" style="display: none;">
+				<legend>藏品列表（首页只展示前五项热门藏品）</legend>
+				<div class="layui-field-box layui-form">
+					<table class="layui-table admin-table" >
+						<thead>
+							<tr>
+								<th style="width: 30px;text-align:center"><input type="checkbox" lay-filter="allselector" lay-skin="primary"></th>
+								<th style="text-align:center">藏品名称</th>
+								<th style="text-align:center">藏品标题</th>
+								<th style="max-width: 350px; text-align:center">藏品图片</th>
+								<th style="width: 100px; text-align:center">操        作</th>
+							</tr>
+						</thead>
+						<tbody id="colContent">
+						</tbody>
+					</table>
+				</div>
+			</fieldset>
+			<div class="admin-table-page">
+				<div id="paged" class="page">
+				</div>
+			</div>
+		</div>
+		<!--模板-->
+		<script type="text/html" id="newsTPL">
+			{{# layui.each(d.newsList, function(index, item){ }}
+			<tr>
+				<td>{{ item.relTitle }}</td>
+				<td>{{ item.relSubTitle }}</td>
+				<td>{{ item.relContent }}</td>
+				<td class="imgContainer">
+					<img src="/upload{{ item.relThumbImage }}" alt="{{ item.relTitle }}" style="width:200px;"/>
+				</td>
+				<td style="text-align:center">
+					<a href="javascript:;" data-id="{{ item.relSequence }}" data-name="{{ item.relTitle }}" data-opt="edit" class="layui-btn layui-btn-normal">编辑</a><br/><br/>
+					<a href="javascript:;" data-id="{{ item.relSequence }}" data-name="{{ item.relTitle }}" data-opt="del" class="layui-btn layui-btn-danger layui-btn-normal">删除</a><br/><br/>
+				</td>
+			</tr>
+			{{# }); }}
+		</script>
+		<script type="text/html" id="collectionTPL">
+			{{# layui.each(d.list, function(index, item){ }}
+			<tr>
+				<td><input type="checkbox" lay-skin="primary"></td>
+				<td>{{ item.colTitle }}</td>
+				<td>{{ item.colSubTitle }}</td>
+				<td class="imgContainer">
+					<img src="/upload{{ item.colThumb }}"  alt="{{ item.cateName }}" style="width:200px;"/>
+				</td>
+				<td style="text-align:center">
+					<a href="javascript:;" data-id="{{ item.colSequence }}" data-name="{{ item.colTitle }}" data-opt="del" class="layui-btn layui-btn-danger layui-btn-normal">不展示</a><br/><br/>
+				</td>
+			</tr>
+			{{# }); }}
+		</script>
+		<script type="text/javascript" src="/admin/js/jquery.js"></script>
+		<script>
+			$("#newsField").hide();
+			$("#collectionField").hide();
+			var layer,cateSequence;layui.config({ base: 'js/' });
+			reWriteCateView();
+			layui.use(['paging', 'form'], function() {
+				var $ = layui.jquery,
+				paging = layui.paging(),
+				layerTips = parent.layer === undefined ? layui.layer : parent.layer, //获取父窗口的layer对象
+				form = layui.form();
+				layer = layui.layer; //获取当前窗口的layer对象
+				// 请求数据
+				queryShowType(paging, layerTips, form, cateSequence);
+				// 按钮点击事件
+				$('#changeType').on('click', function() {
+					layer.confirm('转化展示将更改News的展示内容,是否继续操作?', { icon: 3, title: '系统提示' }, function (index) {
+						changeShowType(paging, layerTips, form, cateSequence);
+						layer.close(index);
+					});
+				});
+				// 监听点击事件
+				form.on('radio(cate)', function(data){
+					cateSequence = data.value;
+					queryShowType(paging, layerTips, form, cateSequence);
+				}); 
+			});
+			// 刷新种类数据
+			function reWriteCateView(){
+				$.ajax({
+				    url:'/jsonAction/release_queryCategaryList.action?v=' + new Date().getTime(),
+				    type:'POST', 		//GET
+				    async:false,   		//或false,是否异步
+				    data:{cateRelType:'1'},
+				    timeout:5000,    	//超时时间
+				    dataType:'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+				    success:function(data,textStatus,xhr){
+				    	if(data && data.statusCode == 200){
+				    		var i = 0,len = data.categaryList.length,html=[],item;
+				    		for(i;i<len;i++){
+				    			item = data.categaryList[i];
+				    			if(i==0){
+				    				cateSequence = item.cateSequence;
+					    			html.push('<input type="radio" lay-filter="cate" name="cateSequence" value="'+item.cateSequence+'" title="'+item.cateName+'" checked="checked">')
+				    			}else{
+					    			html.push('<input type="radio" lay-filter="cate" name="cateSequence" value="'+item.cateSequence+'" title="'+item.cateName+'">')
+				    			}
+				    		}
+							$('#newsCategery').html(html.join(""));
+				    	}
+				    },
+				    error:function(xhr,textStatus){
+				    },
+				    complete:function(data,textStatus,xhr){
+				    }
+				});
+			}
+			// 请求新闻展示类型
+			function queryShowType(paging, layerTips, form, cateSequence){
+				$.ajax({
+				    url:'/jsonAction/release_queryNewsShowType.action?v=' + new Date().getTime(),
+				    type:'GET', 					//GET
+				    async:false, 					//或false,是否异步
+					data : {},
+					timeout:5000,    				//超时时间
+				    dataType:'json',    			//返回的数据格式：json/xml/html/script/jsonp/text
+				    success:function(data,textStatus,xhr){
+				    	if(data.showType == 0){
+				    		$("#newsField").show();
+							$("#collectionField").hide();
+							$("#changeType").text("切换藏品展示");
+							reNewsPagingView(paging, layerTips, form, cateSequence);
+				    	}else{
+							$("#newsField").hide();
+							$("#collectionField").show();
+							$("#changeType").text("切换新闻展示");
+							reColPagingView(paging, layerTips, form, cateSequence);
+				    	}
+				    },
+				    error:function(xhr,textStatus){
+						layer.msg("获取新闻信息失败！");
+				    }
+				});
+			}
+			
+			// 更换展示内容
+			function changeShowType(paging, layerTips, form, cateSequence){
+				$.ajax({
+				    url:'/jsonAction/release_changeNewsShowType.action?v=' + new Date().getTime(),
+				    type:'GET', 					//GET
+				    async:false, 					//或false,是否异步
+					data : {},
+					timeout:5000,    				//超时时间
+				    dataType:'json',    			//返回的数据格式：json/xml/html/script/jsonp/text
+				    success:function(data,textStatus,xhr){
+				    	if(data.showType == 0){
+				    		$("#newsField").show();
+							$("#collectionField").hide();
+							$("#changeType").text("切换藏品展示");
+							reNewsPagingView(paging, layerTips, form, cateSequence);
+				    	}else{
+							$("#newsField").hide();
+							$("#collectionField").show();
+							$("#changeType").text("切换新闻展示");
+							reColPagingView(paging, layerTips, form, cateSequence);
+				    	}
+				    },
+				    error:function(xhr,textStatus){
+						layer.msg("获取新闻信息失败！");
+				    }
+				});
+			}
+			// 请求News信息
+			function reNewsPagingView(paging,layerTips,form,cateSequence){
+				paging.init({
+                    openWait: true,
+                    url: '/jsonAction/release_queryNewsList.action?v=' + new Date().getTime(), //地址
+					elem: '#newsContent', //内容容器
+					params: { //发送到服务端的参数
+						cateSequence:cateSequence,
+						relStatus:"N"
+					},
+					type: 'GET',
+					tempElem: '#newsTPL', //模块容器
+					pageConfig: { //分页参数配置
+						elem: '#paged', //分页容器
+						pageSize: 10 //分页大小
+					},
+					success: function() { //渲染成功的回调
+						//alert('渲染成功');
+					},
+					fail: function(msg) { //获取数据失败的回调
+						//alert('获取数据失败')
+					},
+					complate: function() { //完成的回调
+						//重新渲染复选框
+						form.render('checkbox');
+						form.on('checkbox(allselector)', function(data) {
+							var elem = data.elem;
+							$('#newsContent').children('tr').each(function() {
+								var $that = $(this);
+								//全选或反选
+								$that.children('td').eq(0).children('input[type=checkbox]')[0].checked = elem.checked;
+								form.render('checkbox');
+							});
+						});
+						//绑定所有编辑按钮事件						
+						$('#newsContent').children('tr').each(function() {
+							var $that = $(this);
+							$that.children('td:last-child').children('a[data-opt=edit]').on('click', function() {
+								window.location.href='/admin/homeNewsEditor.html?relSequence='+$(this).data('id');
+							});
+							$that.children('td:last-child').children('a[data-opt=del]').on('click', function() {
+								var relSeq = $(this).data('id');
+								layer.confirm('删除News将不再展示，是否继续删除?', { icon: 3, title: '系统提示' }, function (index) {
+									layer.close(index);
+									delateNewsMsg(relSeq)
+								});
+							});
+						});
+					},
+				});
+			}
+			// 请求藏品信息
+			function reColPagingView(paging,layerTips,form,cateSequence){
+				paging.init({
+                    openWait: true,
+                    url: '/jsonAction/collection_queryHotCollectionDataList.action?v=' + new Date().getTime(), //地址
+					elem: '#colContent', //内容容器
+					params: { //发送到服务端的参数
+						cateSequence:cateSequence,
+					},
+					type: 'GET',
+					tempElem: '#collectionTPL', //模块容器
+					pageConfig: { //分页参数配置
+						elem: '#paged', //分页容器
+						pageSize: 10 //分页大小
+					},
+					success: function() { //渲染成功的回调
+						//alert('渲染成功');
+					},
+					fail: function(msg) { //获取数据失败的回调
+						//alert('获取数据失败')
+					},
+					complate: function() { //完成的回调
+						//重新渲染复选框
+						form.render('checkbox');
+						form.on('checkbox(allselector)', function(data) {
+							var elem = data.elem;
+							$('#colContent').children('tr').each(function() {
+								var $that = $(this);
+								//全选或反选
+								$that.children('td').eq(0).children('input[type=checkbox]')[0].checked = elem.checked;
+								form.render('checkbox');
+							});
+						});
+						//绑定所有编辑按钮事件						
+						$('#colContent').children('tr').each(function() {
+							var $that = $(this);
+							$that.children('td:last-child').children('a[data-opt=del]').on('click', function() {
+								var colSequence = $(this).data('id');
+								layer.confirm('藏品将不在首页展示，但不会删除该藏品，是否继续操作?', { icon: 3, title: '系统提示' }, function (index) {
+									layer.close(index);
+									deleteShowInHome(colSequence)
+								});
+							});
+						});
+					},
+				});
+			}
+			// 藏品不在主页展示
+			function deleteShowInHome(colSequence){
+				$.ajax({
+				    url:'/jsonAction/collection_deleteCollectionShowInHome.action?v=' + new Date().getTime(),
+				    type:'POST', 					//GET
+				    async:false, 					//或false,是否异步
+					data : {colSequence : colSequence},
+					timeout:5000,    				//超时时间
+				    dataType:'json',    			//返回的数据格式：json/xml/html/script/jsonp/text
+				    success:function(data,textStatus,xhr){
+						location.reload();
+				    },
+				    error:function(xhr,textStatus){
+						layer.msg("获取新闻信息失败！");
+				    }
+				});
+				
+			}
+		</script>
+	</body>
+</html>

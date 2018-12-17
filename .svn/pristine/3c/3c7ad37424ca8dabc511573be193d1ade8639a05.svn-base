@@ -1,0 +1,20 @@
+package cn.smartcandy.application.a.report;
+
+import cn.smartcandy.common.common.BaseAction;
+
+/**
+ * @项目名称：zmjema
+ * @类名称：ReportAction
+ * @类描述：举报藏品
+ * @创建人：tangzhifeng
+ * @创建时间：2017年10月31日 上午11:33:35
+ * @修改人：someOne
+ * @修改时间：2017年10月31日 上午11:33:35 
+ * @Company:SmartCandy (C) 2017
+ * @version 1.0
+ */
+public class ReportAction extends BaseAction{
+
+	private static final long serialVersionUID = 2761005301464315831L;
+
+}

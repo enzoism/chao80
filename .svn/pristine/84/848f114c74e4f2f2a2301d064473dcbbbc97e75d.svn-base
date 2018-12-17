@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="format-detection" content="telephone=no">
+		<title>Tag管理</title>
+		<link rel="stylesheet" href="/admin/plugins/layui/css/layui.css" media="all" />
+		<link rel="stylesheet" href="/admin/css/global.css" media="all">
+		<link rel="stylesheet" href="/admin/plugins/font-awesome/css/font-awesome.min.css">
+		<link rel="stylesheet" href="/admin/css/table.css" />
+		<link rel="stylesheet" href="/admin/plugins/layui2/css/layui.css"  media="all">
+		<script type="text/javascript" src="/admin/js/jquery.js"></script>
+		<script type="text/javascript" src="/admin/plugins/layui/layui.js"></script>
+	</head>
+
+	<body>
+		<div class="admin-main">
+			<blockquote class="layui-elem-quote">
+				<form class="layui-form layui-form-inline" >
+					<button class="layui-btn" id="refresh"><i class="layui-icon">刷新</i></button>
+					<button class="layui-btn" id="addNewNews"><i class="layui-icon">添加新Tag</i></button>
+				</form>
+			</blockquote>
+			<fieldset class="layui-elem-field">
+				<legend>Tag列表</legend>
+				<div class="layui-field-box layui-form">
+					<table class="layui-table admin-table" >
+						<thead>
+							<tr>
+								<th style="text-align:center">新闻标题</th>
+							</tr>
+						</thead>
+						<tbody id="content"> </tbody>
+					</table>
+				</div>
+			</fieldset>
+
+			<div class="admin-table-page">
+				<div id="paged" class="page">
+				</div>
+			</div>
+		</div>
+		<!--模板-->
+		<script type="text/html" id="tpl">
+			{{# layui.each(d.tagList, function(index, item){ }}
+			<tr>
+				<td>{{ item.tagName }}</td>
+			</tr>
+    		    <div>
+  					<div>{{ item.tagName }}</div>
+     			</div>
+			{{# }); }}
+		</script>
+		<script>
+			// 重写类别视图
+			var layer,cateSequence;layui.config({ base: 'js/' });
+			// 初始化视图
+			layui.use(['paging', 'form'], function() {
+				var $ = layui.jquery,
+					paging = layui.paging(),
+					layerTips = parent.layer === undefined ? layui.layer : parent.layer, //获取父窗口的layer对象
+					form = layui.form();
+					layer = layui.layer; //获取当前窗口的layer对象
+					
+				// 页面数据刷新
+				rePagingView(paging, layerTips, form, layer);
+				
+				// 监听点击事件
+				form.on('radio(cate)', function(data){
+					cateSequence = data.value;
+					rePagingView(paging,layerTips,form,layer);
+				}); 
+				
+				// 按钮点击事件
+				$('#addNewNews').on('click', function() {
+					window.location.href='/admin/homeNewsAdd.html';
+				});
+				$('#refresh').on('click', function() {
+					location.reload();
+				});
+				
+			});
+			// 刷新当前页面数据
+			function rePagingView(paging,layerTips,form,layer){
+				paging.init({
+                    openWait: true,
+                    url: '/jsonAction/tag_queryCateTagDataList.action?v=' + new Date().getTime(), //地址
+					elem: '#content', 	//内容容器
+					params: {},			//发送到服务端的参数
+					type: 'GET',
+					tempElem: '#tpl', 	//模块容器
+					pageConfig: { 		//分页参数配置
+						elem: '#paged', //分页容器
+						pageSize: 15 	//分页大小
+					},
+					success: function() { //渲染成功的回调
+						//alert('渲染成功');
+					},
+					fail: function(msg) { //获取数据失败的回调
+						//alert('获取数据失败')
+					},
+					complate: function() { //完成的回调
+						//绑定所有编辑按钮事件						
+						$('#content').children('tr').each(function() {
+							var $that = $(this);
+							$that.children('td:last-child').children('a[data-opt=edit]').on('click', function() {
+								window.location.href='/admin/homeNewsEditor.html?relSequence='+$(this).data('id');
+							});
+							$that.children('td:last-child').children('a[data-opt=del]').on('click', function() {
+								var relSeq = $(this).data('id');
+								layer.confirm('删除News将不再展示，是否继续删除?', { icon: 3, title: '系统提示' }, function (index) {
+									layer.close(index);
+									delateNewsMsg(relSeq)
+								});
+							});
+						});
+					},
+				});
+			}
+			
+			// 删除News
+			function delateNewsMsg(relSeq){
+				$.ajax({
+					cache : true,
+					type : "POST",
+					url : '/jsonAction/release_deleteNewsMsg.action?v=' + new Date().getTime(),
+					data : {relSequence:relSeq}, // 你的formid
+					async : false,
+					error : function(request) {
+						layer.msg("删除News删除失败");
+					},
+					success : function(data) {
+						location.reload(); //刷新
+					}
+				});
+			}
+			
+			
+		</script>
+	</body>
+</html>

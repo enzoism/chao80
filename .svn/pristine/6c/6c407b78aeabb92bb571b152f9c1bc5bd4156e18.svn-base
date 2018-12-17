@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="error-default" extends="struts-default">
+		<action name="error_*" class="cn.smartcandy.common.error.ErrorAction" method="{1}">
+			<result name="add-success">/success.jsp</result>
+			<result name="delete-success">/success.jsp</result>
+			<result name="modifyPage-success">/sys/errorcodemng/modifyErrorcode.jsp</result>
+			<result name="modify-success">/success.jsp</result>
+			<result name="query-success">/sys/errorcodemng/errorcodeMng.jsp</result>
+			<result name="errorquery-success">/sys/errorcodequery/errorcodeList.jsp</result>
+			<result name="queryDetail-success">/sys/errorcodequery/errorDetail.jsp</result>
+		</action>
+	</package>
+</struts>

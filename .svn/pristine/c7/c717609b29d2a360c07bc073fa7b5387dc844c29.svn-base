@@ -1,0 +1,62 @@
+var navs = [{
+	"title": "用户组管理",
+	"icon": "fa-cubes",
+	"spread": false,
+	"children": [{
+		"title": "用户管理",
+		"icon": "&#xe63c;",
+		"href": "userList.html"
+	}, {
+		"title": "用户黑名单",
+		"icon": "&#xe63c;",
+		"href": "userBlackList.html"
+	}]
+}, {
+	"title": "藏家组管理",
+	"icon": "fa-cogs",
+	"spread": true,
+	"children": [{
+		"title": "藏家管理",
+		"icon": "&#xe63c;",
+		"href": "collectorList.html"
+	}, {
+		"title": "藏品管理",
+		"icon": "&#xe63c;",
+		"href": "collectionList.html"
+	}, {
+		"title": "藏家黑名单",
+		"icon": "&#xe63c;",
+		"href": "collectorBlackList.html"
+	}]
+}, {
+	"title": "系统内容管理",
+	"icon": "fa-cogs",
+	"spread": false,
+	"children": [{
+		"title": "轮播图管理",
+		"icon": "fa-table",
+		"href": "homeBanner.html"
+	}, {
+		"title": "新闻管理",
+		"icon": "fa-navicon",
+		"href": "homeNews.html"
+	}, {
+		"title": "Video管理",
+		"icon": "&#xe62a;",
+		"href": "homeVideo.html"
+	}, {
+		"title": "种类管理",
+		"icon": "&#xe62a;",
+		"href": "homeCategory.html"
+	}]
+}, {
+	"title": "其他",
+	"icon": "fa-stop-circle",
+	"href": "#",
+	"spread": false,
+	"children": [{
+		"title": "更多精彩",
+		"icon": "fa-github",
+		"href": "other.html"
+	}]
+}];

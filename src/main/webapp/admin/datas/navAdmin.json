@@ -1,0 +1,62 @@
+[
+	{
+		"title": "Admin藏品管理",
+		"icon": "fa-cubes",
+		"spread": true,
+		"children": [
+			{
+				"title": "藏家管理",
+				"icon": "&#xe63c;",
+				"href": "adminCollector.html"
+			}, {
+				"title": "藏品管理",
+				"icon": "&#xe63c;",
+				"href": "adminCollection.html"
+			}
+		]
+	}, {
+		"title": "Admin系统管理",
+		"icon": "fa-cogs",
+		"spread": false,
+		"children": [
+			{
+				"title": "轮播图管理",
+				"icon": "fa-table",
+				"href": "adminHomeBanner.html"
+			}, {
+				"title": "新闻管理",
+				"icon": "fa-navicon",
+				"href": "adminHomeNews.html"
+			}, {
+				"title": "Video管理",
+				"icon": "&#xe62a;",
+				"href": "adminHomeVideo.html"
+			}, {
+				"title": "种类管理",
+				"icon": "&#xe62a;",
+				"href": "adminHomeCategary.html"
+			}
+		]
+	}, {
+		"title": "User内容管理",
+		"icon": "fa-cogs",
+		"spread": false,
+		"children": [
+			{
+				"title": "管理藏品",
+				"icon": "fa-navicon",
+				"href": "operCollection.html"
+			}
+		]
+	}, {
+		"title": "其他",
+		"icon": "fa-stop-circle",
+		"href": "#",
+		"spread": false,
+		"children": [{
+			"title": "更多精彩",
+			"icon": "fa-github",
+			"href": "other.html"
+		}]
+	}
+]

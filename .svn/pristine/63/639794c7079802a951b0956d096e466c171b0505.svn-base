@@ -1,0 +1,434 @@
+package cn.smartcandy.application.a.attention;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.collections.CollectionUtils;
+
+import cn.smartcandy.application.a.account.AccountDao;
+import cn.smartcandy.application.a.account.User;
+import cn.smartcandy.application.a.collection.Collection;
+import cn.smartcandy.application.a.collection.CollectionDao;
+import cn.smartcandy.common.BaseBiz;
+import cn.smartcandy.common.common.SessionKeys;
+import cn.smartcandy.common.utils.TStringUtils;
+import cn.smartcandy.framework.biz.workdate.WorkDate;
+import cn.smartcandy.framework.core.data.DataTable;
+import cn.smartcandy.framework.core.db.mybatis.MyBatisDBAccess;
+import cn.smartcandy.framework.core.exception.BusinessException;
+import cn.smartcandy.framework.utils.CStringUtils;
+
+public class AttentionBiz extends BaseBiz{
+	private AttentionDao attentionDao = new AttentionDao();
+	private AccountDao accountDao = new AccountDao();
+	private CollectionDao collectionDao = new CollectionDao();
+	// 关注用户 DONE
+	public int addUserAttention(Map<String, String> param, User user) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			String userSequence = param.get("userSequence");
+			if (CStringUtils.isEmpty(userSequence)) {
+				throw new BusinessException("参数不合法");
+			}
+			if (CStringUtils.equals(userSequence, user.getUserSequence())) {
+				throw new BusinessException("不能关注自己!");
+			}
+
+			param.put("attentStatus", UserAttention.STATUS_NORMAL);
+			param.put("relUserSequence", userSequence);
+			param.put("userSequence", user.getUserSequence());
+			
+			// 查询用户有没有点过赞
+			int count = attentionDao.selectUserAttention(param, dbAccess);
+			if (count == 0) {
+				String attentSequence = dbAccess.getSeqID("a_user_attent");
+				param.put("attentSequence", attentSequence);
+				param.put("attentDate", WorkDate.getSystemTime());
+				attentionDao.insertUserAttention(param, dbAccess);
+			} else{
+				attentionDao.updateUserAttention(param, dbAccess);
+			}
+			
+			// 更改自己账户信息
+			Map<String, String> userParam = new HashMap<String, String>();
+			userParam.put("userSequence", user.getUserSequence());
+			userParam.put("attentCount", String.valueOf(1));
+			accountDao.updateUserCount(userParam, dbAccess);
+			
+			// 更改自己账户信息
+			Map<String, String> otherParam = new HashMap<String, String>();
+			otherParam.put("userSequence", userSequence);
+			otherParam.put("fansCount", String.valueOf(1));
+			accountDao.updateUserCount(otherParam, dbAccess);
+			
+			// 在消息记录中插入一条记录
+			Map<String, String> msgParam = new HashMap<String, String>();
+			String msgSequence = dbAccess.getSeqID("a_msg");
+			msgParam.put("msgSequence", msgSequence);
+			msgParam.put("msgStatus", AttentionMsg.STATUS_NORMAL);
+			msgParam.put("userSequence", userSequence);
+			msgParam.put("operSequence", user.getUserSequence());
+			msgParam.put("msgType", AttentionMsg.TYPE_ATT_USER);
+			msgParam.put("msgDate", WorkDate.getSystemTime());
+			attentionDao.insertAttentionMsg(msgParam, dbAccess);
+			
+			dbAccess.commitTransction();
+			return count;
+		} catch (BusinessException e) {
+			dbAccess.rollBack();
+			throw e;
+		} catch (Exception e) {
+			dbAccess.rollBack();
+			throw new BusinessException("关注用户失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	// 取消关注用户 DONE
+	public int removeUserAttention(Map<String, String> param, User user) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			String userSequence = param.get("userSequence");
+			if (CStringUtils.isEmpty(userSequence)) {
+				throw new BusinessException("参数不合法");
+			}
+			
+			param.put("relUserSequence", userSequence);
+			param.put("userSequence", user.getUserSequence());
+			param.put("attentStatus", UserAttention.STATUS_DELETE);
+			// 查询用户有没有点过赞
+			int insertUserAttention = attentionDao.updateUserAttention(param, dbAccess);
+			
+			// 更改用户信息
+			Map<String, String> userParam = new HashMap<String, String>();
+			userParam.put("userSequence", user.getUserSequence());
+			userParam.put("attentCount", String.valueOf(-1));
+			accountDao.updateUserCount(userParam, dbAccess);
+			
+			// 更改自己账户信息
+			Map<String, String> otherParam = new HashMap<String, String>();
+			otherParam.put("userSequence", userSequence);
+			otherParam.put("fansCount", String.valueOf(-1));
+			accountDao.updateUserCount(otherParam, dbAccess);
+			
+			// 在消息记录中插入一条记录
+			Map<String, String> msgParam = new HashMap<String, String>();
+			msgParam.put("msgStatus", AttentionMsg.STATUS_DELETE);
+			msgParam.put("userSequence", userSequence);
+			msgParam.put("operSequence", user.getUserSequence());
+			msgParam.put("msgType", AttentionMsg.TYPE_ATT_USER);
+			attentionDao.updateAttentionMsg(msgParam, dbAccess);
+			
+			dbAccess.commitTransction();
+			return insertUserAttention;
+		} catch (BusinessException e) {
+			dbAccess.rollBack();
+			throw e;
+		} catch (Exception e) {
+			dbAccess.rollBack();
+			throw new BusinessException("关注用户失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	// 查询所有关注用户
+	public List<String> queryAttentionUserList(HttpServletRequest request, Map<String, String> param) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			// 查询关注的用户序号
+			List<String> attUserList = attentionDao.selectAttentionUserList(param, dbAccess);
+			request.getSession().setAttribute(SessionKeys.ATTENTION_USERS, attUserList);
+
+			return attUserList;
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("查询关注用户失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	
+	// 查询所有粉丝用户 DONE
+	public DataTable queryAttentionUserDataList(Map<String, String> param,User user,int pageNo,int pageSize) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			param.put("userSequence",user.getUserSequence());
+			DataTable dataTable = attentionDao.selectAttentionUserDataList(param, pageNo, pageSize, dbAccess);
+			return dataTable;
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("查询关注用户失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	
+	// 查询所有粉丝用户 DONE
+	public DataTable queryFansUserDataList(Map<String, String> param, User user,int pageNo,int pageSize) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			param.put("userSequence",user.getUserSequence());
+			DataTable dataTable = attentionDao.selectFansUserDataList(param, pageNo,pageSize, dbAccess);
+			return dataTable;
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("查询关注用户失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	
+	// 关注商品 DONE
+	public int addCollectionAttention(Map<String, String> param,User user) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			String colSequence = param.get("colSequence");
+			if (CStringUtils.isEmpty(colSequence)) {
+				throw new BusinessException("参数不合法");
+			}
+			Collection collectionMsg = new CollectionDao().selectCollectionMsg(param, dbAccess);
+			if (null == collectionMsg) {
+				throw new BusinessException("当前藏品不存在");
+			}
+			param.put("userSequence", user.getUserSequence());
+			param.put("attentStatus", CollectionAttention.STATUS_NORMAL);
+			param.put("relUserSequence", collectionMsg.getUserSequence());
+
+			int count = attentionDao.selectCollectionAttention(param, dbAccess);
+			if (count == 0) {
+				String attentSequence = dbAccess.getSeqID("a_collection_attent");
+				param.put("attentSequence", attentSequence);
+				param.put("attentDate", WorkDate.getSystemTime());
+				attentionDao.insertCollectionAttention(param, dbAccess);
+			}else{
+				attentionDao.updateCollectionAttention(param, dbAccess);
+			}
+			
+			// 更新自己账户信息
+			Map<String, String> userParam = new HashMap<String, String>();
+			userParam.put("userSequence", user.getUserSequence());
+			userParam.put("likeCount", String.valueOf(1));
+			accountDao.updateUserCount(userParam, dbAccess);
+			
+			// 更新他人账户信息
+			Map<String, String> otherParam = new HashMap<String, String>();
+			otherParam.put("userSequence", collectionMsg.getUserSequence());
+			otherParam.put("likedCount", String.valueOf(1));
+			accountDao.updateUserCount(otherParam, dbAccess);
+			
+			// 更新藏品的like数量
+			Map<String, String> likeParam = new HashMap<String, String>();
+			likeParam.put("colSequence", colSequence);
+			likeParam.put("colLikeNum", String.valueOf(1));
+			collectionDao.updateCollectionLikeCount(likeParam, dbAccess);
+			
+			// 在消息记录中插入一条记录
+			Map<String, String> msgParam = new HashMap<String, String>();
+			String msgSequence = dbAccess.getSeqID("a_msg");
+			msgParam.put("msgSequence", msgSequence);
+			msgParam.put("msgStatus", AttentionMsg.STATUS_NORMAL);
+			msgParam.put("colSequence", colSequence);
+			msgParam.put("userSequence", collectionMsg.getUserSequence());
+			msgParam.put("operSequence", user.getUserSequence());
+			msgParam.put("msgType", AttentionMsg.TYPE_ATT_COLL);
+			msgParam.put("msgDate", WorkDate.getSystemTime());
+			attentionDao.insertAttentionMsg(msgParam, dbAccess);
+			
+			dbAccess.commitTransction();
+			return count;
+		} catch (BusinessException e) {
+			dbAccess.rollBack();
+			throw e;
+		} catch (Exception e) {
+			dbAccess.rollBack();
+			throw new BusinessException("关注藏品失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+
+	// 取消关注商品 DONE
+	public int removeCollectionAttention(Map<String, String> param,User user) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			String colSequence = param.get("colSequence");
+			if (CStringUtils.isEmpty(colSequence)) {
+				throw new BusinessException("参数不合法");
+			}
+			Collection collectionMsg = new CollectionDao().selectCollectionMsg(param, dbAccess);
+			if (null == collectionMsg) {
+				throw new BusinessException("当前藏品不存在");
+			}
+			
+			param.put("userSequence", user.getUserSequence());
+			param.put("attentStatus", CollectionAttention.STATUS_DELETE);
+			int upateUserAttention = attentionDao.updateCollectionAttention(param, dbAccess);
+			
+			// 更新自己账户信息
+			Map<String, String> userParam = new HashMap<String, String>();
+			userParam.put("userSequence", user.getUserSequence());
+			userParam.put("likeCount", String.valueOf(-1));
+			accountDao.updateUserCount(userParam, dbAccess);
+			
+			// 更新他人账户信息
+			Map<String, String> otherParam = new HashMap<String, String>();
+			otherParam.put("userSequence", collectionMsg.getUserSequence());
+			otherParam.put("likedCount", String.valueOf(-1));
+			accountDao.updateUserCount(otherParam, dbAccess);
+			
+			// 更新藏品的like数量
+			Map<String, String> likeParam = new HashMap<String, String>();
+			likeParam.put("colSequence", colSequence);
+			likeParam.put("colLikeNum", String.valueOf(-1));
+			collectionDao.updateCollectionLikeCount(likeParam, dbAccess);
+			
+			// 在消息记录中插入一条记录
+			Map<String, String> msgParam = new HashMap<String, String>();
+			msgParam.put("msgStatus", AttentionMsg.STATUS_DELETE);
+			msgParam.put("colSequence", colSequence);
+			msgParam.put("userSequence", collectionMsg.getUserSequence());
+			msgParam.put("operSequence", user.getUserSequence());
+			msgParam.put("msgType", AttentionMsg.TYPE_ATT_COLL);
+			attentionDao.updateAttentionMsg(msgParam, dbAccess);
+			
+			dbAccess.commitTransction();
+			return upateUserAttention;
+		} catch (BusinessException e) {
+			dbAccess.rollBack();
+			throw e;
+		} catch (Exception e) {
+			dbAccess.rollBack();
+			throw new BusinessException("取消关注藏品失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	
+	// 关注所有藏品
+	public DataTable queryAttentionCollectionDataList(Map<String, String> param ,User user,int pageNo,int pageSize) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			param.put("userSequence", user.getUserSequence());
+			DataTable dataTable = null;
+			String cateSequence = param.get("cateSequence");
+			if (CStringUtils.isEmpty(cateSequence)) {
+				dataTable = attentionDao.selectAttentionColDataListWithoutCate(param, pageNo, pageSize, dbAccess);
+			}else{
+				dataTable = attentionDao.selectAttentionColDataListWithCate(param, pageNo, pageSize, dbAccess);
+			}
+			return dataTable;
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("查询关注用户失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	
+	// 被赞所有藏品
+	public DataTable queryFansCollectionDataList(Map<String, String> param,User user,int pageNo,int pageSize) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			param.put("userSequence", user.getUserSequence());
+			DataTable dataTable = attentionDao.selectFansCollectionDataList(param,pageNo, pageSize,dbAccess);
+			return dataTable;
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("查询关注用户失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	
+	// 查询用户消息
+	public DataTable queryAttentionMsgDataList(Map<String, String> param,User user,int pageNo,int pageSize) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			param.put("userSequence", user.getUserSequence());
+			DataTable dataTable = attentionDao.selectAttentionMsgDataList(param,pageNo, pageSize,dbAccess);
+			return dataTable;
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("查询关注用户失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	// 查询消息列表
+	public List<AttentionMsg> queryAttentionMsgList(List<Map<String, String>> msgMapList) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			ArrayList<AttentionMsg> arrayList = new ArrayList<AttentionMsg>(); 
+			if (CollectionUtils.isEmpty(msgMapList)) {
+				return arrayList;
+			}
+			// 取出主键列表
+			List<String> usrSeqList = new ArrayList<String>();
+			List<String> colSeqList = new ArrayList<String>();
+			for (int i = 0; i < msgMapList.size(); i++) {
+				Map<String, String> map = msgMapList.get(i);
+				if (CStringUtils.equals(map.get("msgType"), AttentionMsg.TYPE_ATT_USER)) {
+					usrSeqList.add(map.get("operSequence"));
+				}else if (CStringUtils.equals(map.get("msgType"), AttentionMsg.TYPE_ATT_COLL)) {
+					colSeqList.add(map.get("colSequence"));
+				}
+			}
+			// 查询数据
+			List<AttentionMsg> userMsgList = null;
+			if (usrSeqList.size()>0) {
+				System.out.println("-------------------------->usrSeqList");
+				TStringUtils.printList(usrSeqList);
+				Map<String, Object> userMap = new HashMap<String, Object>();
+				userMap.put("userList", usrSeqList);
+				userMsgList = attentionDao.selectUserAttentionMsgList(userMap, dbAccess);
+				TStringUtils.printList(userMsgList);
+				arrayList.addAll(userMsgList);
+			}
+			List<AttentionMsg> colMsgList = null;
+			if (colSeqList.size()>0) {
+				System.out.println("-------------------------->colMsgList");
+				TStringUtils.printList(colMsgList);
+				Map<String, Object> colMap = new HashMap<String, Object>();
+				colMap.put("colList", colSeqList);
+				colMsgList = attentionDao.selectColAttentionMsgList(colMap, dbAccess);
+				TStringUtils.printList(colMsgList);
+				arrayList.addAll(colMsgList);
+			}
+
+			Collections.sort(arrayList);
+
+			return arrayList;
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("查询消息失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	
+	
+	
+}

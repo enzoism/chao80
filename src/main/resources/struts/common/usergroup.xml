@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="usergroup" extends="struts-default" >
+	    <action name="usergroup_*" class="cn.smartcandy.common.usergroupmng.UserGroupAction" method="{1}">
+	    	<!--用户权限组列表页-->
+			<result name="ugquerysuccess">/sys/usergroupmng/userGroupList.jsp</result>
+			
+			<!--查询权限组信息-->
+			<result name="queryRolesList">/sys/usergroupmng/addUserGroup.jsp</result>
+			
+			<!--增加用户权限组-->
+			<result name="ugaddsuccess">/success.jsp</result>
+			
+			<!--查询所需要修改用户权限组-->
+			<result name="ugquerymodifysuccess">/sys/usergroupmng/modifyUserGroup.jsp</result>
+			
+			<!--修改用户权限组 -->
+			<result name="ugmodifysuccess">/success.jsp</result>
+			
+			<!--删除用户权限组-->
+			<result name="ugdelsuccess">/success.jsp</result>
+		 </action>
+	</package>
+</struts>

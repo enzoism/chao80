@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="user">
+
+	<sql id="topBeanch">userTopBranchSequence = #{topBranchSequence}</sql>
+	<sql id="manageBranch">
+		userDeptSequence IN <foreach collection="userManageBranch" item="id" open="(" separator="," close=")">#{id}</foreach>
+	</sql>
+	<!-- 查询用户下权限组可访问的URL -->
+	<select id="queryUrlByUserID" parameterType="String" resultType="map">
+		SELECT
+			s.cs_url,
+			s.m_sequence,
+			m.m_bistype
+		FROM
+			c_user u,
+			c_rm rm,
+			c_menu m,
+			c_sysurl s
+		WHERE
+			rm.ro_sequence = u.ro_sequence
+		AND m.m_sequence = rm.m_sequence
+		AND s.m_sequence = m.m_sequence
+		AND s.cs_status = '0' <!-- 正常 -->
+		AND m.m_status = 'N' <!-- 正常 -->
+		AND u.userid = #{_parameter} <!--用户ID-->
+	</select>
+
+	<!-- 查询用户下权限组可访问的URL -->
+	<select id="queryUrlByRoSeq" parameterType="String" resultType="map">
+		SELECT
+			s.cs_url,
+			s.m_sequence,
+			m.m_bistype
+		FROM
+			c_rm rm,
+			c_menu m,
+			c_sysurl s
+		WHERE
+			m.m_sequence = rm.m_sequence
+		AND s.m_sequence = m.m_sequence
+		AND s.cs_status = '0' <!-- 正常 -->
+		AND m.m_status = 'N' <!-- 正常 -->
+		AND rm.ro_sequence =  #{_parameter} <!--特殊权限组-->
+	</select>
+	<!-- 根据角色sequence查询 -->
+	<select id="getRoleBySequence" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			*
+		FROM
+			c_role
+		<where>
+			<if test="null != ro_sequence">ro_sequence = #{ro_sequence}</if>
+			<if test="null != ro_name">ro_name = #{ro_name}</if>
+		</where>
+	</select>
+
+	<!--查询手机号对应用户 -->
+	<select id="selectPhoneUser" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			userSequence,
+			userID
+		FROM
+			c_user
+		<where>
+			<if test="null != userPhone">userPhone = ${userPhone}</if>
+			<if test="null != topBranchSequence">topBranchSequence = ${topBranchSequence}</if>
+		</where>
+	</select>
+
+
+	<!-- 查询对应能添加的权限组 -->
+	<select id="queryAuthorizeByUserID" parameterType="map" resultType="map">
+		SELECT
+			r.ro_sequence,
+			r.ro_name,
+			r.ro_banktype,
+			r.ro_dept_type
+		FROM
+			c_role r,
+			c_rr rr
+		WHERE
+			r.ro_sequence = rr.ro_sequence
+		AND rr.can_ro_sequence = (
+			SELECT
+				u.ro_sequence
+			FROM
+				c_user u
+			WHERE
+				u.userid = #{userID})
+	</select>
+
+	<!-- 获取下一位操作员ID -->
+	<select id="getNextUserID" resultType="String">
+		SELECT IFNULL(MAX(userID), 0) + 1 FROM c_user
+		<!-- select to_number(nvl(MAX(userID), 0)) + 1 from c_user -->
+	</select>
+
+	<!-- 重置密码 -->
+	<update id="resetPassword" parameterType="map">
+		UPDATE c_user
+		SET userpwd = #{userpwd} WHERE userID = #{userID}
+	</update>
+
+	<!-- 注销用户 -->
+	<update id="deleteUser" parameterType="String">
+		UPDATE c_user
+		SET userStatus='D' WHERE userID = #{_parameter}
+	</update>
+	
+	<!-- 锁定用户 -->	
+	<update id="lockUser" parameterType="String">
+		UPDATE c_user 
+		SET userStatus='P' WHERE userID = #{_parameter}
+	</update>
+	
+	<!-- 解除锁定用户 -->	
+	<update id="unLockUser" parameterType="String">
+		UPDATE c_user 
+		SET userStatus='A' WHERE userID = #{_parameter}
+	</update>
+	
+   <!-- 查询所有用户 -->
+   <select id="queryUser" parameterType="map" resultType="map">
+   		SELECT
+			u.*, r.ro_name
+		FROM
+			c_user u,
+			c_role r
+		WHERE
+			r.ro_sequence = u.ro_sequence
+		    <if test="null != userID">
+		    	AND u.userID = #{userID}
+		    </if>
+		    <if test="null != userName">
+		    	AND u.userName LIKE '%${userName}%'
+		    </if>
+		    <if test="null != ro_sequence">
+		    	AND u.ro_sequence = #{ro_sequence}
+		    </if>
+		    <if test="null != userDeptSequence">
+		    	AND u.userDeptSequence = #{userDeptSequence}
+		    </if>
+		    <if test="null != userStatus">
+		    	AND u.userStatus = #{userStatus}
+		    </if>
+		    <if test="null != can_ro_sequence">
+			    AND u.ro_sequence in(select c_rr.ro_sequence from c_rr where c_rr.can_ro_sequence = #{can_ro_sequence})
+		    </if>
+		    <!-- <trim>
+				<if test="null != topBranchSequence">
+					AND u.<include refid="topBeanch"/>
+				</if>
+			</trim> -->
+			<trim>
+ 				 <if test="null == branchSequence and null != userManageBranch">AND u.<include refid="manageBranch"/></if>
+			</trim>
+		    AND u.userDeptType != '00'
+			ORDER BY u.userStatus,u.userID
+   </select>
+   
+   <!-- 查询所有用户 -->
+   <select id="selectUsers" parameterType="String" resultType="cn.smartcandy.framework.core.user.User">
+		SELECT
+			u.*
+		FROM
+			c_user u
+		ORDER BY
+			userID
+   </select>
+
+   <!-- 根据用户ID查询用户 -->
+	<select id="getUserByID" parameterType="cn.smartcandy.framework.core.user.User" resultType="cn.smartcandy.framework.core.user.User" >
+		SELECT * FROM c_user
+		<where>
+			<if test="null != userPhone">userPhone = #{userPhone}</if>
+			<if test="null == userPhone and null != userID">userID = #{userID}</if>
+		</where>	
+	</select>
+	
+	<!-- 根据userSequence查询用户 -->
+	<select id="queryUserBean" parameterType="String" resultType="cn.smartcandy.framework.core.user.User">
+		SELECT
+			*
+		FROM
+			c_user
+		WHERE
+			userSequence = #{_parameter}
+	</select>
+   
+   <!-- 根据员工序号查询用户 -->
+	<select id="getUserByEmployeeSequence" parameterType="cn.smartcandy.framework.core.user.User" resultType="cn.smartcandy.framework.core.user.User" >
+		SELECT *
+		FROM c_user
+		<where>
+			<if test="null != employeeSequence">AND employeeSequence = #{employeeSequence}</if>
+			<if test="null != userPhone">AND userPhone = #{userPhone}</if>
+		</where>
+	</select>
+	
+	<!-- 向操作员表中插入记录 -->
+	<insert id="insertUser" parameterType="cn.smartcandy.framework.core.user.User">
+		INSERT INTO c_user
+			  (userSequence,
+			   userID,
+			   employeeSequence,
+			   userStatus,
+			   userStartDate,
+			   userpwd,
+			   userName,
+			  userTopBranchSequence,
+			   userDeptType,
+			   userDeptSequence,
+			   ro_sequence,
+			   userCreator,
+			   userCreatDate,
+			   userCredType,
+			   userCredNO,
+			   userPhone,
+			   userRemark,
+			   isAuthorization)
+			VALUES
+			  (#{userSequence},
+			   #{userID},
+			   #{employeeSequence},
+			   #{userStatus},
+			   #{userStartDate},
+			   #{userpwd},
+			   #{userName},
+			   #{userTopBranchSequence},
+			   #{userDeptType},
+			   #{userDeptSequence},
+			   #{ro_sequence},
+			   #{userCreator},
+			   #{userCreatDate},
+			   #{userCredType},
+			   #{userCredNO},
+			   #{userPhone},
+			   #{userRemark},
+			   #{isAuthorization})
+	</insert>
+	
+	<!-- 根据操作员姓名、旧密码修改操作员密码 -->
+	<update id="updateUserPwd" parameterType="HashMap">
+		UPDATE c_user
+		SET userpwd = #{newPassword} 
+		WHERE userID = #{userID} AND userpwd = #{oldPassword}
+	</update>
+	
+	<!-- 修改用户 -->
+	<update id="modifyUser" parameterType="cn.smartcandy.framework.core.user.User">
+		UPDATE c_user
+		SET userName = #{userName},
+			<!-- employeeSequence = #{employeeSequence}, -->
+			userDeptType = #{userDeptType},
+			userDeptSequence = #{userDeptSequence},
+			ro_sequence = #{ro_sequence},
+			userPhone = #{userPhone},
+			userRemark = #{userRemark},
+			userCredType = #{userCredType},
+			userCredNO = #{userCredNO},
+			isAuthorization = #{isAuthorization}
+		WHERE
+			userID = #{userID}
+		AND userSequence = #{userSequence}
+	</update>
+	
+	<select id="printUser" parameterType="String" resultType="HashMap">
+		SELECT
+			u.*, r.ro_name,
+			b.branchName
+			
+		FROM
+			c_user u,
+			c_role r,
+			a_branch b
+		WHERE
+			r.ro_sequence = u.ro_sequence
+		AND userID = #{_parameter}
+		AND u.userDeptSequence = b.branchSequence
+	</select>
+	
+	<!-- 存入用户与门店对应关系 -->	
+	<insert id="saveUserUnionBranch" parameterType="HashMap">
+		INSERT INTO c_unb (
+					unbSequence,
+					branchSequence,
+					userSequence,
+					permissionGrade,
+					unbStatus
+				)
+				VALUES
+		<if test="null != branchSequence">
+			<foreach collection="branchSequence" item="item" index="num" separator=",">
+					(
+						#{unbSequence} + #{num},
+						#{item},
+						#{userSequence},
+						#{permissionGrade},
+						'N'
+					)
+			</foreach>
+		</if>
+	</insert>
+	
+	<!-- 修改用户与门店关联自增的主键 -->
+	<update id="updateSequence" parameterType="HashMap">
+		UPDATE
+			sequence
+		SET
+			seq_value = #{sequence}
+		WHERE
+			seq_name = 'SEQ_c_unb'
+	</update>
+
+	<!-- 查询用户管理门店-->
+	<select id="queryUnionBranch" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			branchSequence
+		FROM
+			c_unb
+		WHERE
+			userSequence = #{userSequence}
+		AND
+			unbStatus = 'N'	
+	</select>
+
+	<select id="queryUserUnionBranch" parameterType="HashMap" resultType="String">
+		SELECT
+			branchSequence
+		FROM
+			c_unb
+		WHERE
+			userSequence = #{userSequence}
+		AND
+			unbStatus = 'N'
+	</select>
+	
+	<update id="updateUnionBranch" parameterType="HashMap">
+		UPDATE
+			c_unb
+		SET
+			unbStatus = 'D'
+		WHERE
+			userSequence = #{userSequence}
+			<if test="null != branchArray">
+				AND oldBranchSequence IN (
+					<foreach collection="branchArray" item="item" separator=",">
+					   #{item}
+					</foreach>
+				)
+			</if>
+	</update>
+	
+	<select id="queryUserSequence" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			userSequence
+		FROM
+			c_user
+		WHERE
+			userID = #{userID}
+	</select>
+	
+	
+
+</mapper> 

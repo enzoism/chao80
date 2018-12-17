@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+
+	<package name="user-default" extends="struts-default">
+		<action name="login" class="cn.smartcandy.common.login.LoginAction" method="login">
+			<result name="success" type="redirect">/index.jsp</result>
+			<result name="input">/login.jsp</result>
+		</action>
+
+		<action name="login_*" class="cn.smartcandy.common.login.LoginAction" method="{1}">
+			<result name="subLoginSuccess">/json/user_json.jsp</result>
+		</action>
+
+		 <!-- 关闭浏览器 -->
+		<action name="closeBrower" class="cn.smartcandy.common.login.LoginAction" method="closeBrowser">
+			<result name="closeBrower">/json/user_json.jsp</result>
+		</action>
+
+		<action name="user_*" class="cn.smartcandy.common.user.UserAction" method="{1}">
+
+			<result name="toAddUser">/common/user/addUser.jsp</result>
+			<result name="queryUser">/common/user/queryUser.jsp</result>
+			<result name="userQuery-success">/common/user/userQuery.jsp</result>
+
+			<result name="toModifyUser">/common/user/modifyUser.jsp</result>
+
+			<result name="success">/success.jsp</result>
+
+			<result name="printUser">/common/user/userInfoPrint.jsp</result>
+		 	
+		 	<!-- 修改密码 -->
+			<result name="modifyUserPwd">/json/user_json.jsp</result>
+		 	
+		 	<!-- 证书绑定 -->
+			<result name="queryUnitUser">/common/certificate/queryUnitUser.jsp</result>
+			<result name="unitUserBind">/common/certificate/unitUserBind.jsp</result>
+			<result name="bindUnitUserCard">/json/user_json.jsp</result>
+			<result name="bindSuccess">/common/certificate/success.jsp</result>
+
+		</action>
+	</package>
+
+</struts>

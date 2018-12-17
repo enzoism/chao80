@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.1.7//EN"
+        "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+    <package name="thirdpartyaccount" extends="struts-default">
+
+        <action name="weiXinLogin_*" class="cn.smartcandy.common.login.thirdpartyaccount.WeiXinLoginAction" method="{1}">
+            <result name="bind">/user/webThirdPartyBind.jsp</result>
+            <result name="success" type="redirect">/index.jsp</result>
+            <result name="input">/login.jsp</result>
+        </action>
+        <action name="alipayLogin_*" class="cn.smartcandy.common.login.thirdpartyaccount.AlipayLoginAction" method="{1}">
+            <result name="bind">/user/webThirdPartyBind.jsp</result>
+            <result name="success" type="redirect">/index.jsp</result>
+            <result name="input">/login.jsp</result>
+        </action>
+        <action name="weiboLogin_*" class="cn.smartcandy.common.login.thirdpartyaccount.WeiboLoginAction" method="{1}">
+            <result name="bind">/user/webThirdPartyBind.jsp</result>
+            <result name="success" type="redirect">/index.jsp</result>
+            <result name="input">/login.jsp</result>
+        </action>
+        <action name="qqLogin_*" class="cn.smartcandy.common.login.thirdpartyaccount.QQLoginAction" method="{1}">
+            <result name="bind">/user/webThirdPartyBind.jsp</result>
+            <result name="success" type="redirect">/index.jsp</result>
+            <result name="input">/login.jsp</result>
+        </action>
+        
+        <!--第三方账号信息 -->
+        <action name="thirdPartyLogin_*" class="cn.smartcandy.common.login.thirdpartyaccount.ThirdPartyLoginAction" method="{1}">
+            <result name="bind">/user/webThirdPartyBind.jsp</result>
+            <result name="success" type="redirect">/index.jsp</result>
+            <result name="input">/login.jsp</result>
+        </action>
+        
+          <!--阿里短信认证 -->
+        <action name="aliyun_*" class="cn.smartcandy.common.alimsg.AliMsgAction" method="{1}">
+        </action>
+    </package>
+
+</struts>

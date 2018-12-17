@@ -1,0 +1,804 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="customerMng">
+
+	<sql id="manageBranch">
+		branchSequence IN <foreach collection="userManageBranch" item="id" open="(" separator="," close=")">#{id}</foreach>
+	</sql>
+	<!-- 公用参数 -->
+	<sql id="BASE_CUSTOMER_MSG" >
+		c.customerSequence,
+		c.customerType,
+		c.memberID,
+		c.memberIDOld,
+		c.customerName,
+		c.customerCredType,
+		c.customerCredNo,
+		c.customerSex,
+		c.customerBirth,
+		c.customerAddr,
+		c.customerDebtAmount,
+		c.customerPrepayment,
+		c.customerPrepaymentAccrued,
+		c.customerConsumeAccrued,
+		c.customerDebtProNum,
+		c.customerDepositProNum,
+		c.customerPoints,
+		c.customerTel,
+		c.cOpenedBranch,
+		c.branchSequence,
+		c.cToStoreChannel,
+		c.cFirstConsumeDate,
+		c.cToMemberDate,
+		c.cRecommenderType,
+		c.cRecommenderSeq,
+		c.cRecommenderName,
+		c.cIsPartner,
+		c.cMark,
+		c.customerFlag,
+		c.isPartnerBranch,
+		c.cImageURL,
+		c.topBranchSequence,
+		c.customerLeader
+	</sql>
+	<!-- 根据条件查询客户信息列表 -->
+	<select id="selectBCustomerList" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			*
+		FROM
+			a_customer c
+		WHERE
+			c.customerFlag = 'N'
+		<if test="null != customerType">AND c.customerType = #{customerType}</if>
+		<if test="null != branchSequence">AND c.branchSequence = #{branchSequence}</if>
+		<if test="null != isPartnerBranch">AND c.isPartnerBranch != #{isPartnerBranch}</if>
+		<if test="null != customerTel">AND c.customerTel = #{customerTel}</if>
+		<if test="null != customerSequence">AND c.customerSequence != #{customerSequence}</if>
+		<if test="null != customerName">AND c.customerName LIKE '%${customerName}%'</if>
+		<if test="null != memberID">AND (c.memberID LIKE '%${memberID}%' OR c.memberIDOld LIKE '%${memberID}%')</if>
+		<trim>
+ 		 <if test="null == branchSequence and null != userManageBranch">AND c.<include refid="manageBranch"/></if>
+		</trim>
+		ORDER BY
+			c.branchSequence,
+			c.customerType DESC,
+			c.memberID
+	</select>
+	
+	<!-- 根据条件查询客户信息列表 -->
+	<select id="queryCustomerListByFlag" parameterType="HashMap" resultType="HashMap">
+			SELECT
+				c.customerSequence,
+				c.memberID,
+				c.customerName,
+				c.customerTel,
+				c.customerType,
+				c.branchSequence,
+				(
+					SELECT
+						max(t.orderSettleTime)
+					FROM
+						a_order t
+					WHERE
+						c.customerSequence = t.customerSequence
+					AND t.orderStatus = '2'
+					AND t.orderType != '4'
+				) orderSettleTime
+			FROM
+				a_customer c
+			WHERE
+			 c.customerFlag = 'N'
+				<if test="null != branchSeqence">AND c.branchSequence = #{branchSeqence}</if>
+				<trim>
+					<if test="null == branchSequence and null != userManageBranch">AND c.<include refid="manageBranch"/></if>
+				</trim>
+				<if test="null != customerName and ''!= customerName ">AND c.customerName LIKE '%${customerName}%'</if>
+				<if test="null != memberID and ''!= memberID">AND (c.memberID LIKE '%${memberID}%' OR c.memberIDOld LIKE '%${memberID}%')</if>
+				<if test="null != customerTel and ''!= customerTel">AND c.customerTel = #{customerTel}</if>
+				<if test="null != customerType">AND c.customerType = #{customerType}</if>
+				<if test="null != customerSequence">AND c.customerSequence != #{customerSequence}</if>
+			GROUP BY
+				c.customerSequence
+			ORDER BY
+				c.branchSequence,
+				c.customerType DESC,
+				c.memberID
+	</select>
+	<!-- 根据条件查询最常来店客户列表 -->
+	<select id="queryCustomerListByCount" parameterType="HashMap" resultType="HashMap">
+			SELECT
+				c.customerSequence,
+				c.memberID,
+				c.customerName,
+				c.customerTel,
+				c.customerType,
+				c.branchSequence,
+				max(t.orderSettleTime) orderSettleTime
+			FROM
+				a_customer c,
+				a_order t
+			WHERE
+				c.customerSequence = t.customerSequence
+			AND t.orderStatus = '2'
+			AND t.orderType != '4'
+			AND c.customerFlag = 'N'
+			<if test="null != branchSeqence">AND c.branchSequence = #{branchSeqence}</if>
+			<trim>
+					<if test="null == branchSequence and null != userManageBranch">AND c.<include refid="manageBranch"/></if>
+			</trim>
+			<if test="null != customerName and ''!= customerName ">AND c.customerName LIKE '%${customerName}%'</if>
+			<if test="null != memberID and ''!= memberID">AND (c.memberID LIKE '%${memberID}%' OR c.memberIDOld LIKE '%${memberID}%')</if>
+			<if test="null != customerTel and ''!= customerTel">AND c.customerTel = #{customerTel}</if>
+			<if test="null != customerType">AND c.customerType = #{customerType}</if>
+			<if test="null != orderSettleTime">AND t.orderSettleTime LIKE '%${orderSettleTime}%'</if>
+			<if test="null != customerSequence">AND c.customerSequence != #{customerSequence}</if>
+			GROUP BY
+				c.customerSequence
+			<if test = "'12' == flag">
+			HAVING
+				COUNT(*) >5
+			</if>
+			ORDER BY
+				c.branchSequence,
+				c.customerType DESC,
+				c.memberID
+	</select>
+		<!-- 根据条件查询最新客户列表 -->
+	<select id="queryNewCustomerListByFlag" parameterType="HashMap" resultType="HashMap">
+			SELECT
+				c.customerSequence,
+				c.memberID,
+				c.customerName,
+				c.customerTel,
+				c.customerType,
+				c.branchSequence,
+				(
+					SELECT
+						max(o.orderSettleTime) orderSettleTime
+					FROM
+						a_order o
+					WHERE
+						c.customerSequence = o.customerSequence
+					AND o.orderStatus = '2'
+					AND orderType != '4'
+				) orderSettleTime
+			FROM
+				a_customer c
+			WHERE
+				c.customerFlag = 'N'
+			<if test="null != branchSeqence">AND c.branchSequence = #{branchSeqence}</if>
+			<trim>
+				<if test="null == branchSequence and null != userManageBranch">AND c.<include refid="manageBranch"/></if>
+			</trim>
+			<if test="null != customerName and ''!= customerName ">AND c.customerName LIKE '%${customerName}%'</if>
+			<if test="null != memberID and ''!= memberID">AND (c.memberID LIKE '%${memberID}%' OR c.memberIDOld LIKE '%${memberID}%')</if>
+			<if test="null != customerTel and ''!= customerTel">AND c.customerTel = #{customerTel}</if>
+			<if test="null != customerType">AND c.customerType = #{customerType}</if>
+			<if test="null != customerSequence">AND c.customerSequence != #{customerSequence}</if>
+			GROUP BY
+				c.customerSequence
+			ORDER BY
+				c.customerSequence DESC,
+				c.branchSequence,
+				c.customerType DESC
+	</select>
+	<!-- 根据条件查询推荐人信息列表 -->
+	<select id="selectcReCustomerList" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			ct1.*
+		FROM
+			a_customer ct1
+		INNER JOIN a_customer ct2 ON ct1.customerSequence = ct2.cRecommenderSeq
+		WHERE
+			ct1.customerFlag = 'N'
+		<if test="null != customerType">AND ct1.customerType = #{customerType}</if>
+		<if test="null != branchSequence">AND ct1.branchSequence = #{branchSequence}</if>
+		<if test="null != customerName">AND ct1.customerName LIKE '%${customerName}%'</if>
+		<if test="null != memberID">AND (ct1.memberID LIKE '%${memberID}%' OR ct1.memberIDOld LIKE '%${memberID}%')</if>
+		GROUP BY 
+			ct1.customerSequence
+		ORDER BY
+			ct1.branchSequence,
+			ct1.customerType DESC,
+			ct1.memberID
+	</select>
+
+	<!-- 查询所有客户信息 -->
+	<select id="queryCustmoerList" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			SUM(IF(a.a_property = '1',a.a_amount,0)) Prepayment,
+			SUM(IF(a.a_property = '3',a.a_amount,0)) Points,
+			SUM(IF(a.a_property = '4',a.a_amount,0)) DebtAmount,
+			c.*
+		FROM
+			a_customer c,
+			a_a a
+		WHERE
+			c.customerSequence = a.customerSequence
+		<!-- AND c.isPartnerBranch = 'P' -->
+		<if test="null != memberID">AND (c.memberID = #{memberID} OR c.memberIDOld = #{memberID})</if>
+		<if test="null != customerTel">AND c.customerTel = #{customerTel}</if>
+		<if test="null != branchSequence">AND c.branchSequence = #{branchSequence}</if>
+		<if test="null != customerSex">AND c.customerSex = #{customerSex}</if>
+		<if test="null != cToStoreChannel">AND c.cToStoreChannel = #{cToStoreChannel}</if>
+		<if test="null != customerName">AND c.customerName LIKE '%${customerName}%'</if>
+		<if test="null != customerType">AND c.customerType = #{customerType}</if>
+		<if test="null != ToMemberStartDate">AND c.cFirstConsumeDate >= #{ToMemberStartDate}</if>
+		<if test="null != ToMemberEndDate">AND #{ToMemberEndDate} >= c.cFirstConsumeDate</if>
+		<if test="null != cIsPartner">AND c.cIsPartner >= #{cIsPartner}</if>
+		<if test="null != cRecommenderSeq">AND c.cRecommenderSeq = #{cRecommenderSeq}</if>
+		<if test="null != cRecommenderName">AND c.cRecommenderName LIKE '%${cRecommenderName}%'</if>
+		<if test="null != customerFlag">AND c.customerFlag = #{customerFlag}</if>
+		<if test="null != branchSequence">AND c.branchSequence = #{branchSequence}</if>
+		<if test="null != customerSequence">AND c.customerSequence != #{customerSequence}</if>
+		<trim>
+			<if test="null == branchSequence and null != userManageBranch">AND c.<include refid="manageBranch"/></if>
+		</trim>
+		GROUP BY
+			a.customerSequence 
+		ORDER BY c.memberID
+	</select>
+	
+	<!-- 根据客户sequence查询客户详细信息 -->
+	<select id="queryCustomerDetails" parameterType="String" resultType="HashMap">
+		SELECT
+			SUM(IF(a.a_property = '1',a.a_amount,0)) Prepayment,
+			SUM(IF(a.a_property = '3',a.a_amount,0)) Points,
+			SUM(IF(a.a_property = '4',a.a_amount,0)) DebtAmount,
+			c.*
+		FROM
+			a_customer c,
+			a_a a
+		WHERE
+			c.customerSequence = a.customerSequence
+			<!-- customerFlag = 'N' -->
+		AND c.customerSequence = #{customerSequence}
+	</select>
+
+	<!-- 根据客户序号查询客户详细信息 -->
+	<select id="selectCustomer" parameterType="String" resultType="cn.smartcandy.application.a.commonbean.Customer">
+		SELECT
+			customer.*,
+			branch.branchName
+		FROM
+			a_customer customer
+		LEFT JOIN a_branch branch
+			ON branch.branchSequence = customer.branchSequence
+		WHERE
+			customerSequence = #{_parameter}
+	</select>
+	
+	<!-- 根据客户手机号/联系电话查询客户详细信息 -->
+	<select id="selectCustomerByPhoneNO" parameterType="HashMap" resultType="cn.smartcandy.application.a.commonbean.Customer">
+		SELECT
+			*
+		FROM
+			a_customer
+		WHERE
+			customerFlag = 'N'
+		AND customerTel = #{customerTel}
+		<if test="null != customerName">AND customerName = #{customerName}</if>
+		<if test="null != branchSequence">AND topBranchSequence = #{branchSequence}</if>
+	</select>
+
+	<!-- 根据客户手机号/联系电话查询客户详细信息 -->
+	<select id="selectCustomerByParam" parameterType="Map" resultType="cn.smartcandy.application.a.commonbean.Customer">
+		SELECT
+			*
+		FROM
+			a_customer
+		<where>
+			customerFlag = 'N'
+			<if test="null != customerTel">AND customerTel = #{customerTel}</if>
+			<if test="null != customerName">AND customerName = #{customerName}</if>
+			<if test="null != branchSequence">AND topBranchSequence = #{branchSequence}</if>
+		</where>
+	</select>
+	
+
+	<!--修改客户账户信息-->
+	<update id="updateCustomerAccount" parameterType="cn.smartcandy.application.a.commonbean.Customer" >
+		UPDATE a_customer
+		SET customerDebtAmount = #{customerDebtAmount},
+		customerPrepayment = #{customerPrepayment},
+		customerPoints = #{customerPoints},
+		customerPrepaymentAccrued = #{customerPrepaymentAccrued},
+		customerConsumeAccrued = #{customerConsumeAccrued}
+		WHERE
+			customerSequence = #{customerSequence} 
+	</update>
+
+	<!--客户信息表(a_customer)插入信息-->
+	<insert id="customerAdd" parameterType="cn.smartcandy.application.a.commonbean.Customer">
+		INSERT INTO a_customer (
+			customerSequence,
+			customerType,
+			memberID,
+			memberIDOld,
+			customerName,
+			customerSex,
+			customerBirth,
+			customerAddr,
+			customerDebtAmount,
+			customerPrepayment,
+			customerPrepaymentAccrued,
+			customerConsumeAccrued,
+			customerDebtProNum,
+			customerDepositProNum,
+			customerPoints,
+			customerTel,
+			cOpenedBranch,
+			branchSequence,
+			cToStoreChannel,
+			cFirstConsumeDate,
+			cToMemberDate,
+			cRecommenderType,
+			cRecommenderSeq,
+			cRecommenderName,
+			cIsPartner,
+			cPassword,
+			cMark,
+			customerFlag,
+			isPartnerBranch,
+			cImageURL,
+			topBranchSequence,
+			customerLeader
+		 )
+	     VALUES (
+			#{customerSequence},
+			#{customerType},
+			#{memberID},
+			#{memberIDOld},
+			#{customerName},
+			#{customerSex},
+			#{customerBirth},
+			#{customerAddr},
+			#{customerDebtAmount},
+			#{customerPrepayment},
+			#{customerPrepaymentAccrued},
+			#{customerConsumeAccrued},
+			#{customerDebtProNum},
+			#{customerDepositProNum},
+			#{customerPoints},
+			#{customerTel},
+			#{cOpenedBranch},
+			#{branchSequence},
+			#{cToStoreChannel},
+			#{cFirstConsumeDate},
+			#{cToMemberDate},
+			#{cRecommenderType},
+			#{cRecommenderSeq},
+			#{cRecommenderName},
+			#{cIsPartner},
+			#{cPassword},
+			#{cMark},
+			#{customerFlag},
+			#{isPartnerBranch},
+			#{cImageURL},
+			#{topBranchSequence},
+			#{customerLeader}
+        )
+	</insert>
+	
+	<!--向客户信息操作表插入修改前的客户信息-->
+	<insert id="insertACO" parameterType="cn.smartcandy.application.a.commonbean.Customer">
+		INSERT INTO a_co (
+			acoSequence,
+			batch_no,
+			customerSequence,
+			customerType,
+			memberID,
+			memberIDOld,
+			customerName,
+			customerSex,
+			customerBirth,
+			customerAddr,
+			customerDebtAmount,
+			customerPrepayment,
+			customerPrepaymentAccrued, 
+			customerConsumeAccrued,
+			customerDebtProNum,
+			customerDepositProNum,
+			customerPoints,
+			customerTel,
+			cOpenedBranch,
+			branchSequence,
+			cToStoreChannel,
+			cRecommenderName,
+			cFirstConsumeDate,
+			cToMemberDate,
+			cRecommenderSeq,
+			cIsPartner,
+			cPassword,
+			cMark,
+			customerFlag,
+			isModified,
+			operTime,
+			operID,
+			customerLeader
+		 )
+	     VALUES (
+			#{acoSequence},
+			#{batch_no},
+			#{customerSequence},
+			#{customerType},
+			#{memberID},
+			#{memberIDOld},
+			#{customerName},
+			#{customerSex},
+			#{customerBirth},
+			#{customerAddr},
+			#{customerDebtAmount},
+			#{customerPrepayment},
+			#{customerPrepaymentAccrued}, 
+			#{customerConsumeAccrued},
+			#{customerDebtProNum},
+			#{customerDepositProNum},
+			#{customerPoints},
+			#{customerTel},
+			#{cOpenedBranch},
+			#{branchSequence},
+			#{cToStoreChannel},
+			#{cRecommenderName},
+			#{cFirstConsumeDate},
+			#{cToMemberDate},
+			#{cRecommenderSeq},
+			#{cIsPartner},
+			#{cPassword},
+			#{cMark},
+			#{customerFlag},
+			#{isModified},
+			#{operTime},
+			#{operID},
+			#{customerLeader}
+        )
+	</insert>
+	
+	<!--  根据客户查询客户卡片及余额、次数信息 -->
+	<select id="queryCardRemaingsByCustomerSequence" parameterType="String" resultType="HashMap">
+		SELECT
+			ct.ctType ctType,
+			IFNULL(count(*), 0) count,
+			IFNULL(SUM(c.cardRemaining), 0) valueCardRemainingsum,
+			IFNULL(SUM(c.remainingtimes), 0) timesCardRemainingTimessum,
+			IFNULL(SUM(c.cardNominalValue), 0) nominalCardRemainingSum
+		FROM
+			a_card c,
+			a_ct ct
+		WHERE
+			c.cardStatus = 'S'
+		AND c.ctSequence = ct.ctSequence
+		AND ct.ctStatus = 'N'
+		AND c.customerSequence = #{_parameter}
+		GROUP BY
+			ct.ctType
+		ORDER BY
+			ct.ctType; 
+	</select>
+	
+	<!-- 根据客户sequence从oid表中查询寄存/欠货信息 -->
+	<select id="queryCustomerDepositDebtProNum" parameterType="String" resultType="HashMap">
+		SELECT
+			oid.customerSequence,
+			IFNULL(SUM(oidDepositCount), 0) oidDepositCount,
+			IFNULL(SUM(oidDebtCount), 0) oidDebtCount
+		FROM
+			a_oid oid
+		WHERE
+			oid.oidStatus = '2'
+		AND oid.pspcType = '1'
+		AND oid.customerSequence = #{_parameter}
+	</select>
+	
+	<!-- 根据客户序号查询客户信息修改历史 -->
+	<select id="customerChangeHistory" parameterType="String" resultType="HashMap">
+		SELECT
+			*
+		FROM
+			a_co
+		WHERE
+			customerFlag = 'N'
+		AND customerSequence = #{_parameter}
+		ORDER BY
+			batch_no
+	</select>
+	
+	<!-- 根据客户memberID查询客户详细信息 -->
+	<select id="queryExistMember" parameterType="String" resultType="HashMap">
+		SELECT
+			*
+		FROM
+			a_customer
+		WHERE
+			memberID = #{_parameter}
+	</select>
+	
+	<!--修改客户信息-->
+	<update id="customerModify" parameterType="cn.smartcandy.application.a.commonbean.Customer" >
+		UPDATE a_customer
+		<trim prefix="set" suffixOverrides=",">
+			<if test="null != customerType">customerType = #{customerType},</if>
+			<if test="null != memberIDOld">memberIDOld = #{memberIDOld},</if>
+			<if test="null != customerName">customerName = #{customerName},</if>
+			<if test="null != customerSex">customerSex = #{customerSex},</if>
+			<if test="null != customerBirth">customerBirth = #{customerBirth},</if>
+			<if test="null != customerAddr">customerAddr = #{customerAddr},</if>
+			<if test="null != customerTel">customerTel = #{customerTel},</if>
+			<if test="null != customerPoints">customerPoints = #{customerPoints},</if>
+			<if test="null != customerPrepayment">customerPrepayment = #{customerPrepayment},</if>
+			<if test="null != customerPrepaymentAccrued">customerPrepaymentAccrued = #{customerPrepaymentAccrued},</if>
+			<if test="null != customerConsumeAccrued">customerConsumeAccrued = #{customerConsumeAccrued},</if>
+			<if test="null != branchSequence">cOpenedBranch = #{cOpenedBranch},</if>
+			<if test="null != branchSequence">branchSequence = #{branchSequence},</if>
+			<if test="null != cToStoreChannel">cToStoreChannel = #{cToStoreChannel},</if>
+			<if test="null != cFirstConsumeDate">cFirstConsumeDate = #{cFirstConsumeDate},</if>
+			<if test="null != cToMemberDate">cToMemberDate = #{cToMemberDate},</if>
+			<if test="null != cRecommenderType and '' != cRecommenderType">cRecommenderType = #{cRecommenderType},</if>
+			<if test="null != cRecommenderName and '' != cRecommenderName">cRecommenderName = #{cRecommenderName},</if>
+			<if test="null != cRecommenderSeq and '' != cRecommenderSeq">cRecommenderSeq = #{cRecommenderSeq},</if>
+			<if test="null != cIsPartner">cIsPartner = #{cIsPartner},</if>
+			<if test="null != cPassword">cPassword = #{cPassword},</if>
+			<if test="null != cMark">cMark = #{cMark},</if>
+			<if test="null != cImageURL">cImageURL = #{cImageURL},</if>
+			<if test="null != customerLeader">customerLeader = #{customerLeader},</if>
+			<if test="null != topBranchSequence">topBranchSequence = #{topBranchSequence},</if>
+		</trim>
+		WHERE customerSequence = #{customerSequence} 
+	</update>
+	
+	<!--修改客户信息推荐客户信息-->
+	<update id="updateCustomerRecommendInfo" parameterType="cn.smartcandy.application.a.commonbean.Customer" >
+		UPDATE a_customer
+		<set>
+			<if test="null != cRecommenderType">cRecommenderType = #{cRecommenderType},</if>
+			<if test="null != cRecommenderName">cRecommenderName = #{cRecommenderName},</if>
+			<if test="(null != cRecommenderSeq) and ('' != cRecommenderSeq)">cRecommenderSeq = #{cRecommenderSeq},</if>
+		</set>
+		WHERE customerSequence = #{customerSequence} 
+	</update>
+	
+	<!--根据客户sequence逻辑删除客户信息-->
+	<update id="customerDel" parameterType="String" >
+		UPDATE a_customer
+		SET customerFlag = 'D'
+		WHERE
+			customerSequence = #{customerSequence} 
+	</update>
+	
+	<!--修改客户密码息-->
+	<update id="passwordModify" parameterType="HashMap" >
+		UPDATE a_customer
+		SET cPassword = #{newpwd}
+		WHERE
+			customerSequence = #{customerSequence} 
+	</update>
+	
+	<!--重置客户密码息-->
+	<update id="resetPassword" parameterType="HashMap" >
+		UPDATE a_customer
+		SET cPassword = #{cPassword}
+		WHERE
+			customerSequence = #{customerSequence} 
+	</update>
+	
+	<!-- 根据客户序号查询所有订单 -->
+	<select id="selectOrderByCustomerSeq" parameterType="String" resultType="cn.smartcandy.application.a.commonbean.Order">
+		SELECT
+			*
+		FROM
+			a_order
+		WHERE
+			customerSequence = #{_parameter}
+		AND orderSettleType = '1'
+		AND orderType != '4'
+		AND orderStatus = '2'
+	</select>
+	
+
+	
+	<!-- 根据客户序号查询欠货数量-->
+	<select id="selectCDP" parameterType="String" resultType="String">
+		SELECT
+			cdpProNum
+		FROM
+			a_cdp
+		WHERE
+			customerSequence = #{customerSequence}
+	</select>
+	
+	<!--重置客户密码息-->
+	<update id="updateCDP" parameterType="Map" >
+		UPDATE a_cdp
+		SET cdpProNum = #{cdpProNum}
+		WHERE
+			customerSequence = #{customerSequence} 
+	</update>
+	
+	<!--插入客户欠货表-->
+	<insert id="insertCDP" parameterType="Map">
+		INSERT INTO a_cdp (
+			customerSequence,
+			cdpProNum
+		)
+		VALUES
+			(
+			#{customerSequence},
+			#{cdpProNum}
+			)
+	
+	</insert>
+	<!--插入欠货明细表-->
+	<insert id="insertCDPD" parameterType="cn.smartcandy.application.a.commonbean.CustomerDebtProductDetail">
+		INSERT INTO a_cdpd (
+			cdpdSequence,
+			customerSequence,
+			productSequence,
+			cdpdProNum,
+			branchSequence,
+			whSequence
+		)
+		VALUES
+			(
+			#{cdpdSequence},
+			#{customerSequence},
+			#{productSequence},
+			#{cdpdProNum},
+			#{branchSequence},
+			#{whSequence}
+			)
+	</insert>
+	<!--插入欠货流水表-->
+	<insert id="insertCDPW" parameterType="cn.smartcandy.application.a.commonbean.CustomerDebtProductWater">
+		INSERT INTO a_cdpw (
+			cdpwSequence,
+			batch_no,
+			customerSequence,
+			productSequence,
+			cdpwProNum,
+			cdpwDirection,
+			whSequence,
+			branchSequence,
+			cashierID
+		)
+		VALUES
+			(
+			#{cdpwSequence},
+			#{batch_no},
+			#{customerSequence},
+			#{productSequence},
+			#{cdpwProNum},
+			#{cdpwDirection},
+			#{whSequence},
+			#{branchSequence},
+			#{cashierID}
+			)
+	</insert>
+	
+	<!--更新客户总欠货数  -->
+	<update id="updateCdpProNum" parameterType="HashMap">
+		UPDATE a_cdp
+		SET cdpProNum = #{cdpProNum}
+		WHERE customerSequence = #{customerSequence}
+	</update>
+	
+	<!--更新欠货/寄存流水表  -->
+	<update id="updateProductNum" parameterType="HashMap">
+		UPDATE a_cdpw
+		SET cdpwProNum = #{cdpwProNum}
+		WHERE batch_no = #{batch_no}
+	</update>
+	
+	<!--更新欠货/寄存明细表  -->
+	<update id="updateProductDetail" parameterType="HashMap">
+		UPDATE a_cdpd
+		SET cdpdProNum = #{cdpwProNum}
+		WHERE customerSequence = #{customerSequence}
+		AND productSequence = #{productSequence}
+		
+	</update>
+	<!-- 根据客户OldID查询客户详细信息 -->
+	<select id="queryCustomerDetail" parameterType="String" resultType="HashMap">
+		SELECT
+			SUM(IF(a.a_property = '1',a.a_amount,0)) Prepayment,
+			SUM(IF(a.a_property = '3',a.a_amount,0)) Points,
+			SUM(IF(a.a_property = '4',a.a_amount,0)) DebtAmount,
+			c.*
+		FROM
+			a_customer c,
+			a_a a
+		WHERE
+			c.customerSequence = a.customerSequence
+		AND c.branchSequence = #{branchSequence}
+	</select>
+	<!-- 查询所有客户信息 -->
+	<select id="queryCustmoer" parameterType="HashMap" resultType="HashMap">
+		SELECT
+			SUM(IF(a.a_property = '1',a.a_amount,0)) Prepayment,
+			SUM(IF(a.a_property = '3',a.a_amount,0)) Points,
+			SUM(IF(a.a_property = '4',a.a_amount,0)) DebtAmount,
+			c.*
+		FROM
+			a_customer c,
+			a_a a
+		WHERE
+			c.customerSequence = a.customerSequence
+		AND c.isPartnerBranch <![CDATA[<>]]>#{isPartnerBranch}
+		<!-- <if test="null != memberID">AND (c.memberID = #{memberID} OR c.memberIDOld = #{memberID})</if>
+		<if test="null != customerTel">AND c.customerTel = #{customerTel}</if>
+		<if test="null != branchSequence">AND c.branchSequence = #{branchSequence}</if>
+		<if test="null != customerSex">AND c.customerSex = #{customerSex}</if>
+		<if test="null != cToStoreChannel">AND c.cToStoreChannel = #{cToStoreChannel}</if>
+		<if test="null != customerName">AND c.customerName LIKE '%${customerName}%'</if>
+		<if test="null != customerType">AND c.customerType = #{customerType}</if>
+		<if test="null != ToMemberStartDate">AND c.cFirstConsumeDate >= #{ToMemberStartDate}</if>
+		<if test="null != ToMemberEndDate">AND #{ToMemberEndDate} >= c.cFirstConsumeDate</if>
+		<if test="null != cIsPartner">AND c.cIsPartner >= #{cIsPartner}</if>
+		<if test="null != cRecommenderSeq">AND c.cRecommenderSeq = #{cRecommenderSeq}</if>
+		<if test="null != cRecommenderName">AND c.cRecommenderName LIKE '%${cRecommenderName}%'</if>
+		<if test="null != customerFlag">AND c.customerFlag = #{customerFlag}</if> -->
+		<if test="null != branchSequence">AND c.branchSequence = #{branchSequence}</if>
+		<trim>
+			<if test="null == branchSequence and null != userManageBranch">AND c.<include refid="manageBranch"/></if>
+		</trim>
+		GROUP BY
+			a.customerSequence 
+		ORDER BY c.memberID
+	</select>
+	
+	<!-- 判断数据库有没有该用户的手机号 -->
+<!-- 	<select id="queryCustomerTelephone" parameterType="map" resultType="int">
+		SELECT
+			COUNT(cust.customerSequence)
+		FROM
+			a_customer cust
+		WHERE
+			cust.customerTel = #{customerTel}
+			<if test="null != topBranchSequence">AND cust.topBranchSequence = #{topBranchSequence}</if>
+	</select> -->
+	
+		
+	<!-- Customer表查询手机号 -->
+	<select id="selectCustomerExistMsg" parameterType="map" resultType="int">
+		SELECT
+			COUNT(cust.customerSequence)
+		FROM
+			a_customer cust
+		WHERE
+			cust.customerTel = #{telePhone}
+			<if test="null != name">AND cust.customerName = #{name}</if>
+			<if test="null != topBranchSequence">AND cust.topBranchSequence = #{topBranchSequence}</if>
+	</select>
+	
+	<!-- Employee表查询手机号 -->
+	<select id="selectEmployeeExistMsg" parameterType="map" resultType="int">
+		SELECT
+			COUNT(emp.employeeSequence)
+		FROM
+			a_employees emp
+		WHERE
+			emp.employeePhone = #{telePhone}
+			<if test="null != name">AND emp.employeeName = #{name}</if>
+		<if test="null != topBranchSequence">AND emp.topBranchSequence = #{topBranchSequence}</if>
+	</select>
+	
+	
+	
+	<!-- 查询员工信息 -->
+	<select id="selectCustomerMsg" parameterType="map" resultType="cn.smartcandy.application.a.commonbean.Customer">
+		SELECT
+			<include refid="BASE_CUSTOMER_MSG"/>
+		FROM
+			a_customer c
+		WHERE
+			c.customerFlag = 'N'
+		<if test="null != customerSequence">AND c.customerSequence != #{customerSequence}</if>
+		<if test="null != branchSequence">AND c.branchSequence = #{branchSequence}</if>
+		<if test="null != customerType">AND c.customerType = #{customerType}</if>
+		<if test="null != isPartnerBranch">AND c.isPartnerBranch != #{isPartnerBranch}</if>
+		<if test="null != customerTel">AND c.customerTel = #{customerTel}</if>
+		<if test="null != customerName">AND c.customerName LIKE '%${customerName}%'</if>
+	</select>
+	
+	
+</mapper> 

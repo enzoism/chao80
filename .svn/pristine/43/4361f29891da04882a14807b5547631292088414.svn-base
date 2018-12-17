@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 放置公用查询内容 -->
+<mapper namespace="BASEREF">
+
+	<!-- 藏品管理 -->
+	<sql id="COLLECTION_BASE">
+		col.colSequence,
+		col.colDate,
+		col.colTitle,
+		col.colSubTitle,
+		col.colContent,
+		col.colLikeNum,
+		col.colDisLikeNum,
+		col.userSequence,
+		col.userName,
+		col.colThumb,
+		col.colImageBatch,
+		col.colPrice,
+		col.createDate,
+		col.colStatus,
+		col.imgWidth,
+		col.imgHeigh,
+		col.searchTag
+	</sql>
+	<!-- 藏品管理最简信息 -->
+	<sql id="COLLECTION_SIMPLE_MSG">
+		col.colSequence,
+		col.colTitle,
+		col.colSubTitle,
+		col.colContent,
+		col.colLikeNum,
+		col.colDisLikeNum,
+		col.colThumb,
+		col.colPrice,
+		col.createDate,
+		col.imgWidth,
+		col.imgHeigh,
+		col.searchTag
+	</sql>
+	
+	<!-- 藏品管理最简图片信息 -->
+	<sql id="COLLECTION_SIMPLE_IMG_MSG">
+		col.colSequence,
+		col.colThumb,
+		col.imgWidth,
+		col.imgHeigh
+	</sql>
+	
+	<!-- 账户管理 -->
+	<sql id="USER_BASE">
+		usr.userSequence,
+		usr.userName,
+		usr.userEmail,
+		usr.userPhone,
+		usr.userStatus,
+		usr.userCreatDate,
+		usr.userRemark,
+		usr.userSex,
+		usr.userBirth,
+		usr.userAddr,
+		usr.userImageURL,
+		usr.adminStatus,
+		usr.verfyID,
+		usr.attentCount,
+		usr.fansCount,
+		usr.likeCount,
+		usr.likedCount,
+		usr.colCount
+	</sql>
+	<sql id="USER_DETAIL_MSG">
+		usr.userSequence,
+		usr.userName,
+		usr.userEmail,
+		usr.userPhone,
+		usr.userStatus,
+		usr.userCreatDate,
+		usr.userRemark,
+		usr.userSex,
+		usr.userBirth,
+		usr.userAddr,
+		usr.userImageURL,
+		usr.adminStatus,
+		usr.verfyID,
+		usr.attentCount,
+		usr.fansCount,
+		usr.likeCount,
+		usr.likedCount,
+		usr.colCount
+	</sql>
+	<sql id="USER_BASE_ACCOUNT">
+		usr.userSequence,
+		usr.userName,
+		usr.userStatus,
+		usr.userSex,
+		usr.userImageURL,
+		usr.adminStatus,
+		usr.verfyID,
+		usr.attentCount,
+		usr.fansCount,
+		usr.likeCount,
+		usr.colCount,
+		usr.likedCount
+	</sql>
+	<!-- 管理员管理 -->
+	<sql id="ADMIN_ACCOUNT">
+		admin.adminSequence,
+		admin.adminName,
+		admin.adminEmail,
+		admin.adminPhone,
+		admin.adminStatus,
+		admin.adminCreatDate,
+		admin.adminRemark,
+		admin.adminSex,
+		admin.adminImageURL,
+		admin.adminLevel
+	</sql>
+	<!-- 发布管理 -->
+	<sql id="RELEASE_BASE_MSG">
+		rel.relSequence,
+		rel.relTitle,
+		rel.relSubTitle,
+		rel.relBrief,
+		rel.relContent,
+		rel.relStatus,
+		rel.relThumbImage,
+		rel.userSequence,
+		rel.userName,
+		rel.cateSequence,
+		rel.cateName,
+		rel.relDate,
+		rel.relImageBatchNo,
+		rel.relType,
+		rel.relURL
+	</sql>
+	<!-- 发布种类 -->
+	<sql id="RELEASE_BASE_CATE">
+		cate.cateSequence,
+		cate.cateName,
+		cate.cateBrief,
+		cate.cateContent,
+		cate.cateDate,
+		cate.cateStatus,
+		cate.cateRelType,
+		cate.userSequence
+	</sql>
+	
+	<!-- 关注管理 -->
+	<sql id="ATTENTION_BASE">
+		usrAtt.attentSequence,
+		usrAtt.attentDate,
+		usrAtt.attentStatus,
+		usrAtt.userSequence,
+		usrAtt.relUserSequence
+	</sql>
+	
+	<!-- 图片管理 -->
+	<sql id="IMAGE_BASE">
+		colImg.imgSequence,
+		colImg.imgBatchNo,
+		colImg.imgURL,
+		colImg.colSequence,
+		colImg.imgStatus,
+		colImg.imgWidth,
+		colImg.imgHeigh
+	</sql>
+	
+	<!-- 生活照管理 -->
+	<sql id="PHOTO_BASE">
+		photo.photoSequence,
+		photo.photoTitle,
+		photo.photoBrief,
+		photo.photoURL,
+		photo.photoRelType,
+		photo.photoStatus,
+		photo.colSequence,
+		photo.userSequence,
+		photo.userName
+	</sql>	
+	
+	<!-- 标签管理 -->
+	<sql id="TAG_BASE">
+		tag.tagSequence,
+		tag.tagName
+	</sql>	
+	
+	<!-- 第三方绑定管理 -->
+	<sql id="UEAB_BASE">
+		ueab.ueabSequence,
+		ueab.userSequence,
+		ueab.openID,
+		ueab.unionID,
+		ueab.ueabType,
+		ueab.ueabBindDate,
+		ueab.ueabUnBindDate,
+		ueab.ueabStatus
+	</sql>
+</mapper>

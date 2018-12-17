@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="thirtyLogin">
+
+	<!-- 判断账户是否绑定 -->
+	<select id="selectBindCount" parameterType="String" resultType="int">
+		SELECT
+			COUNT(ueab.ueabSequence)
+		FROM
+			a_ueab AS ueab
+		<where>
+			<if test="null != openID">AND ueab.openID = #{openID}</if>
+			<if test="null != unionID">AND ueab.unionID = #{unionID}</if>
+			<if test="null != ueabType">AND ueab.ueabType = #{ueabType}</if>
+			<if test="null != ueabStatus">AND ueab.ueabStatus = #{ueabStatus}</if>
+		</where>
+	</select>
+	
+	
+	<!-- 查询绑定Ueab信息 -->
+	<select id="selectBindUeab" parameterType="String" resultType="int">
+		SELECT
+			<include refid="BASEREF.UEAB_BASE"/>
+		FROM
+			a_ueab AS ueab
+		<where>
+			<if test="null != ueabSequence">AND ueab.ueabSequence = #{ueabSequence}</if>
+			<if test="null != userSequence">AND ueab.userSequence = #{userSequence}</if>
+			<if test="null != openID">AND ueab.openID = #{openID}</if>
+			<if test="null != unionID">AND ueab.unionID = #{unionID}</if>
+			<if test="null != ueabType">AND ueab.ueabType = #{ueabType}</if>
+		</where>
+	</select>
+	
+	
+	<!-- 查询绑定用户信息 -->
+	<select id="selectBindUser" parameterType="String" resultType="cn.smartcandy.application.a.account.User">
+		SELECT
+			<include refid="BASEREF.USER_DETAIL_MSG"/>
+		FROM
+			a_ueab AS ueab
+		INNER JOIN c_user AS usr ON ueab.userSequence = usr.userSequence
+		<where>
+			<if test="null != ueabSequence">AND ueab.ueabSequence = #{ueabSequence}</if>
+			<if test="null != userSequence">AND ueab.userSequence = #{userSequence}</if>
+			<if test="null != openID">AND ueab.openID = #{openID}</if>
+			<if test="null != unionID">AND ueab.unionID = #{unionID}</if>
+			<if test="null != ueabType">AND ueab.ueabType = #{ueabType}</if>
+			<if test="null != ueabStatus">AND ueab.ueabStatus = #{ueabStatus}</if>
+		</where>
+	</select>
+	
+	<!-- 插入用户绑定数据 -->
+	<insert id="inserBindMsg" parameterType="Map">
+		INSERT INTO a_ueab (
+			ueabSequence,
+			userSequence,
+			openID,
+			unionID,
+			ueabType,
+			ueabBindDate,
+			ueabUnBindDate,
+			ueabStatus
+		)VALUES(
+			#{ueabSequence},
+			#{userSequence},
+			#{openID},
+			#{unionID},
+			#{ueabType},
+			#{ueabBindDate},
+			#{ueabUnBindDate},
+			#{ueabStatus}
+		)
+	</insert>
+
+	<!-- 删除用户绑定数据 -->
+	<update id="updateCollectionImages" parameterType="Map">
+		UPDATE a_ueab 
+		SET
+			ueabUnBindDate = #{ueabUnBindDate}
+		WHERE
+			ueabSequence = #{ueabSequence}
+	</update>
+
+</mapper>

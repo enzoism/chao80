@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="release">
+
+
+	<!-- ====================================轮播图==================================== -->
+	<!-- 轮播图发布 -->
+	<insert id="insertBannerMsg" parameterType="Map">
+		INSERT INTO a_release (
+			relSequence,
+			relTitle,
+			relSubTitle,
+			relBrief,
+			relContent,
+			relStatus,
+			relThumbImage,
+			userSequence,
+			userName,
+			cateSequence,
+			cateName,
+			relDate,
+			relImageBatchNo,
+			relType,
+			relURL
+		)VALUES(
+			#{relSequence},
+			#{relTitle},
+			#{relSubTitle},
+			#{relBrief},
+			#{relContent},
+			#{relStatus},
+			#{relThumbImage},
+			#{userSequence},
+			#{userName},
+			#{cateSequence},
+			#{cateName},
+			#{relDate},
+			#{relImageBatchNo},
+			#{relType},
+			#{relURL}
+		)
+	</insert>
+
+	<!-- 查询轮播图信息 -->
+	<select id="selectBannerMsg" parameterType="Map" resultType="cn.smartcandy.application.cms.release.ReleaseBanner">
+		SELECT
+			<include refid="BASEREF.RELEASE_BASE_MSG"/>
+		from a_release rel
+		<where>
+		    <if test="null != relSequence">AND rel.relSequence = #{relSequence}</if>
+		    <if test="null != relStatus">AND rel.relStatus = #{relStatus}</if>
+		   	AND rel.relType = '0'
+        </where>
+        ORDER BY rel.relDate DESC
+	</select>
+	
+	<!-- 查询轮播图信息 -->
+	<select id="selectBannerDataList" parameterType="Map" resultType="Map">
+		SELECT
+			<include refid="BASEREF.RELEASE_BASE_MSG"/>
+		from a_release rel
+		<where>
+		    <if test="null != relSequence">AND rel.relSequence = #{relSequence}</if>
+		    <if test="null != relStatus">AND rel.relStatus = #{relStatus}</if>
+		   	AND rel.relType = '0'
+        </where>
+        ORDER BY rel.relDate DESC
+	</select>
+	
+	<!-- 更新轮播信息 -->
+	<update id="updateBannerMsg" parameterType="Map">
+		UPDATE a_release 
+			<trim prefix="set" suffixOverrides=",">
+				<if test="null != relTitle">relTitle = #{relTitle},</if>
+				<if test="null != relSubTitle">relSubTitle = #{relSubTitle},</if>
+				<if test="null != relBrief">relBrief = #{relBrief},</if>
+				<if test="null != relContent">relContent = #{relContent},</if>
+				<if test="null != relStatus">relStatus = #{relStatus},</if>
+				<if test="null != relThumbImage">relThumbImage = #{relThumbImage},</if>
+				<if test="null != relDate">relDate = #{relDate},</if>
+				<if test="null != userSequence">userSequence = #{userSequence},</if>
+				<if test="null != userName">userName = #{userName},</if>
+				<if test="null != cateSequence">cateSequence = #{cateSequence},</if>
+				<if test="null != cateName">relCateName = #{cateName},</if>
+				<if test="null != relURL">relURL = #{relURL},</if>
+			</trim>
+		WHERE
+			relSequence = #{relSequence}
+		AND relType = '0'
+	</update>
+	
+	<!-- ====================================新闻==================================== -->
+	<!-- 新闻发布 -->
+	<insert id="insertNewsMsg" parameterType="Map">
+		INSERT INTO a_release (
+			relSequence,
+			relTitle,
+			relSubTitle,
+			relBrief,
+			relContent,
+			relStatus,
+			relThumbImage,
+			userSequence,
+			userName,
+			cateSequence,
+			cateName,
+			relDate,
+			relImageBatchNo,
+			relType
+		)VALUES(
+			#{relSequence},
+			#{relTitle},
+			#{relSubTitle},
+			#{relBrief},
+			#{relContent},
+			#{relStatus},
+			#{relThumbImage},
+			#{userSequence},
+			#{userName},
+			#{cateSequence},
+			#{cateName},
+			#{relDate},
+			#{relImageBatchNo},
+			#{relType}
+		)
+	</insert>
+
+	<!-- 查询新闻信息 -->
+	<select id="selectNewsMsg" parameterType="Map" resultType="cn.smartcandy.application.cms.release.ReleaseNews">
+		SELECT
+			<include refid="BASEREF.RELEASE_BASE_MSG"/>
+		from a_release rel
+		<where>
+		    <if test="null != relSequence">AND rel.relSequence = #{relSequence}</if>
+		    <if test="null != relStatus">AND rel.relStatus = #{relStatus}</if>
+		    AND rel.relType = '1'
+        </where>
+	</select>
+	
+	<!-- 查询新闻信息 -->
+	<select id="selectNewsDataList" parameterType="Map" resultType="Map">
+		SELECT
+			<include refid="BASEREF.RELEASE_BASE_MSG"/>
+		from a_release rel
+		<where>
+		    <if test="null != relSequence">AND rel.cateSequence = #{relSequence}</if><!-- 设计错误了 -->
+		    <if test="null != cateSequence">AND rel.cateSequence = #{cateSequence}</if>
+		    <if test="null != relStatus">AND rel.relStatus = #{relStatus}</if>
+		   	AND rel.relType = '1'
+        </where>
+        ORDER BY rel.relDate DESC
+	</select>
+	
+	<!-- 更新轮播信息 -->
+	<update id="updateNewsMsg" parameterType="Map">
+		UPDATE a_release 
+			<trim prefix="set" suffixOverrides=",">
+				<if test="null != relTitle">relTitle = #{relTitle},</if>
+				<if test="null != relSubTitle">relSubTitle = #{relSubTitle},</if>
+				<if test="null != relBrief">relBrief = #{relBrief},</if>
+				<if test="null != relContent">relContent = #{relContent},</if>
+				<if test="null != relStatus">relStatus = #{relStatus},</if>
+				<if test="null != relThumbImage">relThumbImage = #{relThumbImage},</if>
+				<if test="null != relDate">relDate = #{relDate},</if>
+				<if test="null != userSequence">userSequence = #{userSequence},</if>
+				<if test="null != userName">userName = #{userName},</if>
+				<if test="null != cateSequence">cateSequence = #{cateSequence},</if>
+				<if test="null != cateName">cateName = #{cateName},</if>
+			</trim>
+		WHERE
+			relSequence = #{relSequence}
+		AND relType = '1'
+	</update>
+	<!-- 查询News展示类型 -->
+	<select id="selectNewsShowType" parameterType="Map" resultType="int">
+		SELECT
+			pmFlag
+		FROM
+			a_pm
+		WHERE
+			pmSequence = 1000000001
+	</select>
+	<!-- 改变News展示类型 -->
+	<update id="updateNewsShowType" parameterType="Map">
+		UPDATE 
+			a_pm 
+		SET 
+			pmFlag = #{pmFlag}
+		WHERE
+			pmSequence = 1000000001
+	</update>
+	
+	<!-- ====================================视频==================================== -->
+	<!-- 视频发布 -->
+	<insert id="insertVideoMsg" parameterType="Map">
+		INSERT INTO a_release (
+			relSequence,
+			relTitle,
+			relSubTitle,
+			relBrief,
+			relContent,
+			relStatus,
+			relThumbImage,
+			userSequence,
+			userName,
+			cateSequence,
+			cateName,
+			relDate,
+			relImageBatchNo,
+			relType,
+			relURL
+		)VALUES(
+			#{relSequence},
+			#{relTitle},
+			#{relSubTitle},
+			#{relBrief},
+			#{relContent},
+			#{relStatus},
+			#{relThumbImage},
+			#{userSequence},
+			#{userName},
+			#{cateSequence},
+			#{cateName},
+			#{relDate},
+			#{relImageBatchNo},
+			#{relType},
+			#{relURL}
+		)
+	</insert>
+
+	<!-- 查询视频信息 -->
+	<select id="selectVideoMsg" parameterType="Map" resultType="cn.smartcandy.application.cms.release.ReleaseVideo">
+		SELECT
+			<include refid="BASEREF.RELEASE_BASE_MSG"/>
+		from a_release rel
+		<where>
+		    <if test="null != relSequence">AND rel.relSequence = #{relSequence}</if>
+		    <if test="null != relStatus">AND rel.relStatus = #{relStatus}</if>
+		    AND rel.relType = '2'
+        </where>
+        ORDER BY rel.relDate DESC
+	</select>
+	
+	<!-- 查询视频信息 -->
+	<select id="selectVideoDataList" parameterType="Map" resultType="Map">
+		SELECT
+			<include refid="BASEREF.RELEASE_BASE_MSG"/>
+		from a_release rel
+		<where>
+		    <if test="null != relSequence">AND rel.relSequence = #{relSequence}</if>
+		    <if test="null != relStatus">AND rel.relStatus = #{relStatus}</if>
+		   	AND rel.relType = '2'
+        </where>
+        ORDER BY rel.relDate DESC
+	</select>
+	
+	
+	<!-- 更新Video信息 -->
+	<update id="updateVideoMsg" parameterType="Map">
+		UPDATE a_release 
+			<trim prefix="set" suffixOverrides=",">
+				<if test="null != relTitle">relTitle = #{relTitle},</if>
+				<if test="null != relSubTitle">relSubTitle = #{relSubTitle},</if>
+				<if test="null != relBrief">relBrief = #{relBrief},</if>
+				<if test="null != relContent">relContent = #{relContent},</if>
+				<if test="null != relStatus">relStatus = #{relStatus},</if>
+				<if test="null != relThumbImage">relThumbImage = #{relThumbImage},</if>
+				<if test="null != relDate">relDate = #{relDate},</if>
+				<if test="null != userSequence">userSequence = #{userSequence},</if>
+				<if test="null != userName">userName = #{userName},</if>
+				<if test="null != cateSequence">cateSequence = #{cateSequence},</if>
+				<if test="null != cateName">cateName = #{cateName},</if>
+				<if test="null != relURL">relURL = #{relURL},</if>
+			</trim>
+		WHERE
+			relSequence = #{relSequence}
+		AND relType = '2'
+	</update>
+	
+	<!-- ====================================生活照==================================== -->
+	<!-- 生活照发布 -->
+	<insert id="insertPhotoMsg" parameterType="Map">
+		INSERT INTO a_collection_photo (
+			photoSequence,
+			photoTitle,
+			photoBrief,
+			photoURL,
+			photoRelType,
+			photoStatus,
+			colSequence,
+			userSequence,
+			userName
+		)VALUES(
+			#{photoSequence},
+			#{photoTitle},
+			#{photoBrief},
+			#{photoURL},
+			#{photoRelType},
+			#{photoStatus},
+			#{colSequence},
+			#{userSequence},
+			#{userName}
+		)
+	</insert>
+
+	<!-- 查询生活照信息 -->
+	<select id="selectPhotoMsg" parameterType="Map" resultType="cn.smartcandy.application.cms.release.ReleasePhoto">
+		SELECT
+			<include refid="BASEREF.PHOTO_BASE"/>
+		from a_collection_photo photo
+		<where>
+		    <if test="null != colSequence">AND photo.colSequence = #{colSequence}</if>
+		    <if test="null != photoSequence">AND photo.photoSequence = #{photoSequence}</if>
+		    <if test="null != photoStatus">AND photo.photoStatus = #{photoStatus}</if>
+        </where>
+	</select>
+	
+	<!-- 查询生活照信息 -->
+	<select id="selectPhotoDataList" parameterType="Map" resultType="Map">
+		SELECT
+			<include refid="BASEREF.PHOTO_BASE"/>
+		from a_collection_photo photo
+		<where>
+		    <if test="null != colSequence">AND photo.colSequence = #{colSequence}</if>
+		    <if test="null != photoSequence">AND photo.photoSequence = #{photoSequence}</if>
+		    AND (photo.photoStatus = "N" OR photo.photoStatus = "R")
+        </where>
+	</select>
+	<!-- 查询生活照信息(后天管理) -->
+	<select id="selectColPhotoDataList" parameterType="Map" resultType="Map">
+		SELECT
+			col.colTitle,
+			col.colContent,
+			col.colThumb,
+			photo.photoSequence,
+			photo.photoURL,
+			photo.photoTitle,
+			photo.photoBrief
+		FROM
+			a_collection_photo AS photo
+		INNER JOIN a_collection AS col ON col.colSequence = photo.colSequence
+		WHERE
+			photo.photoStatus = 'N'
+		AND col.colStatus = 'N'
+		    <if test="null != colSequence">AND photo.colSequence = #{colSequence}</if>
+	</select>
+	
+	<!-- 拉黑Video信息 -->
+	<update id="updatePhotoMsg" parameterType="Map">
+		UPDATE a_collection_photo 
+			<trim prefix="set" suffixOverrides=",">
+				<if test="null != photoStatus">photoStatus = #{photoStatus},</if>
+			</trim>
+		WHERE
+			photoSequence IN <foreach collection="photoList" item="id" open="(" separator="," close=")">#{id}</foreach>
+	</update>
+	<!-- ====================================种类==================================== -->
+	<!--添加分类信息T-->
+	<insert id="insertCategaryMsg" parameterType="Map">
+		INSERT INTO a_release_acate (
+			cateSequence,
+			cateName,
+			cateBrief,
+			cateContent,
+			cateDate,
+			cateStatus,
+			cateRelType,
+			userSequence
+		)VALUES(
+			#{cateSequence},
+			#{cateName},
+			#{cateBrief},
+			#{cateContent},
+			#{cateDate},
+			#{cateStatus},
+			#{cateRelType},
+			#{userSequence}
+		)
+	</insert>
+	<!-- 查询种类信息T -->
+	<select id="selectCategaryMsg" parameterType="Map" resultType="cn.smartcandy.application.cms.release.ReleaseCategary">
+		SELECT
+			<include refid="BASEREF.RELEASE_BASE_CATE"/>
+		FROM
+			a_release_acate cate
+		<where>
+		    <if test="null != cateSequence">AND cate.cateSequence = #{cateSequence}</if>
+		    <if test="null != cateStatus">AND cate.cateStatus = #{cateStatus}</if>
+        </where>
+    </select>
+	
+	<!-- 查询种类信息T -->
+	<select id="selectCategaryList" parameterType="Map" resultType="cn.smartcandy.application.cms.release.ReleaseCategary">
+		SELECT
+			<include refid="BASEREF.RELEASE_BASE_CATE"/>
+		FROM
+			a_release_acate cate
+		<where>
+		    <if test="null != cateStatus">AND cate.cateStatus = #{cateStatus}</if>
+        </where>
+	</select>
+
+	<!-- 查询种类信息T -->
+	<select id="selectCategaryDataList" parameterType="Map" resultType="Map">
+		SELECT
+			<include refid="BASEREF.RELEASE_BASE_CATE"/>
+		FROM
+			a_release_acate cate
+		<where>
+		    <if test="null != cateStatus">AND cate.cateStatus = #{cateStatus}</if>
+        </where>
+	</select>
+	<!-- 更新Video信息 -->
+	<update id="updateCategaryMsg" parameterType="Map">
+		UPDATE a_release_acate 
+			<trim prefix="set" suffixOverrides=",">
+				<if test="null != cateName">cateName = #{cateName},</if>
+				<if test="null != cateBrief">cateBrief = #{cateBrief},</if>
+				<if test="null != cateContent">cateContent = #{cateContent},</if>
+				<if test="null != cateDate">cateDate = #{cateDate},</if>
+				<if test="null != cateStatus">cateStatus = #{cateStatus},</if>
+				<if test="null != cateRelType">cateRelType = #{cateRelType},</if>
+				<if test="null != userSequence">userSequence = #{userSequence},</if>
+			</trim>
+		WHERE
+			cateSequence = #{cateSequence}
+	</update>
+	
+	<!-- 更新种类的发布藏品数量T -->
+	<update id="updateCategaryReleaseNum" parameterType="Map">
+		UPDATE a_release_cate 
+			<trim prefix="set" suffixOverrides=",">
+				<if test="null != colCount">colCount = colCount + #{colCount},</if>
+			</trim>
+		WHERE
+			cateSequence = #{cateSequence}
+		AND userSequence = #{userSequence}
+	</update>
+
+	
+</mapper>

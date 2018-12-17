@@ -1,0 +1,105 @@
+/**
+ * Created by wenbin.lu on 2017/10/12.
+ */
+Chao.dialog={
+    loading:function () {
+        if($('#WY_loading').length>0){
+            $('#WY_loading').show();
+        }else{
+            $('body').append('<div id="WY_loading"><a></a></div>');
+            $('#WY_loading').show();
+        }
+    },
+    unloading:function () {
+        $('#WY_loading').hide();
+    },
+    ajaxError:function (rs) {
+        console.log(res)
+    },
+    /**
+     * 入参 x:{ title:"",content:"",sure:function(){...},close:true/false}
+     * */
+    alert:function (x) {
+        var o = {
+            title:x.title,
+            content:x.content,
+            btns:[
+                {
+                    text:"确定",
+                    close:x.close,
+                    className:"sure",
+                    fn:function () {
+                        x.sure();
+                    }
+                }
+            ]
+        };
+        this.open(o);
+    },
+    /**
+     * 入参 x:{ title:"",content:"",sure:function(){...},sureClose:true/false,cancel:function(){...},cancelClose:true/false}
+     * */
+    confirm:function (x) {
+        var o = {
+            title:x.title,
+            content:x.content,
+            btns:[
+                {
+                    text:"确定",
+                    close:x.sureClose,
+                    className:"sure",
+                    fn:function () {
+                        x.sure();
+                    }
+                },
+                {
+                    text:"取消",
+                    close:x.cancelClose,
+                    className:"cancel",
+                    fn:function () {
+                        x.cancel();
+                    }
+                }
+            ]
+        };
+        this.open(o);
+    },
+    open:function (o) {
+        o = $.extend({
+            title:"标题",
+            content:"提示内容",
+            btns:[]
+        },o);
+        var h=[],_id="WY_dialog_"+new Date().getTime(),i=0,len=o.btns.length;
+        h.push('<div class="WY_dialog dialog" id="'+_id+'">');
+            h.push('<header class="title">'+o.title+'<i class="WY_dialog_close close"></i></header>');
+            h.push('<section class="content"></section>');
+            h.push('<div class="btns btns_colums_'+len+'">');
+            for(i;i<len;i++){
+                h.push('<a class="'+o.btns[i].className+'">'+o.btns[i].text+'</a>');
+            }
+        h.push('</div>');
+        $('body').append(h.join(''));
+        // bind event
+        $('#'+_id).find('btns a').each(function (i, v) {
+            $(v).click(function () {
+               if( typeof (o.btns[i].fn()) =="function" ){
+                   o.btns[i].fn();
+                   if(o.btns[i].close){
+                       Chao.dialog.close(this);
+                   }
+               }else{
+                   Chao.dialog.close(this);
+               }
+            });
+        });
+    },
+    close:function (e) {
+       $(e).parents('.WY_dialog').remove();
+    },
+    init:function () {
+        $('body').on('click','.WY_dialog_close',function () {
+            $(this).parent().parent().remove();
+        });
+    }
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="Parameter" extends="struts-default">
+		<action name="parametersmng_*" class="cn.smartcandy.common.parameter.ParameterAction" method="{1}">
+			<result name="queryPM-success">/sys/parametersmng/pm_modify.jsp</result>
+			<result name="queryPMList-success">/sys/parametersmng/pm_list.jsp</result>
+			<result name="addPM-success">/success.jsp</result>
+			<result name="modifyPM-success">/success.jsp</result>
+			<result name="deletePM-success">/success.jsp</result>
+			<result name="queryPDList-success">/sys/parametersmng/pd_modify.jsp</result>
+			<result name="modifyPD-success">/success.jsp</result>
+			<result name="deletePD-success">/json/success_json.jsp</result>
+		</action>
+	</package>
+</struts>

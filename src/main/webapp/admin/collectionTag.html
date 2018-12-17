@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="format-detection" content="telephone=no">
+		<title>Tag管理</title>
+		<link rel="stylesheet" href="/admin/plugins/layui/css/layui.css" media="all" />
+		<link rel="stylesheet" href="/admin/css/global.css" media="all">
+		<link rel="stylesheet" href="/admin/plugins/font-awesome/css/font-awesome.min.css">
+		<link rel="stylesheet" href="/admin/css/table.css" />
+		<link rel="stylesheet" href="/admin/plugins/layui2/css/layui.css"  media="all">
+		<script type="text/javascript" src="/admin/js/jquery.js"></script>
+		<script type="text/javascript" src="/admin/plugins/layui/layui.js"></script>
+	</head>
+
+	<body>
+		<div class="admin-main">
+			<blockquote class="layui-elem-quote">
+				<form class="layui-form layui-form-inline" >
+				<a href="#" class="layui-btn layui-btn-large" id="refresh">
+					<i class="fa " aria-hidden="true"></i> 刷新
+				</a> 
+				<a href="#" class="layui-btn layui-btn-large" id="addNewTag">
+					<i class="fa " aria-hidden="true"></i> 添加新Tag
+				</a> 
+				<div id="newsCategery">
+					<input type="radio" lay-filter="cate" name="cateSequence" value="1000000001" title="体育周边" >
+					<input type="radio" lay-filter="cate" name="cateSequence" value="1000000002" title="娱乐周边" checked="checked">
+					<input type="radio" lay-filter="cate" name="cateSequence" value="1000000003" title="潮流周边" >
+					<input type="radio" lay-filter="cate" name="cateSequence" value="1000000004" title="动漫周边">
+				</div>
+				</form>
+			</blockquote>
+			<fieldset class="layui-elem-field">
+				<legend>Tag列表</legend>
+				<div class="layui-field-box layui-form">
+					<table class="layui-table admin-table" >
+						<thead>
+							<tr>
+								<th style="text-align:center">分类标题</th>
+								<th style="text-align:center">标签列表</th>
+								<th style="width: 100px; text-align:center">操        作</th>
+							</tr>
+						</thead>
+						<tbody id="content"> </tbody>
+					</table>
+				</div>
+			</fieldset>
+
+			<div class="admin-table-page">
+				<div id="paged" class="page">
+				</div>
+			</div>
+		</div>
+		<!--模板-->
+		<script type="text/html" id="tpl"></script>
+		<script>
+ 			// 重写类别视图
+			var layer,cateSequence;layui.config({ base: 'js/' });reWriteCateView();
+			// 初始化视图
+			layui.use(['paging', 'form'], function() {
+				var $ = layui.jquery,
+					paging = layui.paging(),
+					layerTips = parent.layer === undefined ? layui.layer : parent.layer, //获取父窗口的layer对象
+					form = layui.form();
+					layer = layui.layer; //获取当前窗口的layer对象
+				// 页面数据刷新
+				requestTagData(cateSequence);
+					
+				// 监听点击事件
+				form.on('radio(cate)', function(data){
+					cateSequence = data.value;
+					requestTagData(cateSequence);
+				}); 
+				
+				//绑定所有编辑按钮事件						
+				$('#content').children('tr').each(function() {
+					var $that = $(this);
+					$that.children('td:last-child').children('a[data-opt=edit]').on('click', function() {
+						var typeSeq = $(this).data('id');
+						window.location.href='/admin/collectionTagEditor.html?typeSequence='+typeSeq;
+					});
+					$that.children('td:last-child').children('a[data-opt=del]').on('click', function() {
+						var typeSeq = $(this).data('id');
+						layer.confirm('删除tag将不再展示，是否继续删除?', { icon: 3, title: '系统提示' }, function (index) {
+							delateTagType(typeSeq);
+							layer.close(index);
+						});
+					});
+				});
+				
+			}); 
+			
+			// 按钮点击事件
+			$('#addNewTag').on('click', function() {
+				window.location.href='/admin/collectionTagAdd.html';
+			});
+			$('#refresh').on('click', function() {
+				location.reload();
+			});
+			// 刷新种类数据
+			function reWriteCateView(){
+				$.ajax({
+				    url:'/jsonAction/release_queryCategaryList.action?v=' + new Date().getTime(),
+				    type:'POST', 		//GET
+				    async:false,   		//或false,是否异步
+				    data:{cateRelType:'1'},
+				    timeout:5000,    	//超时时间
+				    dataType:'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+				    success:function(data,textStatus,xhr){
+				    	if(data && data.statusCode == 200){
+				    		var i = 0,len = data.categaryList.length,html=[],item;
+				    		for(i;i<len;i++){
+				    			item = data.categaryList[i];
+				    			if(i==0){
+				    				cateSequence = item.cateSequence;
+					    			html.push('<input type="radio" lay-filter="cate" name="cateSequence" value="'+item.cateSequence+'" title="'+item.cateName+'" checked="checked">')
+				    			}else{
+					    			html.push('<input type="radio" lay-filter="cate" name="cateSequence" value="'+item.cateSequence+'" title="'+item.cateName+'">')
+				    			}
+				    		}
+							$('#newsCategery').html(html.join(""));
+				    	}
+				    },
+				    error:function(xhr,textStatus){
+				    },
+				    complete:function(data,textStatus,xhr){
+				    }
+				});
+			}
+			// 请求
+			function requestTagData(){
+				$.ajax({
+					cache : true,
+					type : "GET",
+					url : '/jsonAction/tag_queryTagTypeDataList.action?v=' + new Date().getTime(),
+					data : {cateSequence:cateSequence}, 
+					async : false,
+					error : function(request) {
+						var errorMsg = JSON.parse(request.responseText.trim()).message;
+						layer.msg(errorMsg);
+					},
+					success : function(data) {
+						var type = [];
+						var typeName = [];
+						var tagList = data.tagList;
+						tagList.forEach(function( val, index ) {
+							if(type.indexOf(val.typeSequence)==-1){
+								type.push(val.typeSequence);
+								typeName.push(val.typeName);
+							}
+						});
+						var str='';
+						type.forEach(function(typeSequence, index ) {
+							str+='<tr><td>'+typeName[index]+'</td><td>'
+							tagList.forEach(function(value, indx ) {
+								if(value.typeSequence == typeSequence){
+									str+=''+value.tagName+' ; '
+								}
+							});
+							str+='</td><td style="text-align:center">'+
+							'<a href="javascript:;" data-id="'+typeSequence+'" data-name="'+typeSequence+'" data-opt="del" class="layui-btn layui-btn-danger layui-btn-normal">删除</a><br/><br/>'+
+							'<a href="javascript:;" data-id="'+typeSequence+'" data-name="'+typeSequence+'" data-opt="edit" class="layui-btn layui-btn-normal">编辑</a><br/><br/></td></tr>';
+						});
+						$('#content').html(str);
+					},
+				    complete:function(){
+				    	//绑定所有编辑按钮事件						
+						$('#content').children('tr').each(function() {
+							var $that = $(this);
+							$that.children('td:last-child').children('a[data-opt=edit]').on('click', function() {
+								var typeSeq = $(this).data('id');
+								window.location.href='/admin/collectionTagEditor.html?typeSequence='+typeSeq;
+							});
+							$that.children('td:last-child').children('a[data-opt=del]').on('click', function() {
+								var typeSeq = $(this).data('id');
+								layer.confirm('删除tag将不再展示，是否继续删除?', { icon: 3, title: '系统提示' }, function (index) {
+									delateTagType(typeSeq);
+									layer.close(index);
+								});
+							});
+						});
+				    }
+				});
+			}
+			// 删除Tag
+			function delateTagType(typeSeq){
+				console.log(typeSeq);
+				$.ajax({
+					cache : true,
+					type : "POST",
+					url : '/jsonAction/tag_deleteTagTypeMsg.action?v=' + new Date().getTime(),
+					data : {typeSequence : typeSeq}, 
+					async : false,
+					error : function(request) {
+						layer.msg("删除Tag删除失败");
+					},
+					success : function(data) {
+						location.reload(); //刷新
+					}
+				});
+			}
+		</script>
+	</body>
+</html>

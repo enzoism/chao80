@@ -1,0 +1,72 @@
+package cn.smartcandy.common.common;
+
+import java.io.File;
+import org.apache.commons.lang.StringUtils;
+
+import cn.smartcandy.framework.web.struts.UploadAction;
+import net.coobird.thumbnailator.Thumbnails;
+
+/**
+ * @项目名称：zmjema
+ * @类名称：UploadReleaseAction
+ * @类描述：上传文件公用Action
+ * @创建人：yaoyinghong
+ * @创建时间：2017年7月12日 上午10:31:48
+ * @修改人：yaoyinghong
+ * @修改时间：2017年7月12日 上午10:31:48 
+ * @Company:SmartCandy (C) 2017
+ * @version 1.0
+ */
+public class UploadReleaseAction extends UploadAction {
+
+	private static final long serialVersionUID = 8921889656896711773L;
+
+	/**
+	 * 方法描述：上传图片后，及反馈图片相对路径
+	 * @throws Exception 
+	 */
+	public void uploadImage() throws Exception{
+		System.out.println("-----------------------图片上传");
+
+		super.uploadAll();
+		String[] relativePaths = super.getUploadFileRelativePath();//相对路径
+		String[] absolutePaths = super.getUploadFileAbsolutePath();//绝对路径
+
+		//返回结果
+		String result = StringUtils.EMPTY;
+		for(int i=0;null != relativePaths && i<relativePaths.length; i++){
+			String relativePath = relativePaths[i].replaceAll("\\\\", "\\\\\\\\");
+			result = "{\"result\":[";
+			result += "{\"uploadURL\":\""+relativePath+ "\"}]}"; //相对路径\
+			System.out.println("-----------------------result:"+result);
+		}
+		//生成本地缩略图
+		for(int i=0;null != absolutePaths && i<absolutePaths.length; i++){
+			String absolutePath = absolutePaths[i];//绝对路径
+			String[] path = absolutePath.split("\\\\");
+			String thumbPath = StringUtils.EMPTY;
+			for(int j=0;null != path && j<path.length-1; j++){
+				thumbPath += path[j]+"/";
+			}
+			File toFile = new File(absolutePath);
+			
+			try {
+				String logoName[] = path[path.length-1].split("\\."); //去掉logo名称后缀
+				
+				String contentType = "jpg"; //转换的文件类型
+					
+			    Thumbnails.of(toFile)  
+			    .scale(1f)  
+			    .outputQuality(0.25f)  
+			    .outputFormat(contentType)  
+			    .toFile(thumbPath + "/" + logoName[0]+ "_thumb"); //不带文件后缀的路径 与 contentType合并 即为完整路径
+			} catch (Exception e) {
+				throw e;
+			} finally {
+				
+			}
+		}
+		
+	}
+	
+}

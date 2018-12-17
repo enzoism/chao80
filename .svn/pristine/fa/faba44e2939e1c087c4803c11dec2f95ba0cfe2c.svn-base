@@ -1,0 +1,69 @@
+package cn.smartcandy.common;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+  * 项目名称：collection
+  * 类名称：SystemType
+  * 类描述：系统类型
+  * 创建人：lgbzc-surface
+  * 创建时间：2017年9月15日 上午12:32:22
+  * 修改人：
+  * 修改时间：
+  * 修改备注：
+  * Company:北京闻壹信息有限公司 (C) 2017
+  * @version 1.0
+  */
+public enum SystemType {
+	
+	SYS("SYS", "系统管理"),
+	
+	ERP("ERP", "企业资源计划系统"),
+	
+	AMS("AMS", "资产管理系统"),
+	OMS("OMS", "订单管理系统"),
+	WMS("WMS", "仓储管理系统"),
+	CRM("CRM", "客户关系管理系统"),
+	HR("HR", "人力资源管理系统");
+	
+	
+	public final String systemCode;
+	public final String systemName;
+
+	SystemType(String systemCode, String systemName) {
+		this.systemCode = systemCode;
+		this.systemName = systemName;
+	}
+
+	private static Map<String, SystemType> codeLookup = new HashMap<String, SystemType>();
+
+	static {
+		for (SystemType type : SystemType.values()) {
+			codeLookup.put(type.systemCode, type);
+		}
+	}
+
+	public static SystemType getSystemType(String systemCode) {
+		return codeLookup.get(systemCode);
+	}
+
+	@Override
+	public String toString() {
+		return String.valueOf(this.systemCode);
+	}
+
+	/**
+	 * @return the systemCode
+	 */
+	public String getSystemCode() {
+		return systemCode;
+	}
+
+	/**
+	 * @return the systemName
+	 */
+	public String getSystemName() {
+		return systemName;
+	}
+}

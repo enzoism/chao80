@@ -1,0 +1,221 @@
+/**
+ * Created by wenbin.lu on 2017/10/12.
+ */
+Chao.user={
+    checkStatus:function () {
+        //ajax,panduan yonghu deglu zhuangtai
+        $.get(Chao.APP.DATA+'account_currentUserMsg.action',{_:new Date().getTime()},function (rs) {
+            var h=[];
+            if(rs.userMsg){
+                h.push('<div onclick="Chao.user.toggle_base_info()" class="signIned "><img src="'+rs.userMsg.userImageURL+'" alt=""></div>');
+                h.push('<div class="use_base_info animated fadeInUp" id="use_base_info">');
+                h.push('<div class="head">');
+                h.push('<div class="img"><img src="'+rs.userMsg.userImageURL+'"></div>');
+                h.push('<div class="summary">');
+                h.push('<h2>'+rs.userMsg.userName+'</h2>');
+                h.push('<p>收藏 '+rs.userMsg.attentCount+'  粉丝 '+rs.userMsg.fansCount+'</p>');
+                h.push('</div>');
+                h.push('</div>');
+                h.push('<a class="link" href="home.html">个人资料编辑</a>');
+                h.push('<div class="signOut" onclick="Chao.user.signOut()">注销</div>');
+                h.push('</div>');
+            }else{
+                h.push('<div onclick="Chao.user.signIn()" class="unSignIn icon_head"></div>');
+            }
+            $('#main_nav').html(h.join(''));
+        })
+    },
+    signOut:function(){
+        $.ajax({
+            url: Chao.APP.DATA + 'account_userLoginOut.action',
+            beforeSend: function () {
+                Chao.dialog.loading();
+            },
+            success: function (d) {
+                Chao.dialog.unloading();
+                if (d.statusCode == "200") {
+                    toastr.success('您已注销');
+                    Chao.user.checkStatus();
+                } else {
+                    toastr.error(d.message);
+                }
+            },
+            error:function(r){Chao.err.ajax(r);}
+        });
+    },
+    toggle_base_info:function(){
+        $('#use_base_info').toggle();
+    },
+    signIn:function () {
+        $('.WY_signIn_Up').hide();
+        if($('#WY_signIn').length>0){
+            $('#WY_signIn').show();
+        }else{
+            var h = [];
+            h.push('<div class="WY_signIn_Up WY_signIn dialog" id="WY_signIn">');
+                h.push('<div class="title">登录<i class="closeDialog"></i></div>');
+                h.push('<div class="content">');
+                    h.push('<div class="input"><input id="signIn_username" type="text" placeholder="手机号码" /></div>');
+                    h.push('<div class="input mb0"><input id="signIn_password" type="password" placeholder="密码" /></div>');
+                    h.push('<div class="recordPassword"><a id="recordPassword" >记住密码</a></div>');
+                    h.push('<div class="btn" onclick="Chao.user._signIn()"><a class="btn btn-block btn-normal" id="WY_signIn_btn">登入</a></div>');
+                    h.push('<div class="tips">还不是用户？现在<span onclick="Chao.user.signUp()">注册</span></div>');
+                    h.push('<div class="other">');
+                        h.push('<div class="t"><span>&nbsp;其他</span></div>');
+                        h.push('<div class="c">');
+                            h.push('<a class="wechat"></a>');
+                            h.push('<a class="weibo"></a>');
+                            h.push('<a class="qq"></a>');
+                        h.push('</div>');
+                    h.push('</div>');
+                h.push('</div>');
+            h.push('</div>');
+            $('body').append(h.join(''));
+        }
+        var user_info=localStorage.getItem('user_info');
+        if(user_info){
+            user_info=eval("("+user_info+")");
+            if(user_info.recordPassword){
+                $('#signIn_username').val(user_info.username);
+                $('#signIn_password').val(user_info.password);
+                $('#recordPassword').addClass('cur');
+            }else{
+                $('#recordPassword').removeClass('cur');
+            }
+        }
+    },
+    _signIn:function () {
+        var d={
+            userName:$.trim($('#signIn_username').val()),
+            userPwd:$.trim($('#signIn_password').val())
+        };
+        if(!d.userName){
+            $('#signIn_username').focus();
+            return toastr.error('请输入您注册时填写的手机号码');
+        }else if(!d.userPwd){
+            $('#signIn_password').focus();
+            return toastr.error('请输入密码');
+        }else{
+            if(  Chao.util.check.mobile(d.userName) ){
+                d.userPhone=d.userName;
+            }else{
+                $('#signUp_emailOrMobile').focus();
+                return toastr.error('请输入合法的手机号码');
+            }
+            delete d.userName;
+            $.ajax({
+                url:Chao.APP.DATA+'account_userLogin.action',
+                data:d,
+                beforeSend:function () {
+                    Chao.dialog.loading();
+                },
+                success:function(r){
+                    Chao.dialog.unloading();
+                    if(r.statusCode=="200"){
+                        $('.WY_signIn_Up').hide();
+                        if($('#recordPassword').hasClass('cur')){
+                            var u={
+                                username:d.userEmail||d.userPhone,
+                                password:d.userPwd,
+                                recordPassword:true
+                            }
+                            localStorage.setItem('user_info',JSON.stringify(u));
+                        }else{
+                            localStorage.removeItem('user_info');
+                        }
+                        toastr.success('登录成功');
+                        Chao.user.checkStatus();
+                    }else{
+                        toastr.error(d.message);
+                    }
+                },
+                error:function (rs) {
+                    Chao.dialog.unloading();
+                    Chao.err.ajax(rs);
+                }
+            })
+        }
+    },
+    signUp:function () {
+        $('.WY_signIn_Up').hide();
+        if($('#WY_signUp').length>0){
+            $('#WY_signUp').show();
+        }else{
+            var h = [];
+            h.push('<div class="WY_signIn_Up WY_signUp dialog" id="WY_signUp">');
+                h.push('<div class="title">注册<i class="closeDialog"></i></div>');
+                h.push('<div class="content">');
+                    h.push('<div class="input"><input id="signUp_username" type="text" placeholder="创建用户名" /></div>');
+                    h.push('<div class="input"><input id="signUp_emailOrMobile" type="text" placeholder="手机号码" /></div>');
+                    h.push('<div class="input"><input id="signUp_password" type="password" placeholder="密码" /></div>');
+                    h.push('<div class="input"><input id="signUp_password2" type="password" placeholder="再次输入密码" /></div>');
+                    h.push('<div class="btn" onclick="Chao.user._signUp()"><a class="btn btn-block btn-normal" id="WY_signUp_btn">创建新用户</a></div>');
+                    h.push('<div class="tips">已是用户？现在<span onclick="Chao.user.signIn()">登录</span></div>');
+                h.push('</div>');
+            h.push('</div>');
+            $('body').append(h.join(''));
+        }
+    },
+    _signUp:function () {
+        var d = {
+            userName: $.trim($('#signUp_username').val()),
+            emailOrMobile: $.trim($('#signUp_emailOrMobile').val()),
+            userPwd: $.trim($('#signUp_password').val()),
+            password2: $.trim($('#signUp_password2').val())
+        };
+        if (!d.userName) {
+            $('#signUp_username').focus();
+            return toastr.error('请输入用户名');
+        } else if (!d.emailOrMobile) {
+            $('#signUp_emailOrMobile').focus();
+            return toastr.error('请输入手机号码');
+        } else if (!d.userPwd) {
+            $('#signUp_password').focus();
+            return toastr.error('请输入密码');
+        } else if (!d.password2) {
+            $('#signUp_password2').focus();
+            return toastr.error('请再次输入密码');
+        } else if (d.userPwd != d.password2) {
+            $('#signUp_password2').focus();
+            return toastr.error('两次输入的密码不一致');
+        }
+        if( Chao.util.check.mobile(d.emailOrMobile) ){
+            d.userPhone=d.emailOrMobile;
+        }else{
+            $('#signUp_emailOrMobile').focus();
+            return toastr.error('请输入合法的手机号码');
+        }
+        delete d.emailOrMobile;
+        delete d.password2;
+        $.ajax({
+            url:Chao.APP.DATA+'account_userRegister.action',
+            data:d,
+            beforeSend:function () {
+                Chao.dialog.loading();
+            },
+            success:function(d){
+                Chao.dialog.unloading();
+                if(d.statusCode=="200"){
+                    $('.WY_signIn_Up').hide();
+                    toastr.success('注册成功');
+                    Chao.user.checkStatus();
+                }else{
+                    toastr.error(d.message);
+                }
+            },
+            error:function (rs) {
+                Chao.dialog.unloading();
+                Chao.err.ajax(rs);
+            }
+        })
+    },
+    init:function () {
+        this.checkStatus();
+        $('body').on('click','.closeDialog',function () {
+            $('.WY_signIn_Up').hide();
+        }).on('click','#recordPassword',function () {
+            $(this).toggleClass('cur');
+        })
+    }
+};
+Chao.user.init();

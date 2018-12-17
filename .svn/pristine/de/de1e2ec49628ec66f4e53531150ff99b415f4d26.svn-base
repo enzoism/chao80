@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="attention">
+
+	<!-- 关注用户 -->
+	<insert id="insertUserAttention" parameterType="Map">
+		INSERT INTO c_user_attention (
+			attentSequence,
+			attentDate,
+			attentStatus,
+			userSequence,
+			relUserSequence
+		)VALUES(
+			#{attentSequence},
+			#{attentDate},
+			#{attentStatus},
+			#{userSequence},
+			#{relUserSequence}
+		)
+	</insert>
+	
+	<!-- 查询是否关注用户 -->
+	<select id="selectUserAttention" parameterType="Map" resultType="int">
+		SELECT
+			COUNT(attentSequence)
+		FROM
+			c_user_attention 
+		where userSequence =#{userSequence}
+		And relUserSequence=#{relUserSequence}
+	</select>
+	
+	<!-- 取消关注用户 -->
+	<update id="updateUserAttention" parameterType="HashMap">
+		UPDATE c_user_attention 
+		SET
+			attentStatus = #{attentStatus}
+		WHERE
+			relUserSequence = #{relUserSequence}
+		AND
+			userSequence = #{userSequence}
+	</update>
+	
+	<!-- 查询关注用户 -->
+	<select id="selectAttentionUserList" parameterType="Map" resultType="String">
+		SELECT
+			relUserSequence
+		from 
+			c_user_attention 
+		WHERE
+			attentStatus = 'N'
+		AND userSequence = #{userSequence}
+	</select>
+	
+	<!-- 查询关注用户 -->
+	<select id="selectAttentionUserDataList" parameterType="Map" resultType="Map">
+		SELECT 
+			<include refid="BASEREF.USER_BASE_ACCOUNT"/>
+		FROM
+			c_user_attention AS usrAtt
+		INNER JOIN c_user AS usr ON usrAtt.relUserSequence = usr.userSequence
+		WHERE
+			usrAtt.userSequence = #{userSequence}
+			AND usrAtt.attentStatus = "N"
+	</select>
+	
+	<!-- 查询粉丝用户 -->
+	<select id="selectFansUserDataList" parameterType="Map" resultType="Map">
+		SELECT
+			<include refid="BASEREF.USER_BASE_ACCOUNT"/>
+		FROM
+			c_user_attention AS usrAtt
+		INNER JOIN c_user AS usr ON usrAtt.userSequence = usr.userSequence
+		WHERE
+			usrAtt.relUserSequence = #{userSequence}
+			AND usrAtt.attentStatus = "N"
+	</select>
+	
+	<!-- 查询有没有关注过某个用户 -->
+	<select id="selectUserAttentionOrNot" parameterType="Map" resultType="int">
+		SELECT
+			COUNT(usrAtt.attentSequence)
+		FROM
+			c_user_attention usrAtt
+		WHERE
+			usrAtt.attentStatus = 'N'
+		AND usrAtt.userSequence = #{userSequence}
+		AND usrAtt.relUserSequence = #{relUserSequence}
+	</select>
+	<!-- ===================================================藏品=================================================== -->
+	
+	<!-- 是否关注藏品 -->
+	<select id="selectCollectionAttention" parameterType="Map" resultType="int">
+		SELECT
+			Count(colAtt.attentSequence)
+		FROM
+		a_collection_attention colAtt
+		WHERE
+			 colAtt.userSequence = #{userSequence}
+		AND colAtt.colSequence = #{colSequence}
+	</select>
+	
+	<!-- 关注商品 -->
+	<insert id="insertCollectionAttention" parameterType="Map">
+		INSERT INTO a_collection_attention (
+			attentSequence,
+			attentDate,
+			attentStatus,
+			userSequence,
+			relUserSequence,
+			colSequence,
+			cateSequence
+		)VALUES(
+			#{attentSequence},
+			#{attentDate},
+			#{attentStatus},
+			#{userSequence},
+			#{relUserSequence},
+			#{colSequence},
+			#{cateSequence}
+		)
+	</insert>
+	<!-- 取消关注藏品 -->
+	<update id="updateCollectionAttention" parameterType="Map">
+		UPDATE a_collection_attention 
+		SET	
+			attentStatus = #{attentStatus}
+		WHERE
+			colSequence = #{colSequence}
+		AND userSequence = #{userSequence}
+	</update>
+	<!-- 查询所有关注藏品 -->
+	<select id="selectAttentionCollectionDataList" parameterType="Map" resultType="Map">
+		SELECT
+			<include refid="BASEREF.COLLECTION_BASE"/>
+		FROM
+			a_collection_attention AS colAtt
+		INNER JOIN a_collection AS col ON colAtt.colSequence = col.colSequence
+		WHERE
+			colAtt.userSequence = #{userSequence}
+			AND col.colStatus = 'N'
+			AND colAtt.attentStatus = 'N'
+		<if test="null != cateSequence">AND colAtt.cateSequence = ${cateSequence}</if>
+		ORDER BY 
+			colAtt.attentSequence DESC
+	</select>
+	<!-- 查询所有关注藏品 -->
+	<select id="selectFansCollectionDataList" parameterType="Map" resultType="Map">
+		SELECT
+			<include refid="BASEREF.COLLECTION_BASE"/>
+		FROM
+			a_collection_attention AS colAtt
+		INNER JOIN a_collection AS col ON colAtt.colSequence = col.colSequence
+		WHERE
+			colAtt.relUserSequence = #{userSequence}
+		<if test="null != cateSequence">AND colAtt.cateSequence = ${cateSequence}</if>
+	</select>
+	
+	
+	<!-- 查询有没有关注过某个藏品 -->
+	<select id="selectColAttentionOrNot" parameterType="Map" resultType="int">
+		SELECT
+			COUNT(colAtt.colSequence)
+		FROM
+			a_collection_attention colAtt
+		WHERE
+			colAtt.attentStatus = 'N'
+		AND colAtt.userSequence = #{userSequence}
+		AND colAtt.colSequence = #{colSequence}
+	</select>
+</mapper>

@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="account">
+
+	<!-- 生成账户信息 -->
+	<insert id="insertUserAccount" parameterType="Map">
+		INSERT INTO c_user (
+			userSequence,
+			userName,
+			userPwd,
+			userEmail,
+			userPhone,
+			userStatus,
+			userCreatDate,
+			userRemark,
+			userSex,
+			userBirth,
+			userAddr,
+			userImageURL,
+			adminStatus,
+			verfyID,
+			attentCount,
+			fansCount,
+			likeCount
+		)VALUES(
+			#{userSequence},
+			#{userName},
+			#{userPwd},
+			#{userEmail},
+			#{userPhone},
+			#{userStatus},
+			#{userCreatDate},
+			#{userRemark},
+			#{userSex},
+			#{userBirth},
+			#{userAddr},
+			#{userImageURL},
+			#{adminStatus},
+			#{verfyID},
+			#{attentCount},
+			#{fansCount},
+			#{likeCount}
+		);
+	</insert>
+	
+	<!-- 查询用户信息 -->
+	<select id="selectUserMsg" parameterType="Map" resultType="cn.smartcandy.application.a.account.User">
+		SELECT
+			<include refid="BASEREF.USER_DETAIL_MSG"/>
+		FROM
+			c_user usr
+		<where>
+		    <if test="null != userName">AND usr.userName = #{userName}</if>
+            <if test="null != userPhone">AND usr.userPhone = #{userPhone}</if>
+            <if test="null != userEmail">AND usr.userEmail = #{userEmail}</if>
+            <if test="null != userPwd">AND usr.userPwd = #{userPwd}</if>
+            <if test="null != userSequence">AND usr.userSequence = #{userSequence}</if>
+        </where>
+	</select>
+	
+	<!-- 查询用户账户 -->
+	<select id="selectUserAccount" parameterType="Map" resultType="cn.smartcandy.application.a.account.User">
+		SELECT
+			<include refid="BASEREF.USER_BASE_ACCOUNT"/>
+		FROM
+			c_user usr
+		<where>
+		    <if test="null != userName">AND usr.userName = #{userName}</if>
+            <if test="null != userPhone">AND usr.userPhone = #{userPhone}</if>
+            <if test="null != userEmail">AND usr.userEmail = #{userEmail}</if>
+            <if test="null != userPwd">AND usr.userPwd = #{userPwd}</if>
+            <if test="null != userSequence">AND usr.userSequence = #{userSequence}</if>
+        </where>
+	</select>
+
+	<!-- 查询所有用户信息 -->
+	<select id="selectUserList" parameterType="Map" resultType="cn.smartcandy.application.a.account.User">
+		SELECT
+			<include refid="BASEREF.USER_BASE"/>
+		FROM
+			c_user usr
+		<where>
+		    <if test="null != userName">AND usr.userName = #{userName}</if>
+            <if test="null != userPhone">AND usr.userPhone = #{userPhone}</if>
+            <if test="null != userEmail">AND usr.userEmail = #{userEmail}</if>
+            <if test="null != userPwd">AND usr.userPwd = #{userPwd}</if>
+            <if test="null != userSequence">AND usr.userSequence = #{userSequence}</if>
+        </where>
+	</select>
+
+
+	<!-- 查询所有用户信息 -->
+	<select id="selectUserDataList" parameterType="Map" resultType="Map">
+		SELECT
+			<include refid="BASEREF.USER_BASE"/>
+		FROM
+			c_user usr
+		<where>
+		    <if test="null != verfyID">AND usr.verfyID = #{verfyID}</if>
+		    <if test="null != userName">AND usr.userName = #{userName}</if>
+            <if test="null != userPhone">AND usr.userPhone = #{userPhone}</if>
+            <if test="null != userEmail">AND usr.userEmail = #{userEmail}</if>
+            <if test="null != userPwd">AND usr.userPwd = #{userPwd}</if>
+            <if test="null != userSequence">AND usr.userSequence = #{userSequence}</if>
+            <if test="null != userStatus">AND usr.userStatus = #{userStatus}</if>
+        </where>
+        ORDER BY usr.userSequence DESC
+	</select>
+
+	<!-- 查询用户Top10 -->
+	<select id="selectTopUserList" parameterType="Map" resultType="cn.smartcandy.application.a.account.User">
+		SELECT
+			<include refid="BASEREF.USER_BASE_ACCOUNT"/>
+		FROM
+			c_user usr
+		WHERE
+		   	usr.userStatus = 'N'
+		   	AND usr.verfyID = '1'
+        ORDER BY
+			usr.colCount DESC
+		LIMIT 0, 
+			<if test="null != topSize">${topSize}</if>
+			<if test="null == topSize">10</if>
+	</select>
+	
+	<!-- 更新用户信息 -->
+	<update id="updateUserMsg" parameterType="Map">
+		UPDATE c_user 
+			<trim prefix="set" suffixOverrides=",">
+			<if test="null != userName">userName = #{userName},</if>
+			<if test="null != userPhone">userPhone = #{userPhone},</if>
+			<if test="null != userImageURL">userImageURL = #{userImageURL},</if>
+			</trim>
+		WHERE
+		userSequence = #{userSequence}
+	</update>
+
+	<!-- 更新用户账户 -->
+	<update id="updateUserCount" parameterType="Map">
+		UPDATE c_user 
+			<trim prefix="set" suffixOverrides=",">
+			<if test="null != attentCount">attentCount = attentCount + #{attentCount},</if>
+			<if test="null != fansCount">fansCount = fansCount + #{fansCount},</if>
+			<if test="null != likeCount">likeCount = likeCount + #{likeCount},</if>
+			<if test="null != likedCount">likedCount = likedCount + #{likedCount},</if>
+			<if test="null != colCount">colCount = colCount + #{colCount},</if>
+			</trim>
+		WHERE
+		userSequence = #{userSequence}
+	</update>
+
+	<!-- 更新用户账户 -->
+	<update id="updateUserPwd" parameterType="Map">
+		UPDATE c_user 
+			<trim prefix="set" suffixOverrides=",">
+			<if test="null != userPwd">userPwd = #{userPwd},</if>
+			</trim>
+		WHERE
+		userSequence = #{userSequence}
+	</update>
+	<!-- ========================================账户信息更改======================================== -->
+	<!-- 查询分类用户序号没有category-->
+	<select id="selectUserSequenceDataWithoutCate" parameterType="Map" resultType="Map">
+		SELECT
+			col.userSequence
+		FROM
+			a_collection col
+		GROUP BY
+			col.userSequence
+		ORDER BY
+			<!-- col.colLikeNum DESC -->
+			col.colSequence DESC
+	</select>
+	<!-- 查询分类用户序号有category -->
+	<select id="selectUserSequenceDataWithCate" parameterType="Map" resultType="Map">
+		SELECT
+			col.userSequence,
+			col.colLikeNum
+		FROM
+			r_collection_cate AS cateRel
+		INNER JOIN a_collection AS col ON cateRel.colSequence = col.colSequence
+		WHERE
+			cateRel.cateSequence = #{cateSequence}
+		AND	cateRel.cateStatus = 'N'
+		AND col.colStatus = 'N'
+		GROUP BY
+			col.userSequence
+		ORDER BY
+			<!-- col.colLikeNum DESC -->
+			col.colSequence DESC
+	</select>
+	
+	
+	<!-- 查询分类用户信息 -->
+	<select id="selectCateUserList" parameterType="List" resultType="cn.smartcandy.application.a.account.User">
+		SELECT
+			<include refid="BASEREF.USER_BASE_ACCOUNT"/>
+		FROM
+			c_user usr
+		WHERE
+			usr.userSequence in 
+		<foreach collection="list" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+	</select>
+	
+	<!-- ========================================未完待续======================================== -->
+	<!-- 升级和拉黑用户 -->
+	<update id="updateUserLevelStatus" parameterType="Map">
+		UPDATE c_user 
+			<trim prefix="set" suffixOverrides=",">
+			<if test="null != adminStatus">adminStatus = #{adminStatus},</if>
+			<if test="null != userStatus">userStatus = #{userStatus},</if>
+			<if test="null != verfyID">verfyID = #{verfyID},</if>
+			</trim>
+		WHERE
+			<if test="null != userList">userSequence in 
+				<foreach collection="userList" item="item" index="index" open="(" separator="," close=")">#{item}</foreach>
+			</if> 
+	</update>
+</mapper>

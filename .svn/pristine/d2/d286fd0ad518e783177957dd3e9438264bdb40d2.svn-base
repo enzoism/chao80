@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 参数管理 -->
+<mapper namespace="sys.parameter">
+	<!-- 查询参数结构信息 -->
+	<select id="selectPM" parameterType="String" resultType="cn.smartcandy.common.parameter.ParameterMappingBean">
+		SELECT
+			*
+		FROM
+			sys_pm pm
+		WHERE
+			pm.pmSequence = #{parameter}
+	</select>
+
+	<!-- 查询参数结构信息列表 -->
+	<select id="selectPMList" parameterType="HashMap" resultType="cn.smartcandy.common.parameter.ParameterMappingBean">
+		SELECT
+			*
+		FROM
+			sys_pm pm
+		<where>
+			<if test="null != pmCode">AND pm.pmCode = #{pmCode}</if>
+			<if test="null != pmName">AND pm.pmName = #{pmName}</if>
+			<if test="null != pmLevel">AND pm.pmLevel = #{pmLevel}</if>
+			<if test="null != pmFlag">AND pm.pmFlag = #{pmFlag}</if>
+			<if test="null != pmParentSequence">AND pm.pmParentSequence = #{pmParentSequence}</if>
+			<if test="null != pmGroupPmSequence">AND pm.pmGroupPmSequence = #{pmGroupPmSequence}</if>
+		</where>
+		ORDER BY 
+			pm.pmOrder ASC
+	</select>
+
+	<!-- 查询参数-参数字典信息 
+	<select id="selectPDPMList" resultType="HashMap">
+		SELECT
+			*
+		FROM
+			sys_pd pd 
+		RIGHT JOIN sys_pm pm ON pd.pmSequence = pm.pmSequence
+		ORDER BY 
+			pd.pmSequence ASC, 
+			pd.pdOrder ASC
+	</select>
+	-->
+	
+	<!-- 查询问题及选项信息的 结果映射 -->
+	<resultMap id="parameterMappingBeanResultMap" type="cn.smartcandy.sys.parameter.ParameterMappingBean">
+		<id property="pmSequence" column="pmSequence" />
+		<result property="pmParentSequence" column="pmParentSequence" />
+		<result property="pmCode" column="pmCode" />
+		<result property="pmName" column="pmName" />
+		<result property="pmType" column="pmType" />
+		<result property="pmMultiChecked" column="pmMultiChecked" />
+		<result property="pmLevel" column="pmLevel" />
+		<result property="pmGroupPmSequence" column="pmGroupPmSequence" />
+		<result property="pmDescription" column="pmDescription" />
+		<result property="pmRemark" column="pmRemark" />
+		<result property="pmOrder" column="pmOrder" />
+		<result property="pmIsDeletable" column="pmIsDeletable" />
+		<result property="pmIsRevisable" column="pmIsRevisable" />
+		<result property="pmAddOper" column="pmAddOper" />
+		<result property="pmAddOperBranchSequence" column="pmAddOperBranchSequence" />
+		<result property="pmAddTime" column="pmAddTime" />
+		<result property="pmLastUpdateOper" column="pmLastUpdateOper" />
+		<result property="pmLastUpdateOperBranchSequence" column="pmLastUpdateOperBranchSequence" />
+		<result property="pmLastUpdateTime" column="pmLastUpdateTime" />
+		<result property="pmVersionNO" column="pmVersionNO" />
+		<result property="pmFlag" column="pmFlag" />
+		<collection property="lstPD" javaType="java.util.List" ofType="cn.smartcandy.sys.parameter.ParameterDictionaryBean">
+			<id property="pmSequence" column="pdPmSequence" />
+			<result property="pdSequence" column="pdSequence" />
+			<result property="branchSequence" column="branchSequence" />
+			<result property="userSequence" column="userSequence" />
+			<result property="pdCode" column="pdCode" />
+			<result property="pdName" column="pdName" />
+			<result property="pdValue" column="pdValue" />
+			<result property="pdValue2" column="pdValue2" />
+			<result property="pdValue3" column="pdValue3" />
+			<result property="pdOrder" column="pdOrder" />
+			<result property="pdIsDefault" column="pdIsDefault" />
+			<result property="pdIsDeletable" column="pdIsDeletable" />
+			<result property="pdIsRevisable" column="pdIsRevisable" />
+			<result property="pmtSequence" column="pmtSequence" />
+			<result property="pdtSequence" column="pdtSequence" />
+			<result property="pdRemark" column="pdRemark" />
+			<result property="pdVersionNO" column="pdVersionNO" />
+			<result property="pdFlag" column="pdFlag" />
+		</collection>
+	</resultMap>
+
+	<!-- 查询参数-参数字典信息 -->
+	<select id="selectPMPDList" parameterType="HashMap" resultMap="parameterMappingBeanResultMap">
+		SELECT
+			pm.*,
+			pd.pdSequence,
+			pd.pmSequence pdPmSequence,
+			pd.branchSequence,
+			pd.userSequence,
+			pd.pdCode,
+			pd.pdName,
+			pd.pdValue,
+			pd.pdValue2,
+			pd.pdValue3,
+			pd.pdOrder,
+			pd.pdIsDefault,
+			pd.pdIsDeletable,
+			pd.pdIsRevisable,
+			pd.pmtSequence,
+			pd.pdtSequence,
+			pd.pdRemark,
+			pd.pdVersionNO,
+			pd.pdFlag
+		FROM
+			sys_pm pm
+		LEFT JOIN sys_pd pd ON pd.pmSequence = pm.pmSequence
+		<where>
+			<if test="null != pmCode">AND pm.pmCode = #{pmCode}</if>
+			<if test="null != pmName">AND pm.pmName = #{pmName}</if>
+			<if test="null != pmLevel">AND pm.pmLevel = #{pmLevel}</if>
+			<if test="null != pmFlag">AND pm.pmFlag = #{pmFlag}</if>
+			<if test="null != pmParentSequence">AND pm.pmParentSequence = #{pmParentSequence}</if>
+			<if test="null != pmGroupPmSequence">AND pm.pmGroupPmSequence = #{pmGroupPmSequence}</if>
+			<if test="null != pmSequence">AND pm.pmSequence = #{pmSequence}</if>
+		</where>
+		ORDER BY 
+			pm.pmOrder ASC, 
+			pd.pdOrder ASC
+	</select>
+
+	<!-- 新增参数结构信息 -->
+	<insert id="insertPM" parameterType="cn.smartcandy.common.parameter.ParameterMappingBean">
+		INSERT INTO sys_pm (
+			pmSequence,
+			pmParentSequence,
+			pmCode,
+			pmName,
+			pmType,
+			pmMultiChecked,
+			pmLevel,
+			pmGroupPmSequence,
+			pmDescription,
+			pmRemark,
+			pmOrder,
+			pmIsDeletable,
+			pmIsRevisable,
+			pmAddOper,
+			pmAddOperBranchSequence,
+			pmAddTime,
+			pmLastUpdateOper,
+			pmLastUpdateOperBranchSequence,
+			pmLastUpdateTime,
+			pmVersionNO,
+			pmFlag
+		)
+		VALUES
+		(
+			#{pmSequence},
+			#{pmParentSequence},
+			#{pmCode},
+			#{pmName},
+			#{pmType},
+			#{pmMultiChecked},
+			#{pmLevel},
+			#{pmGroupPmSequence},
+			#{pmDescription},
+			#{pmRemark},
+			#{pmOrder},
+			#{pmIsDeletable},
+			#{pmIsRevisable},
+			#{pmAddOper},
+			#{pmAddOperBranchSequence},
+			#{pmAddTime},
+			#{pmLastUpdateOper},
+			#{pmLastUpdateOperBranchSequence},
+			#{pmLastUpdateTime},
+			#{pmVersionNO},
+			#{pmFlag}
+		)
+	</insert>
+	
+	<!-- 修改参数结构信息 -->
+	<update id="updatePM" parameterType="cn.smartcandy.common.parameter.ParameterMappingBean" >
+		UPDATE sys_pm
+		<set>
+			<if test="null != pmCode">pmCode = #{pmCode},</if>
+			<if test="null != pmName">pmName = #{pmName},</if>
+			<if test="null != pmDescribe">pmDescribe = #{pmDescribe},</if>
+			<if test="null != pmOrder">pmOrder = #{pmOrder},</if>
+			<if test="null != pmIsDeletable">pmIsDeletable = #{pmIsDeletable},</if>
+			<if test="null != pmIsRevisable">pmIsRevisable = #{pmIsRevisable},</if>
+			<if test="null != pmFlag">pmFlag = #{pmFlag},</if>
+			pmVersionNO = pmVersionNO + 1
+		</set>
+		WHERE 
+			pmSequence = #{pmSequence}
+	</update>
+	
+	<!-- 逻辑删除参数结构信息 -->
+	<update id="updatePMFlag" parameterType="HashMap">
+		UPDATE sys_pm
+		SET
+			pmFlag = #{pmFlag},
+			pmVersionNO = pmVersionNO + 1
+		WHERE 
+			pmSequence = #{pmSequence}
+	</update>
+
+	<!-- 删除参数结构信息 -->
+	<delete id="deletePM" parameterType="string">
+		DELETE
+		FROM
+			sys_pm
+		WHERE
+			pmSequence = #{parameter}
+	</delete>
+
+	<!-- 查询参数字典信息 -->
+	<select id="selectPDList" parameterType="HashMap" resultType="cn.smartcandy.common.parameter.ParameterDictionaryBean">
+		SELECT
+			*
+		FROM
+			sys_pd pd
+		<where>
+			<if test="null != pdCode">AND pd.pdCode = #{pdCode}</if>
+			<if test="null != pmSequence">AND pd.pmSequence = #{pmSequence}</if>
+		</where>
+		ORDER BY 
+			pd.pmSequence ASC, 
+			pd.pdOrder ASC
+	</select>
+
+	<!-- 插入参数字典信息 -->
+	<insert id="insertPD" parameterType="java.util.List">
+		INSERT INTO sys_pd (
+			pdSequence,
+			pmSequence,
+			branchSequence,
+			userSequence,
+			pdCode,
+			pdName,
+			pdValue,
+			pdValue2,
+			pdValue3,
+			pdOrder,
+			pdIsDefault,
+			pdIsDeletable,
+			pdIsRevisable,
+			pmtSequence,
+			pdtSequence,
+			pdRemark,
+			pdVersionNO,
+			pdFlag
+		)
+		VALUES
+		<foreach collection="list" item="pd" separator=",">
+		(
+			#{nextval('SEQ_sys_pd')},
+			#{pd.pmSequence},
+			#{pd.branchSequence},
+			#{pd.userSequence},
+			#{pd.pdCode},
+			#{pd.pdName},
+			#{pd.pdValue},
+			#{pd.pdValue2},
+			#{pd.pdValue3},
+			#{pd.pdOrder},
+			#{pd.pdIsDefault},
+			#{pd.pdIsDeletable},
+			#{pd.pdIsRevisable},
+			#{pd.pmtSequence},
+			#{pd.pdtSequence},
+			#{pd.pdRemark},
+			#{pd.pdVersionNO},
+			#{pd.pdFlag}
+		)
+		</foreach>
+	</insert>
+	
+	<!-- 更新参数字典信息 -->
+	<update id="updatePD" parameterType="cn.smartcandy.common.parameter.ParameterDictionaryBean" >
+		UPDATE sys_pd
+		<set>
+			<if test="null != pdCode">pdCode = #{pdCode},</if>
+			<if test="null != pdName">pdName = #{pdName},</if>
+			<if test="null != pdOrder">pdOrder = #{pdOrder},</if>
+			<if test="null != pdIsDeletable">pdIsDeletable = #{pdIsDeletable},</if>
+			<if test="null != pdIsRevisable">pdIsRevisable = #{pdIsRevisable},</if>
+			<if test="null != pdFlag">pdFlag = #{pdFlag},</if>
+			pdVersionNO = pdVersionNO + 1
+		</set>
+		WHERE
+			pdSequence = #{pdSequence}
+		AND pmSequence = #{pmSequence}
+		<!-- 当参数级别为M-客户级时有效 -->
+		<if test="null != branchSequence">AND branchSequence = #{branchSequence}</if>
+		<!-- 当参数级别为U-操作员级时有效 -->
+		<if test="null != userSequence">AND userSequence = #{userSequence}</if>
+	</update>
+
+	<!-- 逻辑删除参数字典信息 -->
+	<delete id="updatePDFlag" parameterType="HashMap">
+		UPDATE sys_pd
+		SET 
+			pdFlag = #{pdFlag},
+			pdVersionNO = pdVersionNO + 1
+		<where>
+			<if test="null != pdSequences">
+			AND pdSequence IN 
+				<foreach collection="array" item="pdSequences" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+			<if test="null != pmSequence">
+			AND pmSequence = #{pmSequence}
+			</if>
+		</where>	
+	</delete>
+	
+	<!-- 删除参数字典信息 -->
+	<delete id="deletePD" parameterType="string">
+		DELETE
+		FROM
+			sys_pd
+		WHERE
+			pdSequence = #{parameter}
+	</delete>
+</mapper> 

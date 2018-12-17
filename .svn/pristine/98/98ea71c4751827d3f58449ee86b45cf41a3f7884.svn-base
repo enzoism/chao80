@@ -1,0 +1,59 @@
+[
+	{
+		"title": "基本元素",
+		"icon": "fa-cubes",
+		"spread": true,
+		"children": [
+			{
+				"title": "藏品种类",
+				"icon": "&#xe641;",
+				"href": "operCategary.html"
+			}, {
+				"title": "藏家管理",
+				"icon": "&#xe63c;",
+				"href": "operCollector.html"
+			}, {
+				"title": "藏品管理",
+				"icon": "&#xe63c;",
+				"href": "operCollection.html"
+			}, {
+				"title": "添加藏品",
+				"icon": "&#xe63c;",
+				"href": "operCollectionAdd.html"
+			}
+		]
+	}, {
+		"title": "组件",
+		"icon": "fa-cogs",
+		"spread": false,
+		"children": [
+			{
+				"title": "轮播图管理",
+				"icon": "fa-table",
+				"href": "adminHomeBanner.html"
+			}, {
+				"title": "新闻管理",
+				"icon": "fa-navicon",
+				"href": "adminHomeNews.html"
+			}, {
+				"title": "Video管理",
+				"icon": "&#xe62a;",
+				"href": "adminHomeVideo.html"
+			}, {
+				"title": "种类管理",
+				"icon": "&#xe62a;",
+				"href": "adminHomeCategary.html"
+			}
+		]
+	}, {
+		"title": "其他",
+		"icon": "fa-stop-circle",
+		"href": "#",
+		"spread": false,
+		"children": [{
+			"title": "更多精彩",
+			"icon": "fa-github",
+			"href": "other.html"
+		}]
+	}
+]

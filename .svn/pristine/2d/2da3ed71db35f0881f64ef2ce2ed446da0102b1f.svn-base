@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+	<head>
+    	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">  
+		<title>编辑藏家藏品</title>
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="format-detection" content="telephone=no">
+		<link rel="stylesheet" href="/admin/plugins/font-awesome/css/font-awesome.min.css">
+  		<link rel="stylesheet" href="/admin/plugins/layui2/css/layui.css"  media="all">
+		<script type="text/javascript" src="/admin/plugins/layui2/layui.js" charset="utf-8"></script>
+		<script type="text/javascript" src="/admin/js/jquery.js"></script>
+		<script type="text/javascript" src="http://test.vr.wenyiit.com/chao80/res/js/dev/base.js"></script>
+		<script type="text/javascript" src="http://test.vr.wenyiit.com/chao80/res/js/dev/util.js"></script>
+		<style type="text/css">
+			#sort{overflow:hidden;}
+			#sort .WY_img{width:140px;height:140px;border:2px #ddd solid;float:left;margin-right:20px;position:relative;}
+			#sort .WY_img img{max-width:140px;max-height:140px;}
+			#sort .WY_img i{position:absolute;right:5px;top:5px;}
+		</style>
+	</head>
+
+	<body>
+		<div style="margin: 15px;">
+		<blockquote class="layui-elem-quote">
+			<button class="layui-btn" id="backBtn"><i class="layui-icon">返回</i></button>
+			<button class="layui-btn" id="refresh"><i class="layui-icon">刷新当前页</i></button>
+		</blockquote>	
+			<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+				<legend>编辑藏品</legend>
+			</fieldset>
+
+			<form class="layui-form" action="/jsonAction/collection_addCollection.action" method="post" id="uploadForm">
+				<input type="text" name="photoURL" lay-verify="" class="layui-input" id="photoURL" style="display: none;">
+				<input type="text" name="colSequence" lay-verify="" class="layui-input" id="colSequence" style="display: none;">
+				<div class="layui-form-item">
+					<label class="layui-form-label">藏品标题1</label>
+					<div class="layui-input-block">
+						<input type="text" name="colTitle" id="colTitle" lay-verify="required" placeholder="100字以内..." autocomplete="off" class="layui-input" id="colTitle">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">藏品子标题</label>
+					<div class="layui-input-block">
+						<input type="text" name="colSubTitle" id="colSubTitle" lay-verify="required" placeholder="100字以内..." autocomplete="off" class="layui-input">
+					</div>
+				</div>
+				<div class="layui-form-item layui-form-text">
+					<label class="layui-form-label">藏品详情</label>
+					<div class="layui-input-block">
+						<textarea placeholder="请输入内容" name="colContent" id="colContent" lay-verify="required" class="layui-textarea"></textarea>
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">藏品类型</label>
+					<div class="layui-input-block" id="newsCategery">
+						<input type="checkbox" name="1000000001" title="体育周边">
+      				 	<input type="checkbox" name="1000000002" title="娱乐周边" checked>
+     					<input type="checkbox" name="1000000003" title="潮流周边">
+     					<input type="checkbox" name="1000000004" title="动漫周边">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<div class="layui-inline">
+						<label class="layui-form-label">出厂日期</label>
+						<div class="layui-input-inline" style="width: 100px;">
+							<input type="text" class="layui-input" id="date" name="colDate" placeholder="yyyy-MM" autocomplete="off" lay-verify="required|colDate">
+						</div>
+						<div class="layui-form-mid" id="price_label">当前价格</div>
+						<div class="layui-input-inline" style="width: 150px;" id="price_div">
+							<input type="text" name="colPrice" id="colPrice" placeholder="￥0.00/非卖品" class="layui-input" lay-verify="required|colPrice">
+						</div>
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">缩略比例</label>
+					<div class="layui-input-block" id="imageSize">
+						<input type="radio" name="imageSize" value="1-1" title="1*1" >
+						<input type="radio" name="imageSize" value="1-2" title="1*2" checked="checked">
+						<input type="radio" name="imageSize" value="1-3" title="1*3" >
+						<input type="radio" name="imageSize" value="2-2" title="2*2" >
+					</div>
+				</div>
+				<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+					<legend>添加藏品图片</legend>
+				</fieldset>
+				<div class="layui-form-item layui-form-text">
+					<div class="layui-form-item">
+						<table class="layui-table">
+							<thead>
+								<tr>
+									<th>文件名</th>
+									<th>大小</th>
+									<th>状态</th>
+									<th>操作</th>
+								</tr>
+							</thead>
+							<tbody id="demoList"></tbody>
+						</table>
+					</div>
+					<button type="button" class="layui-btn layui-btn-normal"
+						id="testList">选择图片文件</button>
+					<button type="button" class="layui-btn" id="testListAction">开始上传</button>
+				</div>
+			
+				<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+					<legend>图片拖动排序（第一张默认为缩略图）</legend>
+				</fieldset>
+				<div class="layui-form-item" id="sort"></div>
+			
+				<fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+					<legend>修改藏品信息</legend>
+				</fieldset>
+				<div class="layui-form-item">
+					<a class="layui-btn layui-btn-primary"  id="resetForm">重置</a>
+			    	<button class="layui-btn" lay-submit lay-filter="*">立即提交</button>
+				</div>
+			</form>
+		</div>
+		<script src="/admin/js/sortable.js" charset="utf-8"></script>
+		
+		<script type="text/javascript">
+		// 移动删除图片
+		function remove_img(e){
+			$(e).parent().remove();
+			resort_img();
+		}
+		function resort_img(){
+			var arr=[];
+			$('#sort .WY_img').each(function(i,v){
+				var src=$(v).attr('data');
+				if(src){
+					arr.push(src);
+				}
+			});
+			$("#photoURL").val(arr.join(','));
+		}
+		// 请求类别 
+		var resCateData,colSequence,files, fileName, colTitle, colSubTitle, colContent, colDate, colPrice,resData,cateSequence,colSize,cateSeqList;
+		$.ajax({
+		    url:'/jsonAction/release_queryCategaryList.action?v=' + new Date().getTime(),
+		    type:'POST', 		//GET
+		    async:false,   		//或false,是否异步
+		    data:{cateRelType:'1'},
+		    timeout:5000,    	//超时时间
+		    dataType:'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+		    success:function(data,textStatus,xhr){
+		    	if(data && data.statusCode == 200){
+		    		resCateData = data;
+		    	}
+		    },
+		    error:function(xhr,textStatus){
+		    },
+		    complete:function(data,textStatus,xhr){
+		    }
+		});
+		// 请求藏品
+		$.ajax({
+		    url:'/jsonAction/collection_queryCollectionMsg.action?colSequence='+Chao.util.getSearch("colSequence"),
+		    type:'GET', 		//GET
+		    async:false,   		//或false,是否异步
+		    dataType:'json',    //返回的数据格式：json/xml/html/script/jsonp/text
+		    success:function(data,textStatus,xhr){
+		    	if(data && data.statusCode == 200){
+		    		resData = data.collection;
+		    		colTitle = resData.colTitle;
+		    		colSubTitle = resData.colSubTitle;
+		    		colContent = resData.colContent;
+		    		colDate = resData.colDate;
+		    		colPrice  = resData.colPrice;
+		    		colSequence = resData.colSequence;
+		    		cateSequence = resData.cateSequence;
+		    		colSize = resData.imgWidth+'-'+resData.imgHeigh;
+		    		cateSeqList = resData.cateSeqList;
+		    		// 回显页面图片
+		    		var i=0,d=resData.imageList,h=[];
+		    		for(i;i<d.length;i++){
+		    			h.push('<div class="WY_img" data="'+d[i].imgURL+'"><img src="/upload'+d[i].imgURL.replace(/image/,"m_image")+'"/> <i class="layui-btn layui-btn-small layui-btn-normal" onclick="remove_img(this)">删除</i></div>');
+		    		}
+		    		$('#sort').append(h.join(''));
+					resort_img();
+		    	}
+		    },
+		    error:function(xhr,textStatus){
+		    },
+		    complete:function(data,textStatus,xhr){
+		    }
+		}); 
+		
+		// 渲染表单
+		layui.use([ 'form', 'upload', 'laydate', 'layedit' ], function() {
+			var $ = layui.jquery,
+				form = layui.form,
+				layer = layui.layer,
+				upload = layui.upload,
+				laydate = layui.laydate,
+				layedit = layui.layedit;
+			// 表单赋值
+			$("#colTitle").val(colTitle);
+			$("#colSubTitle").val(colSubTitle);
+			$("#colContent").val(colContent);
+			$("#colSequence").val(colSequence);
+			$("#colPrice").val(colPrice);
+			
+			// 创建日期选择器
+			laydate.render({elem : '#date', type : 'month', value : colDate });
+			
+			$('#resetForm').off().on('click', function() {
+				location.reload();
+			});
+			$('#backBtn').on('click', function() {
+				window.history.go(-1);
+			});
+			$('#refresh').on('click', function() {
+				location.reload();
+			});
+			
+			// 监控form提交
+			form.on('submit(*)', function(data){
+				uploadFormData();
+				return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+			});
+			
+			//多文件列表示例
+			var demoListView = $('#demoList'),
+				uploadListIns = upload.render({
+					elem : '#testList',
+					url : '/jsonAction/upload_uploadThumb.action',
+					/* accept : 'file', */
+					multiple : true,
+					auto : false,
+					bindAction : '#testListAction',
+					choose : function(obj) {
+						 files = obj.pushFile(); //将每次选择的文件追加到文件队列
+						//读取本地文件
+						obj.preview(function(index, file, result) {
+							var tr = $([ '<tr id="upload-' + index + '">'
+								, '<td>' + file.name + '</td>'
+								, '<td>' + (file.size / 1024).toFixed(1) + 'kb</td>'
+								, '<td>等待上传</td>'
+								, '<td>'
+								, '<button class="layui-btn layui-btn-mini demo-reload layui-hide">重传</button>'
+								, '<button class="layui-btn layui-btn-mini layui-btn-danger demo-delete">删除</button>'
+								, '</td>'
+								, '</tr>' ].join(''));
+							//单个重传
+							tr.find('.demo-reload').on('click', function() {
+								obj.upload(index, file);
+								return false;
+							});
+							//删除
+							tr.find('.demo-delete').on('click', function() {
+								delete files[index]; //删除对应的文件
+								tr.remove();
+								resort_img();
+							});
+							demoListView.append(tr);
+						});
+					},
+					done : function(res, index, upload) {
+						if (res.statusCode == 200) { //上传成功
+							var tr = demoListView.find('tr#upload-' + index),
+								tds = tr.children();
+							tds.eq(2).html('<span style="color: #5FB878;">上传成功</span>');
+							tds.eq(3).html(''); //清空操作
+							fileName = res.src;
+							var d=$("#photoURL").val();
+							if(d){
+								d=d.split(',');
+							}else{
+								d=[];
+							}
+							d.push(fileName);
+							tr.attr({'data':fileName});
+							var h='<div class="WY_img" data="'+fileName+'"><img src="/upload'+fileName.replace(/image/,"m_image")+'"/> <i class="layui-btn layui-btn-small layui-btn-normal" onclick="remove_img(this)">删除</i></div>';
+							$('#sort').append(h);
+							delete files[index]; //删除文件队列已经上传成功的文件
+							resort_img();
+							return;
+						}
+						this.error(index, upload);
+						resort_img();
+					},
+					error : function(index, upload) {
+						var tr = demoListView.find('tr#upload-' + index),
+							tds = tr.children();
+						tds.eq(2).html('<span style="color: #FF5722;">上传失败</span>');
+						tds.eq(3).find('.demo-reload').removeClass('layui-hide'); //显示重传
+					}
+				});
+		});
+		
+ 		// 种类选中项
+		var i = 0,len = resCateData.categaryList.length,cateHtml=[],item;
+		for(i;i<len;i++){
+			item = resCateData.categaryList[i];
+ 			console.log("item.cateSequence:  "+item.cateSequence);
+			console.log("resData.cateSeqList:   "+cateSeqList);
+			console.log($.inArray(item.cateSequence, cateSeqList));
+
+			if($.inArray(item.cateSequence, cateSeqList)<0){
+				cateHtml.push('<input type="checkbox" name="cateSequence" value="'+item.cateSequence+'" title="'+item.cateName+'">')
+			}else{
+				cateHtml.push('<input type="checkbox" name="cateSequence" value="'+item.cateSequence+'" title="'+item.cateName+'" checked="checked">')
+			}
+		}
+		$('#newsCategery').html(cateHtml.join("")); 
+
+		// 表单提交事件
+		function uploadFormData(){
+			resort_img();
+			$.ajax({
+				cache : true,
+				type : "POST",
+				url : '/jsonAction/collection_modifyCollection.action?v=' + new Date().getTime(),
+				data : $('#uploadForm').serialize(), // 你的formid
+				async : false,
+				error : function(request) {
+					layer.msg("藏品更新失败");
+				},
+				success : function(data) {
+					layer.confirm('藏品更新成功,是否返回主页?', {
+						icon : 1,
+						title : '系统提示'
+					}, function(index) {
+						layer.close(index);
+						window.history.go(-1);
+					}); 
+				}
+			});
+		} 
+	</script>
+		
+	</body>
+
+</html>

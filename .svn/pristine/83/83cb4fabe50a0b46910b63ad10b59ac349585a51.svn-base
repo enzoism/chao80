@@ -1,0 +1,23 @@
+<div style="margin: 15px;">
+	<form class="layui-form" action="/jsonAction/release_addAdminCategaryMsg.action" method="post" url='/jsonAction/release_addAdminCategaryMsg.action'>
+		<div class="layui-form-item">
+			<label class="layui-form-label">种类名称</label>
+			<div class="layui-input-block">
+				<input type="text" name="cateName" placeholder="请输入种类名称..." autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">种类简介</label>
+			<div class="layui-input-block">
+				<input type="text" name="cateBrief" placeholder="请输入种类简介..." autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">种类详情</label>
+			<div class="layui-input-block">
+				<input type="text" name="cateContent" placeholder="请输入种类详情..." autocomplete="off" class="layui-input">
+			</div>
+		</div>	
+		<button lay-filter="edit" lay-submit style="display: none;"></button>
+	</form>
+</div>

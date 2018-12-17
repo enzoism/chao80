@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>video管理</title>
+		<link rel="stylesheet" href="/admin/plugins/layui/css/layui.css" media="all" />
+		<link rel="stylesheet" href="/admin/css/global.css" media="all">
+		<link rel="stylesheet" href="/admin/plugins/font-awesome/css/font-awesome.min.css">
+		<link rel="stylesheet" href="/admin/css/table.css" />
+		<script type="text/javascript" src="/admin/js/jquery.js"></script>
+		<script type="text/javascript" src="/admin/plugins/layui/layui.js"></script>
+	</head>
+	<body>
+		<div class="admin-main">
+			<blockquote class="layui-elem-quote">
+				<button class="layui-btn " id="addNewVideo">添加新Video</button>
+				<button class="layui-btn" id="refresh"><i class="layui-icon">刷新</i></button>
+			</blockquote>
+
+			<fieldset class="layui-elem-field">
+				<legend>video列表</legend>
+				<div class="layui-field-box layui-form">
+					<table class="layui-table admin-table" >
+						<thead>
+							<tr>
+								<th style="text-align:center">video标题</th>
+								<th style="text-align:center">video子标题</th>
+								<th style="text-align:center">video详情</th>
+								<th style="text-align:center">发布时间</th>
+								<th style="max-width: 350px; text-align:center">缩略图</th>
+								<th style="width: 100px; text-align:center">操        作</th>
+							</tr>
+						</thead>
+						<tbody id="content">
+						</tbody>
+					</table>
+				</div>
+			</fieldset>
+			
+			<div class="admin-table-page">
+				<div id="paged" class="page">
+				</div>
+			</div>
+		</div>
+		<!--模板-->
+		<script type="text/html" id="tpl">
+			{{# layui.each(d.videoList, function(index, item){ }}
+			<tr>
+				<td>{{ item.relTitle }}</td>
+				<td>{{ item.relSubTitle }}</td>
+				<td>{{ item.relBrief }}</td>
+				<td>{{ item.relDate }}</td>
+				<td class="imgContainer">
+					<img src="/upload{{ item.relThumbImage }}" alt="{{ item.relTitle }}" style="width:200px;"/>
+				</td>
+				<td style="text-align:center">
+					<a href="javascript:;" data-id="{{ item.relSequence }}" data-name="{{ item.relTitle }}" data-opt="edit" class="layui-btn layui-btn-normal">编辑</a><br/><br/>
+					<a href="javascript:;" data-id="{{ item.relSequence }}" data-name="{{ item.relTitle }}" data-opt="del" class="layui-btn layui-btn-danger layui-btn-normal">删除</a><br/><br/>
+				</td>
+			</tr>
+			{{# }); }}
+		</script>
+		<script>
+			// 初始化视图
+			var layer;layui.config({ base: 'js/' });
+			layui.use(['paging', 'form'], function() {
+				var $ = layui.jquery,
+					paging = layui.paging(),
+					layerTips = parent.layer === undefined ? layui.layer : parent.layer, //获取父窗口的layer对象
+					form = layui.form();
+					layer = layui.layer; //获取当前窗口的layer对象
+				// 分页数据
+				pagingRefresh(paging,layerTips,form,layer);
+					
+				// 添加新Banner
+				$('#addNewVideo').on('click', function() {
+					window.location.href='/admin/homeVideoAdd.html';
+				});
+				$('#showDeleteVideo').on('click', function() {
+					layer.msg("功能正在设计中...");
+				});
+				
+				$('#refresh').on('click', function() {
+					location.reload();
+				});
+			});
+			
+			// 删除当前video
+			function deleteVideoMsg(relSeq){
+				$.ajax({
+					cache : true,
+					type : "POST",
+					url : '/jsonAction/release_deleteVideoMsg.action?v=' + new Date().getTime(),
+					data : {relSequence:relSeq}, // 你的formid
+					async : false,
+					error : function(request) {
+						layer.msg("删除video失败");
+					},
+					success : function(data) {
+						location.reload(); //刷新
+					}
+				});
+			}
+
+			// 刷新当前页面数据
+			function pagingRefresh(paging,layerTips,form,layer){
+				paging.init({
+                    openWait: true,
+                    url: '/jsonAction/release_queryVideoList.action?v=' + new Date().getTime(), //地址
+					elem: '#content', //内容容器
+					params: { //发送到服务端的参数
+					},
+					type: 'GET',
+					tempElem: '#tpl', //模块容器
+					pageConfig: { //分页参数配置
+						elem: '#paged', //分页容器
+						pageSize: 10 //分页大小
+					},
+					success: function() { //渲染成功的回调
+						//alert('渲染成功');
+					},
+					fail: function(msg) { //获取数据失败的回调
+						//alert('获取数据失败')
+					},
+					complate: function() { //完成的回调
+						//绑定所有编辑按钮事件						
+						$('#content').children('tr').each(function() {
+							var $that = $(this);
+							$that.children('td:last-child').children('a[data-opt=edit]').on('click', function() {
+								window.location.href='/admin/homeVideoEditor.html?relSequence='+$(this).data('id');
+							});
+							$that.children('td:last-child').children('a[data-opt=del]').on('click', function() {
+								var relSeq = $(this).data('id');
+								layer.confirm('删除video将不再展示，是否继续删除?', { icon: 3, title: '系统提示' }, function (index) {
+									layer.close(index);
+									deleteVideoMsg(relSeq);
+								});
+							});
+						});
+					},
+				});
+			}
+		</script>
+	</body>
+
+</html>

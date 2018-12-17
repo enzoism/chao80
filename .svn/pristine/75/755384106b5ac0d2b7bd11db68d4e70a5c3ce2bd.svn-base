@@ -1,0 +1,155 @@
+package cn.smartcandy.common;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import cn.smartcandy.common.common.BusinessSort;
+import cn.smartcandy.framework.core.db.mybatis.MyBatisDBAccess;
+import cn.smartcandy.framework.core.exception.BusinessException;
+
+/**
+ * 项目名称：a-source 
+ * 类名称：BusinessSortQuery 
+ * 类描述：业务类型查询类
+ * 创建人：lgbzc 
+ * 创建时间：2016-4-17 下午07:19:51 
+ * 修改人：lgbzc 
+ * 修改时间：2016-4-17 下午07:19:51 
+ * 修改备注：
+ * Company:Annjema & HLS (C) 2016
+ * @version 1.0
+ */
+public class BusinessSortQuery {
+	private static BusinessSortQuery businessSortQuery = null;
+	private static Map<Integer, BusinessSort> mapBusinessSort = null;
+	private static List<BusinessSort> lstBusinessSort = null;
+
+	private BusinessSortQuery() {
+		init();
+	}
+
+	public static BusinessSortQuery getInstance() {
+		if (null == businessSortQuery) {
+			businessSortQuery = new BusinessSortQuery();
+		}
+		return businessSortQuery;
+	}
+
+	private void init() throws BusinessException {
+		mapBusinessSort = new HashMap<Integer, BusinessSort>();
+		lstBusinessSort = this.queryBusinessSort();
+		for (BusinessSort businessType : lstBusinessSort) {
+			mapBusinessSort.put(businessType.getCbs_sequence(), businessType);
+		}
+	}
+
+	/**
+	 * 方法描述：查询所有的业务类型
+	 *
+	 * @return List<BusinessSort> 
+	 * @throws BusinessException
+	 */
+	private List<BusinessSort> queryBusinessSort() throws BusinessException {
+		List<BusinessSort> lstBusinessSort = null;
+		MyBatisDBAccess dbAccess = null;
+		try {
+			dbAccess = MyBatisDBAccess.getInstance();
+			dbAccess.startTransction();
+			lstBusinessSort = dbAccess.selectList("businessSort.query");
+		} catch (Exception e) {
+			throw new BusinessException("查询业务类型失败！", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+		return lstBusinessSort;
+	}
+
+	/**
+	 * 方法描述：查询小于等于n级审核所有的业务类型
+	 *
+	 * @param cbs_auditGrade 审核级数
+	 * @return List<Integer> 
+	 * @throws BusinessException
+	 */
+	public List<Integer> queryCbs_sequence(int cbs_auditGrade) throws BusinessException {
+		List<Integer> lstCbs_sequence = new ArrayList<Integer >();
+		try {
+			for (int i = 0;  i < lstBusinessSort.size(); i++) {
+				BusinessSort bs = lstBusinessSort.get(i);
+				if (bs.getCbs_auditGrade() >= cbs_auditGrade && bs.getCbs_property().contains("1")) {
+					lstCbs_sequence.add(bs.getCbs_sequence());
+				}
+			}
+			if (lstCbs_sequence.size() <= 0) {
+				return null;
+			}
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("查询业务类型序号失败！", e);
+		}
+		return lstCbs_sequence;
+	}
+
+	/**
+	 * 方法描述：获取审核级数
+	 *
+	 * @param cbs_sequence 业务类型序号
+	 * @return 审核级数
+	 * @throws BusinessException
+	 */
+	public static int getAuditGrade(int cbs_sequence) throws BusinessException {
+		if (null == mapBusinessSort || mapBusinessSort.size() < 1) {
+			new BusinessSortQuery().init();
+		}
+		BusinessSort bs = mapBusinessSort.get(cbs_sequence);
+		if (null != bs) {
+			return bs.getCbs_auditGrade();
+		}
+		return 0;
+	}
+
+	/**
+	 * 方法描述：根据业务类型序号查询业务类型
+	 *
+	 * @param cbs_sequence 业务类型序号
+	 * @return 业务类型Bean
+	 * @throws BusinessException
+	 */
+	public BusinessSort getBusinessSort(int cbs_sequence) throws BusinessException {
+		if (null == mapBusinessSort || mapBusinessSort.size() < 1) {
+			this.init();
+		}
+		BusinessSort businessSort = mapBusinessSort.get(cbs_sequence);
+
+		return businessSort;
+	}
+
+	/**
+	 * 方法描述：获取业务类型List
+	 *
+	 * @return List<BusinessSort> 
+	 * @throws BusinessException
+	 */
+	public List<BusinessSort> getBusinessSortList() throws BusinessException {
+		if (null == lstBusinessSort || lstBusinessSort.size() < 1) {
+			this.init();
+		}
+		return lstBusinessSort;
+	}
+
+	/**
+	 * 方法描述：获取业务类型Map
+	 *
+	 * @return Map<Integer, BusinessSort> 
+	 * @throws BusinessException
+	 */
+	public Map<Integer, BusinessSort> getBusinessSortMap() throws BusinessException {
+		if (null == mapBusinessSort || mapBusinessSort.size() < 1) {
+			this.init();
+		}
+		return mapBusinessSort;
+	}
+}

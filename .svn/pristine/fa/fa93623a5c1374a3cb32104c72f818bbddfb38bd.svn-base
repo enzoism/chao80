@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="collection" extends="struts-default">
+		<action name="collection_*" class="cn.smartcandy.application.a.collection.CollectionAction" method="{1}">
+			<!--用户注册成功 -->
+			<result name="success">/success.html</result>
+			<result name="addCollectionSuccess" type="redirect">/admin/operCollectionAdd.html</result>
+		</action>
+	</package>
+</struts>

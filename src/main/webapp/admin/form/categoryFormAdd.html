@@ -1,0 +1,23 @@
+<div style="margin: 15px;">
+	<form class="layui-form"  method="post" id="newCategoryForm" action="/jsonAction/release_addCategaryMsg.action">
+		<div class="layui-form-item">
+			<label class="layui-form-label">类别名称</label>
+			<div class="layui-input-block">
+				<input type="text" name="cateName" placeholder="请输入类别名称..." lay-verify="required" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">类别简介</label>
+			<div class="layui-input-block">
+				<input type="text" name="cateBrief" placeholder="请输入类别简介..." lay-verify="required" autocomplete="off" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">类别详情</label>
+			<div class="layui-input-block">
+				<input type="text" name="cateContent" placeholder="请输入类别详情..." lay-verify="required" autocomplete="off" class="layui-input">
+			</div>
+		</div>	
+		<button lay-filter="edit" lay-submit style="display: none;"></button>
+	</form>
+</div>

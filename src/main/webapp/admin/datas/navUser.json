@@ -1,0 +1,28 @@
+[
+	{
+		"title": "内容管理",
+		"icon": "fa-cubes",
+		"spread": false,
+		"children": [
+			{
+				"title": "藏品管理",
+				"icon": "&#xe63c;",
+				"href": "operCollection.html"
+			}, {
+				"title": "添加藏品",
+				"icon": "&#xe63c;",
+				"href": "operCollectionAdd.html"
+			}
+		]
+	}, {
+		"title": "其他",
+		"icon": "fa-stop-circle",
+		"href": "#",
+		"spread": false,
+		"children": [{
+			"title": "更多精彩",
+			"icon": "fa-github",
+			"href": "other.html"
+		}]
+	}
+]

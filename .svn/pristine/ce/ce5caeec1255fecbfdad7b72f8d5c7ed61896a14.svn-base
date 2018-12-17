@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+
+	<package name="default" namespace="/" extends="struts-default">
+		<global-results>
+			<result name="bizException">/json/error_json.jsp</result>
+			<result name="error">/error.jsp</result>
+		</global-results>
+		<global-exception-mappings>
+			<exception-mapping result="bizException" exception="cn.smartcandy.framework.core.exception.BusinessException"></exception-mapping>
+			<exception-mapping result="error" exception="java.lang.Exception"></exception-mapping>
+		</global-exception-mappings>
+	</package>
+
+	<!-- 该属性指定需要Struts2处理的请求后缀，该属性的默认值是action，即所有匹配*.action的请求都由Struts2处理。如果用户需要指定多个请求后缀，则多个后缀之间以英文逗号（,）隔开。 -->
+	<constant name="struts.action.extension" value="do,action" />
+	
+	<!-- 配置webSocket链接 -->
+	<constant name="struts.action.excludePattern" value="^ws://.$"/>
+	
+	<!-- 设置浏览器是否缓存静态内容，默认值为true，开发阶段最好false -->
+	<constant name="struts.serve.static.browserCache " value="false" />
+
+	<!-- 当struts的配置文件修改后，系统是否自动重新加载该文件，默认值为false，开发阶段最好true -->
+	<constant name="struts.configuration.xml.reload" value="true" />
+
+	<!-- 开发模式下使用,这样可以打印出更详细的错误信息(会导致异常抛得页面，慎用) -->
+	<!-- <constant name="struts.devMode" value="true" /> -->
+
+	<!-- 指定Web应用的默认编码集，相当于调用HttpServletRequest的setCharacterEncoding方法 -->
+	<constant name="struts.i18n.encoding" value="UTF-8" />
+
+	<constant name="struts.custom.i18n.resources" value="messageResource" />
+
+	<!-- 指定允许上传的文件最大字节数。默认值是2097152(2M) -->
+	<constant name="struts.multipart.maxSize" value="10701096" />
+
+	<!-- 设置上传文件的临时文件夹,默认使用javax.servlet.context.tempdir -->
+	<constant name="struts.multipart.saveDir " value="d:/tmp" />
+
+	<!-- 【公共】 -->
+    <include file="struts/common/error.xml"></include> 
+	<include file="struts/common/upload.xml"></include>
+	<!-- 添加藏品 -->
+	<include file="struts/collection/collection.xml"></include>
+	<!-- 账户管理-->
+	<include file="struts/account/account.xml"></include>	
+	<!-- 发布管理 -->
+	<include file="struts/release/release.xml"></include>	
+	<!-- 关注管理 -->
+	<include file="struts/attention/attention.xml"></include>	
+	<!-- 图片管理 -->
+	<include file="struts/image/image.xml"></include>	
+	<!-- 标签管理 -->
+	<include file="struts/tag/collectionTag.xml"></include>		
+	<!-- 举报管理 -->
+	<include file="struts/report/report.xml"></include>		
+	<!-- 第三方登录 -->
+	<include file="struts/thirtylogin/thirtylogin.xml"></include>	
+</struts>

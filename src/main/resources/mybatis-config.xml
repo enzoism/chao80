@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<properties resource="SysConf.properties">
+		<property name="dialect" value="mysql" />
+	</properties>
+
+	<settings>
+		<!-- 配置全局性 cache 的 ( 开 / 关) default:true -->
+		<setting name="cacheEnabled" value="false" />
+		<!-- 设置但JDBC类型为空时,某些驱动程序 要指定值,default:other -->
+		<setting name="jdbcTypeForNull" value="VARCHAR" />
+	</settings>
+
+	<plugins>
+		<plugin interceptor="org.mybatis.extend.interceptor.PaginationInterceptor" />
+	</plugins>
+	<!-- 巢天下数据库配置 -->
+	<!-- <environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC" />
+				<dataSource type="JNDI">
+					<property name="data_source" value="java:comp/env/DS_CTX" />
+					<property name="poolPingEnabled" value="true" />
+					<property name="poolPingQuery" value="select now() from DUAL" />
+					<property name="poolPingConnectionsNotUsedFor" value="25200000" />
+				</dataSource>
+		</environment>
+	</environments> -->
+
+	<!-- 本地数据库连接 -->
+ 	<!-- <environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<property name="driver" value="com.p6spy.engine.spy.P6SpyDriver" />
+				<property name="poolPingQuery" value="SELECT NOW()" />
+				<property name="poolPingEnabled" value="true" />
+				<property name="url" value="jdbc:mysql://127.0.0.1:3306/ctx?useUnicode=true&amp;characterEncoding=UTF-8" />
+				<property name="username" value="root" />
+				<property name="password" value="123456" />
+			</dataSource>
+		</environment>
+	</environments> -->
+	
+	<!-- 朝天下直联 -->
+	<environments default="development">
+		<environment id="development">
+			<transactionManager type="JDBC" />
+			<dataSource type="POOLED">
+				<property name="driver" value="com.p6spy.engine.spy.P6SpyDriver" />
+				<property name="poolPingQuery" value="SELECT NOW()" />
+				<property name="poolPingEnabled" value="true" />
+				<property name="url" value="jdbc:mysql://113.209.71.96:5621/ctx?useUnicode=true&amp;characterEncoding=UTF-8" />
+				<property name="username" value="tangzhifeng" />
+				<property name="password" value="Ctx_Adbc#2016" />
+			</dataSource>
+		</environment>
+	</environments>
+
+	
+	
+	
+	<!-- 列出映射文件,作用：告诉mybatis配置文件路径 -->
+	<mappers>
+		<!-- 【系统公共功能】 -->
+		<mapper resource="sqlmappers/common/common.xml" />
+		<mapper resource="sqlmappers/common/BASEREF.xml"/>	
+		<mapper resource="sqlmappers/common/error.xml" />
+		<!-- 【公共业务】 -->
+		<!-- 添加藏品 -->
+		<mapper resource="sqlmappers/collection/collection.xml"/>	
+		<!-- 账户管理 -->
+		<mapper resource="sqlmappers/account/account.xml"/>	
+		<!-- 发布管理 -->
+		<mapper resource="sqlmappers/release/release.xml"></mapper>	
+		<!-- 收藏管理 -->
+		<mapper resource="sqlmappers/attention/attention.xml"></mapper>	
+		<!-- 图片管理 -->
+		<mapper resource="sqlmappers/image/image.xml"></mapper>	
+		<!-- 标签管理 -->
+		<mapper resource="sqlmappers/tag/collectionTag.xml"></mapper>	
+		<!-- 举报管理 -->
+		<mapper resource="sqlmappers/report/report.xml"></mapper>	
+		<!-- 第三方登录 -->
+		<mapper resource="sqlmappers/thirtylogin/thirtylogin.xml"/>
+	</mappers>
+</configuration>

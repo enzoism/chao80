@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="error">
+   
+	<select id="select" parameterType="String" resultType="cn.smartcandy.framework.core.exception.Error">
+		SELECT * FROM c_ei WHERE cei_sequence = #{parameter}
+	</select>
+   
+	<select id="selectList" parameterType="cn.smartcandy.framework.core.exception.Error" resultType="HashMap">
+		SELECT * FROM c_ei 
+		<where>
+			<if test="null != cei_sequence">AND cei_sequence = #{cei_sequence}</if>
+			<if test="null != cei_code">AND cei_code = #{cei_code}</if>
+			<if test="null != cei_name">AND cei_name LIKE '%${cei_name}%'</if>
+			<if test="null != cbs_sequence">AND cbs_sequence = #{cbs_sequence}</if>
+		</where>
+		ORDER BY cei_sequence
+	</select>
+   
+   	<!-- 查询所有异常信息 -->
+	<select id="queryAllError" resultType="cn.smartcandy.framework.core.exception.Error">
+		SELECT * FROM c_ei ORDER BY cei_sequence
+	</select>
+	
+	<insert id="insert" parameterType="cn.smartcandy.framework.core.exception.Error">
+		INSERT INTO c_ei (
+			cei_sequence,
+			cei_code,
+			cei_name,
+			cbs_sequence,
+			cei_flag,
+			cei_reason,
+			cei_solution
+		)
+		VALUES
+			(
+				#{cei_sequence},
+				#{cei_code},
+				#{cei_name},
+				#{cbs_sequence},
+				#{cei_flag},
+				#{cei_reason},
+				#{cei_solution}
+			)
+	</insert>
+	
+	<update id="update" parameterType="cn.smartcandy.framework.core.exception.Error" >
+		UPDATE c_ei
+		<set>
+			<if test="null != cei_code">cei_code = #{cei_code},</if>
+			<if test="null != cei_name">cei_name = #{cei_name},</if>
+			<if test="null != cbs_sequence">cbs_sequence = #{cbs_sequence},</if>
+			<if test="null != cei_flag">cei_flag = #{cei_flag},</if>
+			<if test="null != cei_reason">cei_reason = #{cei_reason},</if>
+			<if test="null != cei_solution">cei_solution = #{cei_solution},</if>
+		</set>
+		WHERE cei_sequence = #{cei_sequence} 
+	</update>
+	
+	<delete id="delete" parameterType="String" >
+		DELETE FROM c_ei WHERE cei_sequence = #{_parameter}
+	</delete>
+</mapper> 

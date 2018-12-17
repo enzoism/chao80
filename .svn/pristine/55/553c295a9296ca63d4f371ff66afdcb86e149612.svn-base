@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="image">
+
+
+	<!-- ====================================轮播图==================================== -->
+	<!-- 轮播图发布 -->
+	<insert id="insertCollectionImages" parameterType="Map">
+		INSERT INTO a_collection_image (
+			imgSequence,
+			imgBatchNo,
+			imgURL,
+			colSequence,
+			imgStatus,
+			imgWidth,
+			imgHeigh
+		)VALUES(
+			#{imgSequence},
+			#{imgBatchNo},
+			#{imgURL},
+			#{colSequence},
+			#{imgStatus},
+			#{imgWidth},
+			#{imgHeigh}
+		)
+	</insert>
+	
+	<!-- 更改藏品图片 -->
+	<update id="updateCollectionImages" parameterType="Map">
+		UPDATE a_collection_image 
+		SET
+			imgStatus = #{imgStatus}
+		WHERE
+			colSequence = #{colSequence}
+		AND imgStatus = 'N'
+	</update>
+	
+	<!-- 查询指定用户的Top6图片 -->
+	<select id="selectCateUserList" parameterType="String" resultType="cn.smartcandy.application.a.image.ImageCollection">
+		SELECT
+			<include refid="BASEREF.IMAGE_BASE"/>
+		FROM
+			a_collection AS col
+		INNER JOIN a_collection_image AS colImg ON col.colSequence = colImg.colSequence
+		WHERE
+			col.colStatus = 'N'
+		AND col.userSequence = #{userSequence}
+		ORDER BY
+			col.colSequence DESC
+		LIMIT 0,6
+	</select>
+
+
+	<!-- 查询图片的批次信息 -->
+	<select id="selectCollectionMsg" parameterType="String" resultType="cn.smartcandy.application.a.collection.Collection">
+		SELECT
+			<include refid="BASEREF.COLLECTION_BASE"/>
+		FROM
+			a_collection AS col
+		INNER JOIN a_collection_image AS colImg ON col.colSequence = colImg.colSequence
+		WHERE
+			colImg.imgSequence = #{imgSequence}
+	</select>
+
+	<!-- 查询藏品的所有图片 -->
+	<select id="selectCollectionImageList" parameterType="Map" resultType="cn.smartcandy.application.a.image.ImageCollection">
+		SELECT
+			<include refid="BASEREF.IMAGE_BASE"/>
+		FROM
+			a_collection_image colImg
+		WHERE
+			colImg.colSequence = #{colSequence}
+		AND colImg.imgStatus = 'N'
+	</select>
+	
+	<!-- 查询藏品的生活照 -->
+	<select id="selectCollectionPhotoDataList" parameterType="Map" resultType="Map">
+		SELECT
+			<include refid="BASEREF.IMAGE_BASE"/>
+		FROM
+			a_collection_image colImg
+		WHERE
+			colImg.colSequence = #{colSequence}
+	</select>
+	
+</mapper>

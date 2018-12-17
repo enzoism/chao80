@@ -1,0 +1,456 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="thirdPartyAccount">
+
+    <!-- 查询第三方账号登录的用户sequence -->
+    <select id="queryUserSequence" parameterType="HashMap" resultType="HashMap">
+        SELECT
+	        ue.userSequence,
+	        ue.ueabUserOpenID,
+	        ue.unionID,
+	        ue.customerSequence,
+	        ue.ueabTPType,
+	        employeeSequence
+	   	FROM
+	        c_ueab ue
+        WHERE
+	        ue.ueabStatus = 'N'
+        <if test="null != ueabUserOpenID and null == unionID">AND  ue.ueabUserOpenID = #{ueabUserOpenID}</if>
+       	<if test="null == ueabUserOpenID and null != unionID">AND ue.unionID = #{unionID}</if>
+	   	<if test="null != ueabUserOpenID and null != unionID">AND  (ue.ueabUserOpenID = #{ueabUserOpenID} OR ue.unionID = #{unionID})</if>
+        <if test="null != ueabTPType">AND ue.ueabTPType = #{ueabTPType}</if>
+        <if test="null != userSequence">AND ue.userSequence = #{userSequence}</if>
+        <if test="null != customerSequence">AND ue.customerSequence = #{customerSequence}</if>
+        <if test="null != employeeSequence">AND ue.employeeSequence = #{employeeSequence}</if>
+    </select>
+
+    <!-- 查询用户绑定的第三方账号 -->
+    <select id="selectThirdParty" parameterType="HashMap" resultType="cn.smartcandy.application.a.commonbean.Ueab" >
+        SELECT
+            ueabSequence,
+            userSequence,
+            customerSequence,
+            ueabUserOpenID,
+            unionID,
+            ueabTPType,
+            ueabStatus,
+            ueabBindTime,
+            ueabUnBindTime,
+            employeeSequence
+        FROM
+            c_ueab
+        WHERE
+            ueabStatus = 'N'
+            <if test="null != ueabTPType">AND ueabTPType = #{ueabTPType}</if>
+            <if test="null != userSequence">AND userSequence = #{userSequence}</if>
+            <if test="null != customerSequence">AND customerSequence = #{customerSequence}</if>
+            <if test="null != ueabUserOpenID and null == unionID">AND  ueabUserOpenID = #{ueabUserOpenID}</if>
+	       	<if test="null == ueabUserOpenID and null != unionID">AND unionID = #{unionID}</if>
+		   	<if test="null != ueabUserOpenID and null != unionID">AND  (ueabUserOpenID = #{ueabUserOpenID} OR unionID = #{unionID})</if>
+    </select>
+
+    <!-- 查询客户的手机号 -->
+    <select id="selectCustomerTel" parameterType="String" resultType="String">
+        SELECT
+        customerTel
+        FROM
+        a_customer
+        WHERE
+        customerSequence = #{_parameter}
+    </select>
+
+    <!-- 插入用户外部帐号关联表 -->
+    <insert id="insertUeab" parameterType="cn.smartcandy.application.a.commonbean.Ueab">
+        INSERT INTO c_ueab (
+	        ueabSequence,
+	        userSequence,
+	        customerSequence,
+	        ueabUserOpenID,
+	        unionID,
+	        ueabTPType,
+	        ueabStatus,
+	        ueabBindTime,
+	        ueabUnBindTime,
+	        employeeSequence,
+	        branchSequence
+        )
+        VALUES
+        (
+	        #{ueabSequence},
+	        #{userSequence},
+	        #{customerSequence},
+	        #{ueabUserOpenID},
+	        #{unionID},
+	        #{ueabTPType},
+	        #{ueabStatus},
+	        #{ueabBindTime},
+	        #{ueabUnBindTime},
+	        #{employeeSequence},
+	        #{branchSequence}
+        )
+    </insert>
+
+    <!-- 解除绑定 -->
+    <update id="updateUeab" parameterType="HashMap">
+        UPDATE c_ueab
+        SET
+          ueabStatus = 'D',
+          ueabUnBindTime = #{ueabUnBindTime}
+        WHERE
+            ueabTPType = #{ueabTPType}
+            <if test="null != userSequence">AND userSequence = #{userSequence}</if>
+            <if test="null != customerSequence">AND customerSequence = #{customerSequence}</if>
+            <if test="null != employeeSequence">AND employeeSequence = #{employeeSequence}</if>
+            <if test="null != ueabUserOpenID">AND ueabUserOpenID = #{ueabUserOpenID}</if>
+    </update>
+
+    <!--查询被推荐的客户的奖励  -->
+    <select id="selectRecommenderBonus" parameterType="HashMap" resultType="HashMap">
+        SELECT
+            b.orderSettleTime,
+            SUM(baseConsumeAmount) sumbaseConsume,
+            SUM(branchConsumeAmount) sumBranchConsume,
+            c.customerName,
+            c.customerTel,
+            c.cFirstConsumeDate
+        FROM
+         a_cbonus b
+        LEFT JOIN a_order o     ON o.batch_no = b.batch_no
+        LEFT JOIN a_customer c  ON o.customerSequence = c.customerSequence
+        WHERE
+          b.orderStatus = '2'
+          <if test="null != customerSequence">AND b.cRecommenderSeq = #{customerSequence}</if>
+          <if test="null != cFirstConsumeDate">AND c.cFirstConsumeDate LIKE '${cFirstConsumeDate}%'</if>
+        GROUP BY o.customerSequence
+    </select>
+
+    <!--查询推荐人总共奖励  -->
+    <select id="selectSumCbonus" parameterType="String" resultType="HashMap">
+        SELECT
+	        SUM(baseConsumeAmount) baseConsumeAmount,
+	        SUM(branchConsumeAmount) branchConsumeAmount
+        FROM
+        	a_cbonus
+        WHERE
+        	cRecommenderSeq = ${_parameter}
+    </select>
+
+    <!--查询服务中心  -->
+    <select id="selectServCenterAddr" parameterType="String" resultType="HashMap">
+        SELECT
+        branchName,
+        branchAddress,
+        branchTelephone,
+        branchLongitude,
+        branchLatitude
+        FROM
+        a_branch
+        WHERE
+        branchFlag = 'N'
+        <if test="null != _parameter">AND branchCity = #{_parameter}</if>
+    </select>
+
+    <!--中脉杰玛  查询微信用户卡劵信息 -->
+    <select id="selectCardInfo" parameterType="HashMap" resultType="HashMap">
+        SELECT
+	        ca.cardRemaining,
+	        ca.cardNominalValue,
+	        ca.remainingtimes,
+	        ct.ctType,
+	        ct.ctName,
+	        cu.branchSequence
+        FROM
+        	c_ueab ue
+        LEFT JOIN a_card ca ON ue.customerSequence = ca.customerSequence
+        LEFT JOIN a_ct ct ON ct.ctSequence = ca.ctSequence
+        LEFT JOIN a_customer cu ON cu.customerSequence = ca.customerSequence
+        LEFT JOIN a_branch br ON br.branchSequence = cu.branchSequence
+        WHERE
+        	ue.ueabStatus = 'N'
+        AND ue.ueabTPType = '02'
+        <if test="null != openId">AND ue.ueabUserOpenID = #{openId}</if>
+    </select>
+
+
+
+    <!-- 查询所有服务中心的所属城市 -->
+    <select id="selectBeancCity" resultType="String">
+        SELECT DISTINCT
+        	branchCity
+        FROM
+        a_branch
+    </select>
+
+    <!-- 查询当前时间的优惠活动 -->
+    <select id="selectPromotion" parameterType="HashMap" resultType="HashMap">
+        SELECT
+	        promotionSequence,
+	        promotionCode,
+	        promotionName,
+	        promotionPurchaseMode,
+	        promotionEffectiveDate,
+	        promotionExpiredDate,
+	        promotionType,
+	        promotionProposedPrice,
+	        promotionLowerPrice,
+	        promotionDiscount,
+	        promotionIsAllProduct,
+	        promotionIsAllService,
+	        promotionIsAllPackage,
+	        promotionIsAllCard,
+	        promotionRemark,
+	        promotionDetail,
+	        FROM
+	        a_promotion
+        WHERE
+        	promotionStatus = 'N'
+        <if test="null != currentDate">AND promotionEffectiveDate <![CDATA[>=]]> ${currentDate}</if>
+        <if test="null != currentDate">AND promotionExpiredDate <![CDATA[<=]]> ${currentDate}</if>
+    </select>
+
+    <!-- 查询客户个人消费记录 -->
+    <select id="selectConsumerecord" parameterType="HashMap" resultType="HashMap">
+        SELECT
+	        o.batch_no,
+	        o.orderSettleTime,
+	        o.branchSequence,
+	        br.branchName,
+	        oid.pspcName,
+	        pa.paymentModes,
+	        pa.paymentPrice
+        FROM
+        	a_order o
+        LEFT JOIN a_oid oid ON o.batch_no = oid.batch_no
+        LEFT JOIN a_payment pa ON oid.oidSequence = pa.oidSequence
+        LEFT JOIN a_branch br ON o.branchSequence = br.branchSequence
+        WHERE
+       	 	o.orderStatus = '2'
+        <if test="null != dateStart">AND o.orderSettleTime <![CDATA[<=]]> ${dateStart}</if>
+        <if test="null != dateEnd">AND o.orderSettleTime <![CDATA[>=]]> ${dateEnd}</if>
+        <if test="null != customerSequence">AND o.customerSequence = ${customerSequence}</if>
+    </select>
+
+    <!-- 查询客户积分 -->
+    <select id="selectPoints" parameterType="HashMap" resultType="HashMap">
+        SELECT
+	        c.customerPoints,
+	        o.oidUserPoints,
+	        o.oidGainPoints,
+	        o.pspcName,
+	        o.oidAddTime,
+	        br.branchName,
+	        o.oidStatus,
+	        order.orderSettleTime
+        FROM
+       		a_customer c
+        JOIN a_order order order.batch_no = c.customerSequence
+        JOIN a_oid o c.customerSequence = o.customerSequence
+        JOIN a_branch br br.branchSequence = o.branchSequence
+        WHERE
+        	o.oidPaymentConfirmStatus = '1'
+        AND o.oidStatus IN (2, 3)
+        <if test="null != customerSequence">AND c.customerSequence = ${customerSequence} </if>
+    </select>
+    
+    
+    <!-- 修复数据库没有unionID和branchSequence-->
+    <update id="updateUeabMsg" parameterType="Map">
+        UPDATE c_ueab
+            <trim prefix="set" suffixOverrides=",">
+                <if test="null != unionID">unionID = #{unionID},</if>
+                <if test="null != branchSequence">branchSequence = #{branchSequence},</if>
+            </trim>        
+        WHERE
+            ueabUserOpenID = #{openID}
+		AND	ueabTPType = #{ueabTPType}
+    </update>
+    
+    <!-- 查询微信绑定的核销用户 -->
+    <select id="selectWXBindVerfyUser" parameterType="Map" resultType="cn.smartcandy.framework.core.user.User">
+		SELECT
+			usr.userSequence,
+			usr.userID,
+			usr.userStatus,
+			usr.userStartDate,
+			usr.userName,
+			usr.userSex,
+			usr.userBirth,
+			usr.userAddr,
+			usr.userTopBranchSequence,
+			usr.userDeptType,
+			usr.userDeptSequence,
+			usr.ro_sequence,
+			usr.userCreator,
+			usr.userPermissionGrade,
+			usr.userCreatDate,
+			usr.userCredType,
+			usr.userCredNO,
+			usr.userPhone,
+			usr.userDN,
+			usr.userImageURL,
+			usr.userRemark,
+			usr.isAuthorization,
+			usr.employeeSequence
+		FROM
+			c_ueab ueab
+		INNER JOIN c_user usr ON ueab.userSequence = usr.userSequence
+		WHERE
+		    ueab.ueabStatus = "N"
+		AND	ueab.ueabTPType = #{ueabTPType}
+		AND ueab.unionID = #{unionID}
+		AND ueab.branchSequence = #{branchSequence}
+		LIMIT 0,1
+    </select> 
+
+    <!-- ==================================================================================================== -->
+ 
+    <!-- 查询微信绑定的用户 -->
+    <select id="selectWXMemberBindUser" parameterType="Map" resultType="cn.smartcandy.framework.core.user.User">
+		SELECT 
+			usr.userSequence,
+			usr.userID,
+			usr.userStatus,
+			usr.userStartDate,
+			usr.userName,
+			usr.userSex,
+			usr.userBirth,
+			usr.userAddr,
+			usr.userTopBranchSequence,
+			usr.userDeptType,
+			usr.userDeptSequence,
+			usr.ro_sequence,
+			usr.userCreator,
+			usr.userPermissionGrade,
+			usr.userCreatDate,
+			usr.userCredType,
+			usr.userCredNO,
+			usr.userPhone,
+			usr.userDN,
+			usr.userImageURL,
+			usr.userRemark,
+			usr.isAuthorization,
+			usr.employeeSequence
+		FROM
+			c_ueab ueab
+		INNER JOIN c_user usr ON ueab.userSequence = usr.userSequence
+		WHERE
+			ueab.ueabStatus = "N"
+		AND	ueab.ueabTPType = #{ueabTPType}
+		AND ueab.ueabUserOpenID = #{openID} 
+	 	<if test="null != branchSequence">AND ueab.branchSequence = #{branchSequence}</if>
+		ORDER BY
+			ueab.ueabSequence DESC,
+			ueab.userSequence DESC
+		LIMIT 0,1
+    </select>
+ 
+    <!-- 查询微信绑定的员工 -->
+    <select id="selectWXMemberBindEmployee" parameterType="Map" resultType="cn.smartcandy.application.a.employeemng.Employee">
+		SELECT 
+			ueab.branchSequence,
+			emp.employeeSequence,
+			emp.employeeCode,
+			emp.employeeName,
+			emp.employeeSex,
+			emp.employeePhone,
+			emp.employeeCredType,
+			emp.employeeCredNO,
+			emp.employeeLevel,
+			emp.branchSequence,
+			emp.employeeEntryDate,
+			emp.employeeResignDate,
+			emp.employeeQuitDate,
+			emp.employeeStatus,
+			emp.flag,
+			emp.employeeRemark,
+			emp.topBranchSequence,
+			emp.employeePosition,
+			emp.employeeBirthDate,
+			emp.employeeFirstJobDate
+		FROM
+			c_ueab ueab
+		INNER JOIN a_employees emp ON ueab.employeeSequence = emp.employeeSequence
+		WHERE
+		    ueab.ueabStatus = "N"
+		AND	ueab.ueabTPType = #{ueabTPType}
+		AND ueab.ueabUserOpenID = #{openID} 
+	 	<if test="null != branchSequence">AND ueab.branchSequence = #{branchSequence}</if>
+		ORDER BY
+			ueab.ueabSequence DESC,
+			ueab.employeeSequence DESC
+		LIMIT 0,1
+    </select>   
+ 
+    <!-- 查询微信绑定的会员 -->
+    <select id="selectWXMemberBindCustomer" parameterType="Map" resultType="cn.smartcandy.application.a.commonbean.Customer">
+		SELECT 
+			cust.customerSequence,
+			cust.customerType,
+			cust.memberID,
+			cust.memberIDOld,
+			cust.customerName,
+			cust.customerCredType,
+			cust.customerCredNo,
+			cust.customerSex,
+			cust.customerBirth,
+			cust.customerAddr,
+			cust.customerDebtAmount,
+			cust.customerPrepayment,
+			cust.customerPrepaymentAccrued,
+			cust.customerConsumeAccrued,
+			cust.customerDebtProNum,
+			cust.customerDepositProNum,
+			cust.customerPoints,
+			cust.customerTel,
+			cust.cOpenedBranch,
+			cust.branchSequence,
+			cust.cToStoreChannel,
+			cust.cFirstConsumeDate,
+			cust.cToMemberDate,
+			cust.cRecommenderType,
+			cust.cRecommenderSeq,
+			cust.cRecommenderName,
+			cust.cIsPartner,
+			cust.cMark,
+			cust.customerFlag,
+			cust.isPartnerBranch,
+			cust.cImageURL,
+			cust.topBranchSequence,
+			cust.customerLeader
+		FROM
+			c_ueab ueab
+		INNER JOIN a_customer cust ON cust.customerSequence = ueab.customerSequence
+		WHERE
+		    ueab.ueabStatus = "N"
+		AND	ueab.ueabTPType = #{ueabTPType}
+		AND ueab.ueabUserOpenID = #{openID} 
+	 	AND ueab.branchSequence = #{branchSequence}
+		ORDER BY
+			ueab.ueabSequence DESC,
+			ueab.customerSequence DESC
+		LIMIT 0,1
+ </select>
+
+   
+     <!-- 查询微信绑定的会员 -->
+    <select id="selectBindUeabList" parameterType="Map" resultType="cn.smartcandy.application.a.commonbean.Ueab">
+		SELECT 
+			ueab.ueabSequence,
+			ueab.userSequence,
+			ueab.customerSequence,
+			ueab.ueabUserOpenID,
+			ueab.unionID,
+			ueab.ueabTPType,
+			ueab.ueabStatus,
+			ueab.ueabBindTime,
+			ueab.ueabUnBindTime,
+			ueab.employeeSequence,
+			ueab.branchSequence
+		FROM
+			c_ueab ueab
+		WHERE 
+			ueab.ueabUserOpenID = #{openID}
+    </select>
+
+</mapper>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="roommng" extends="struts-default">
+		<action name="roommng_*" class="cn.smartcandy.application.a.sys.roommng.RoomMngAction" method="{1}">
+			<!--房间管理-->
+			<result name="queryRoomList">/success.jsp</result>
+			<result name="queryRoomDetail">/success.jsp</result>
+			<result name="addRoom">/success.jsp</result>
+			<result name="modifyRoom">/success.jsp</result>
+			<result name="removeRoom">/success.jsp</result>
+		</action>
+	</package>
+</struts>

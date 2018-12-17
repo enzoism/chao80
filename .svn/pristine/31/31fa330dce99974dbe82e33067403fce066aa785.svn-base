@@ -1,0 +1,28 @@
+package cn.smartcandy.common.common;
+
+/**
+ * @项目名称：zmjema
+ * @类名称：SessionKeys
+ * @类描述：SessionKey值
+ * @创建人：tangzhifeng
+ * @创建时间：2017年10月15日 下午12:52:49
+ * @修改人：someOne
+ * @修改时间：2017年10月15日 下午12:52:49 
+ * @Company:SmartCandy (C) 2017
+ * @version 1.0
+ */
+public class SessionKeys {
+
+	// 账户
+	public static final String LOGIN_USER = "LOGIN_USER";					//当前登录的用户
+	// 关注用户
+	public static final String ATTENTION_USERS = "ATTENTION_USERS";			//已经关注的用户
+	
+	
+	// 管理种类
+	public static final String ADMIN_CATE = "ADMIN_CATE";					//管理员创建种类
+	// 自建种类
+	public static final String USER_CATE = "USER_CATE";						//用户创建种类
+
+	
+}

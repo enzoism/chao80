@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<package name="warehousemng" extends="struts-default">
+		<action name="warehousemng_*" class="cn.smartcandy.application.a.sys.warehousemng.WarehouseMngAction" method="{1}">
+			<!--员工信息列表-->
+			<result name="queryWarehousesList">/sys/warehousemng/warehouseslist.jsp</result>
+			<result name="addWarehouse">/success.jsp</result>
+			<result name="getWarehouseByID">/sys/warehousemng/warehousemodify.jsp</result>
+			<result name="modifyWarehouse">/success.jsp</result>
+			<result name="removeWarehouse">/success.jsp</result>
+			<result name="queryEmployeeByBranch">/sys/warehousemng/employeeList.jsp</result>
+		</action>
+	</package>
+</struts>

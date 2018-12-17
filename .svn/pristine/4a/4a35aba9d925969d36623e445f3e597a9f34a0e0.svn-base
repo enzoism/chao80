@@ -1,0 +1,25 @@
+/**
+ * Created by wenbin.lu on 2017/10/12.
+ */
+var Chao={
+    APP:{
+        DATA:"/jsonAction/",
+        IMG:""
+    },
+    err:{
+        ajax:function(r,tohome){
+            var r=r.responseText;
+            if(typeof r=="string") {
+                r = eval("(" + r + ")");
+            }
+            if (r.statusCode == "301") {
+                Chao.user.signIn();
+                if(tohome){
+                    location.href="index.html";
+                }
+            } else {
+                toastr.error(r.message);
+            }
+        }
+    }
+};

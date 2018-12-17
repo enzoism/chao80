@@ -1,0 +1,659 @@
+package cn.smartcandy.application.a.collection;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.solr.client.solrj.response.QueryResponse;
+
+import cn.smartcandy.application.a.account.AccountDao;
+import cn.smartcandy.application.a.account.Admin;
+import cn.smartcandy.application.a.account.User;
+import cn.smartcandy.application.a.attention.AttentionDao;
+import cn.smartcandy.application.a.image.ImageBiz;
+import cn.smartcandy.application.a.image.ImageCollection;
+import cn.smartcandy.application.a.image.ImageDao;
+import cn.smartcandy.application.cms.release.ReleaseBiz;
+import cn.smartcandy.application.cms.release.ReleaseCategary;
+import cn.smartcandy.common.BaseBiz;
+import cn.smartcandy.common.utils.TMemberUtils;
+import cn.smartcandy.common.utils.TSolrUtils;
+import cn.smartcandy.common.utils.TStringUtils;
+import cn.smartcandy.framework.biz.workdate.WorkDate;
+import cn.smartcandy.framework.core.data.DataTable;
+import cn.smartcandy.framework.core.db.mybatis.MyBatisDBAccess;
+import cn.smartcandy.framework.core.exception.BusinessException;
+import cn.smartcandy.framework.core.exception.UserNotLoginException;
+import cn.smartcandy.framework.utils.CStringUtils;
+import cn.smartcandy.framework.utils.DateTimeUtils;
+
+public class CollectionBiz extends BaseBiz{
+
+	private CollectionDao collectionDao = new CollectionDao();
+	private ReleaseBiz releaseBiz = new ReleaseBiz();
+	private ImageBiz imageBiz = new ImageBiz();
+	private AccountDao accountDao = new AccountDao();
+	
+	// 添加收藏品
+	public int addCollection(Map<String, String> param,String[] cateArr,String[] tagArr, Admin admin) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			String userSequence = param.get("userSequence");
+			if (CStringUtils.isEmpty(userSequence)) {
+				throw new BusinessException("参数不合法");
+			}
+			if (ArrayUtils.isEmpty(cateArr)) {
+				throw new BusinessException("缺失产品种类");
+			}
+			
+			// 整理缩略图
+			String imageURL = param.get("photoURL");
+			if (CStringUtils.isEmpty(imageURL)) {
+				throw new BusinessException("当前藏品图片缺失");
+			}
+			List<String> imageList = Arrays.asList(imageURL.split(","));
+			imageURL.replaceFirst("/image/", "/m_image/");
+			String colThumb = imageList.get(0).replaceFirst("/image/", "/m_image/");
+			param.put("colThumb", colThumb);
+
+			// 查询用户
+			Map<String, String> userParam = new HashMap<String, String>();
+			userParam.put("userSequence", userSequence);
+			User usrMsg = accountDao.selectUserAccount(userParam, dbAccess);
+			if (!TMemberUtils.isUser(usrMsg)) {
+				throw new BusinessException("当前用户不存在，添加藏品失败");
+			}
+			
+			// 分离价钱
+			String colPrice =  param.get("colPrice");
+			String isSale =  param.get("isSale");
+			colPrice = CStringUtils.equals("true", isSale)?String.valueOf(0):param.get("colPrice");
+			param.put("colPrice", colPrice);
+
+			String imageSize = param.get("imageSize");
+			String imgWidth = imageSize.split("-")[0];
+			String imgHeigh = imageSize.split("-")[1];
+			param.put("imgWidth", imgWidth);	
+			param.put("imgHeigh", imgHeigh);
+			
+			// 添加藏品
+			String colSequence = dbAccess.getSeqID("a_collection");
+			param.put("colSequence", colSequence);
+			String colDate = DateTimeUtils.format(param.get("colDate"),"yyyyMMddHHmmss");
+			param.put("colDate", colDate);
+			param.put("createDate", WorkDate.getSystemTime());
+			param.put("userSequence", userSequence);	
+			param.put("userName", usrMsg.getUserName());	
+			param.put("colStatus", Collection.STATUS_NORMAL);		
+			param.put("colThumb", colThumb);
+			if (!ArrayUtils.isEmpty(tagArr)) {
+				String searchTag  = CStringUtils.join(tagArr, ";");
+				param.put("searchTag", searchTag);
+			}
+			
+			collectionDao.insertCollection(param, dbAccess);
+
+			// 发布藏品图片
+			Map<String, String> imgParam = new HashMap<String, String>();
+			imgParam.put("colSequence", colSequence);
+			imgParam.put("imageURL", imageURL);
+			imgParam.put("imgWidth", imgWidth);	
+			imgParam.put("imgHeigh", imgHeigh);
+			imageBiz.uploadCollectionImages(imgParam, dbAccess);
+
+			// 更新用户发布的数量
+			Map<String, String> usrParam = new HashMap<String, String>();
+			usrParam.put("userSequence", userSequence);
+			usrParam.put("colCount", String.valueOf(1));
+			accountDao.updateUserCount(usrParam, dbAccess);
+			
+			// 关联表添加数据
+			for (int i = 0; i < cateArr.length; i++) {
+				// 查询藏品
+				Map<String, String> cateParam = new HashMap<String, String>();
+				cateParam.put("cateSequence", cateArr[i]);
+				ReleaseCategary categary = releaseBiz.queryCategaryMsg(cateParam);
+				if (null == categary) {
+					throw new BusinessException("当前种类不存在，添加藏品失败");
+				}
+				
+				String relSequence = dbAccess.getSeqID("r_collection_cate");
+
+				cateParam.put("relSequence", relSequence);
+				cateParam.put("colSequence", colSequence);
+				cateParam.put("cateSequence", categary.getCateSequence());
+				cateParam.put("cateName", categary.getCateName());
+				cateParam.put("cateStatus", Collection.STATUS_NORMAL);
+				cateParam.put("userSequence", userSequence);
+				collectionDao.insertCollectionRelCate(cateParam,dbAccess);
+			}
+			
+			// 上传solr
+			Map<String, String> solrParam = new HashMap<String, String>();
+			solrParam.put("colSequence", colSequence);
+			Collection collection = collectionDao.selectCollectionMsg(solrParam, dbAccess);
+			TSolrUtils.addCollection(collection);
+			dbAccess.commitTransction();
+
+			return 1;
+		} catch (BusinessException e) {
+			dbAccess.rollBack();
+			throw e;
+		} catch (Exception e) {
+			dbAccess.rollBack();
+			throw new BusinessException("添加收藏品:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	
+	// 更新藏品
+	public int modifyCollection(Map<String, String> param,String[] cateArr, HttpServletRequest request, Admin admin) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			// 必填参数
+			String colSequence = param.get("colSequence");
+			String colDate = param.get("colDate");
+			String imageSize = param.get("imageSize");
+			String imgWidth = imageSize.split("-")[0];
+			String imgHeigh = imageSize.split("-")[1];
+			String colPrice = param.get("colPrice");
+			String isSale = param.get("isSale");
+			
+			if (CStringUtils.isEmpty(colSequence) || ArrayUtils.isEmpty(cateArr)) {
+				throw new BusinessException("参数不合法");
+			}
+			if (CStringUtils.equals(isSale, Collection.SALE_PRICE) && CStringUtils.isEmpty(colPrice)) {
+				throw new BusinessException("产品价格为空");
+			}
+
+			Collection collection = collectionDao.selectCollectionMsg(param, dbAccess);
+			if (null == collection) {
+				throw new BusinessException("当前藏品不存在，更新藏品失败！");
+			}
+			
+			// 删除旧藏品种类
+			Map<String, String> cateColParam = new HashMap<String, String>();
+			cateColParam.put("colSequence", colSequence);
+			collectionDao.updateCollectionCate(cateColParam, dbAccess);
+			
+			// 关联表添加数据
+			for (int i = 0; i < cateArr.length; i++) {
+				// 查询藏品
+				Map<String, String> cateParam = new HashMap<String, String>();
+				cateParam.put("cateSequence", cateArr[i]);
+				ReleaseCategary categary = releaseBiz.queryCategaryMsg(cateParam);
+				if (null == categary) {
+					throw new BusinessException("当前种类不存在，添加藏品失败");
+				}
+				
+				String relSequence = dbAccess.getSeqID("r_collection_cate");
+				cateParam.put("relSequence", relSequence);
+				cateParam.put("colSequence", colSequence);
+				cateParam.put("cateSequence", categary.getCateSequence());
+				cateParam.put("cateName", categary.getCateName());
+				cateParam.put("cateStatus", Collection.STATUS_NORMAL);
+				cateParam.put("userSequence", collection.getUserSequence());
+				collectionDao.insertCollectionRelCate(cateParam,dbAccess);
+			}
+
+			param.put("colDate", DateTimeUtils.format(colDate,"yyyyMMddHHmmss"));
+			param.put("imgWidth", imgWidth);
+			param.put("imgHeigh", imgHeigh);
+			
+			// 整理缩略图
+			String imageURL = param.get("photoURL");
+			if (CStringUtils.isEmpty(imageURL)) {
+				throw new BusinessException("当前藏品图片缺失");
+			}
+			List<String> imageList = Arrays.asList(imageURL.split(","));
+			imageURL.replaceFirst("/image/", "/m_image/");
+			String colThumb = imageList.get(0).replaceFirst("/image/", "/m_image/");
+			param.put("colThumb", colThumb);
+			int updateCollection = collectionDao.updateCollection(param, dbAccess);
+			
+			// 删除旧详情图片
+			Map<String, String> imgDelParam = new HashMap<String, String>();
+			imgDelParam.put("colSequence", colSequence);
+			imageBiz.deleteCollectionImages(imgDelParam, dbAccess);
+			
+			// 添加新的详情图片
+			Map<String, String> imgParam = new HashMap<String, String>();
+			imgParam.put("colSequence", colSequence);
+			imgParam.put("imageURL", imageURL);
+			imgParam.put("imgWidth", imgWidth);	
+			imgParam.put("imgHeigh", imgHeigh);
+			imageBiz.uploadCollectionImages(imgParam, dbAccess);
+			
+			// 上传solr
+			Map<String, String> solrParam = new HashMap<String, String>();
+			solrParam.put("colSequence", colSequence);
+			Collection collectionNew = collectionDao.selectCollectionMsg(solrParam, dbAccess);
+			TSolrUtils.addCollection(collectionNew);
+
+			dbAccess.commitTransction();
+			return updateCollection;
+		} catch (BusinessException e) {
+			dbAccess.rollBack();
+			throw e;
+		} catch (Exception e) {
+			dbAccess.rollBack();
+			throw new BusinessException("添加收藏品:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	
+	// 更新藏品
+	public void deleteCollection(Map<String, String> param,String[] colList,HttpServletRequest request, Admin admin) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			// 必填参数
+			if (ArrayUtils.isEmpty(colList)) {
+				throw new BusinessException("参数并合法");
+			}
+			for (int i = 0; i < colList.length; i++) {
+				Map<String, String> colParam = new HashMap<>();
+				colParam.put("colSequence", colList[i]);
+				Collection collection = collectionDao.selectCollectionMsg(colParam, dbAccess);
+				if (null == collection) {
+					throw new BusinessException("当前藏品不存在！");
+				}
+
+				Map<String, String> hashMap = new HashMap<String, String>();
+				hashMap.put("colSequence", colList[i]);
+				hashMap.put("colStatus", Collection.STATUS_DELETE);
+				// 修改藏品状态
+				collectionDao.updateCollection(hashMap, dbAccess);
+
+				// 更新用户发布的数量
+				Map<String, String> usrParam = new HashMap<String, String>();
+				usrParam.put("userSequence", collection.getUserSequence());
+				usrParam.put("colCount", String.valueOf(-1));
+				accountDao.updateUserCount(usrParam, dbAccess);
+				
+				// 上传solr
+				Map<String, String> solrParam = new HashMap<String, String>();
+				solrParam.put("colSequence", colList[i]);
+				Collection collectionNew = collectionDao.selectCollectionMsg(solrParam, dbAccess);
+				TSolrUtils.addCollection(collectionNew);
+			}
+			
+			dbAccess.commitTransction();
+		} catch (BusinessException e) {
+			dbAccess.rollBack();
+			throw e;
+		} catch (Exception e) {
+			dbAccess.rollBack();
+			throw new BusinessException("添加收藏品:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	// 查找藏品详情 DONE
+	public Collection queryCollectionMsg(Map<String, String> param,User user)throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			String colSequence = param.get("colSequence");
+			if (CStringUtils.isEmpty(colSequence)) {
+				throw new BusinessException("参数不合法");
+			}
+			// 查询藏品
+			Collection collection = collectionDao.selectCollectionMsg(param, dbAccess);
+			if (null == collection) {
+				throw new BusinessException("当前藏品不存在");
+			}
+			
+			// 查询藏品种类
+			Map<String, String> cateMap = new HashMap<String, String>();
+			cateMap.put("colSequence", colSequence);
+			List<String> cateSeqList = collectionDao.selectCollectionCateList(cateMap,dbAccess);
+			collection.setCateSeqList(cateSeqList);
+
+			// 格式化时间
+			String colDate = DateTimeUtils.format(collection.getColDate(),"yyyy-MM");
+			collection.setColDate(colDate);
+			
+			// 查询用户
+			Map<String, String> usrParam = new HashMap<>();
+			usrParam.put("userSequence", collection.getUserSequence());
+			User userMsg = accountDao.selectUserAccount(usrParam, dbAccess);
+			
+			// 藏品是否点赞
+			if (TMemberUtils.isUser(user)) {
+				Map<String, String> colMap = new HashMap<String, String>();
+				colMap.put("userSequence", user.getUserSequence());
+				colMap.put("relUserSequence", collection.getUserSequence());
+				colMap.put("colSequence", collection.getColSequence());
+				if (new AttentionDao().selectUserAttentionOrNot(colMap, dbAccess) > 0) {
+					userMsg.setHasAttention(Boolean.TRUE);
+				}
+				if (new AttentionDao().selectColAttentionOrNot(colMap, dbAccess) > 0) {
+					collection.setHasAttention(Boolean.TRUE);
+				}
+			}
+
+			// 查询藏品的所有图片
+			Map<String, String> imgParam = new HashMap<>();
+			imgParam.put("colSequence", collection.getColSequence());
+			List<ImageCollection> collectionImageList = new ImageDao().selectCollectionImageList(imgParam, dbAccess);
+			
+			collection.setUser(userMsg);
+			collection.setImageList(collectionImageList);
+			return collection;
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("查询藏品失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	
+	public DataTable queryCollectionDataList(Map<String, String> param,int pageNo,int pageSize) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		DataTable dataTable =  new DataTable();
+		try {
+			dbAccess.startTransction();
+			String cateSequence = param.get("cateSequence");
+			if (CStringUtils.isEmpty(cateSequence)) {
+				dataTable = collectionDao.selectCollectionDataListWithoutCate(param, pageNo, pageSize, dbAccess);
+			}else{
+				dataTable = collectionDao.selectCollectionDataListWithCate(param, pageNo, pageSize, dbAccess);
+			}
+			return dataTable;
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("添加收藏品:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	// 查询用户藏品（分页）（OK）
+	public DataTable queryUserCollectionDataList(Map<String, String> param,User user,int pageNo,int pageSize) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		DataTable dataTable =  new DataTable();
+		try {
+			dbAccess.startTransction();
+			String userSequence = CStringUtils.isEmpty(param.get("userSequence"))?user.getUserSequence():param.get("userSequence");
+			param.put("userSequence", userSequence);
+			dataTable = collectionDao.selectUserCollectionDataList(param, pageNo, pageSize, dbAccess);
+
+			return dataTable;
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("添加收藏品:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	// 请求藏品的种类信息
+	public List<Map<String, Object>> queryCollectionCateList(DataTable dataTable) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			List<Map<String, Object>>  colList = TStringUtils.turnDataTableToObjectMapList(dataTable);
+			// 请求藏品的类别
+			List<String> colSeqList = TStringUtils.trunObjectMapKeyListToList(colList, "colSequence");
+			List<Map<String, Object>> mapList = null;
+			Map<String, Object> cateMap = new HashMap<String, Object>();
+			if (!CollectionUtils.isEmpty(colSeqList)) {
+				cateMap.put("colList", colSeqList);
+				mapList = collectionDao.selecCollectionCateList(cateMap, dbAccess);
+			}
+			// 匹配类别和藏品
+			for (int i = 0;null!=colList && i<colList.size(); i++) {
+				List<Map<String, Object>> colCateList = new ArrayList<Map<String, Object>>();
+				String colSequence = (String) colList.get(i).get("colSequence");
+				for (int j = 0; null!=mapList && j < mapList.size(); j++) {
+					if (mapList.get(j).get("colSequence").toString().equals(colSequence)) {
+						colCateList.add(mapList.get(j));
+					}
+				}
+				colList.get(i).put("colList", colCateList);
+			}
+			TStringUtils.printList(colList);
+
+			return colList;
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("添加收藏品:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	
+	// 查询用户藏品（分页）（MODIFY）
+	public void queryUserCollectionDataMapList(DataTable dateTable,MyBatisDBAccess dbAccess) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		DataTable dataTable =  new DataTable();
+		try {
+			dbAccess.startTransction();
+			List<Map<String, Object>> colList = TStringUtils.turnDataTableToObjectMapList(dataTable);
+			TStringUtils.printList(colList);
+			List<String> colSeqList = TStringUtils.trunObjectMapKeyListToList(colList, "colSequence");
+			TStringUtils.printList(colSeqList);
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("添加收藏品:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	
+	// 查询分类藏品信息 DONE
+	public DataTable queryCateCollectionDataList(Map<String, String> param, int pageNo, int pageSize) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		DataTable dataTable =  new DataTable();
+		try {
+			dbAccess.startTransction();
+			String cateSequence = param.get("cateSequence");
+			if (CStringUtils.isEmpty(cateSequence)) {
+				dataTable = collectionDao.selectCollectionDataListWithoutCate(param, pageNo, pageSize, dbAccess);
+			}else{
+				dataTable = collectionDao.selectCollectionDataListWithCate(param, pageNo, pageSize, dbAccess);
+			}
+			return dataTable;
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("添加收藏品:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	// 查询分类藏品信息 DONE
+	public List<Map<String, String>> selectColAttentionOrNot(DataTable dataTable, User user){
+		try {
+			dbAccess.startTransction();
+			List<Map<String, String>> userSequenceList = TStringUtils.turnDataTableToStringMapList(dataTable);
+			// 查询藏品
+			if (TMemberUtils.isUser(user)) {
+				Map<String, String> colParam = new HashMap<String, String>();
+				AttentionDao attentionDao = new AttentionDao();
+				List<String> usrSeqList = TStringUtils.trunMapKeyListToList(userSequenceList, "colSequence");
+				for (int i = 0; null!=usrSeqList && i < usrSeqList.size(); i++) {
+					colParam = new HashMap<String, String>();
+					colParam.put("userSequence", user.getUserSequence());
+					colParam.put("colSequence", usrSeqList.get(i));
+					int count = attentionDao.selectColAttentionOrNot(colParam, dbAccess);
+					if (count > 0) {
+						userSequenceList.get(i).put("hasAttention",String.valueOf(Boolean.TRUE));
+					}else{
+						userSequenceList.get(i).put("hasAttention",String.valueOf(Boolean.FALSE));
+					}
+				}
+			}else{
+				for (int i = 0; null!=userSequenceList && i < userSequenceList.size(); i++) {
+					userSequenceList.get(i).put("hasAttention",String.valueOf(Boolean.FALSE));
+				}
+			}
+			return userSequenceList;
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("添加收藏品:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	
+	
+	
+	// 上传藏品图片
+	public int uploadCollectionImages(Map<String, String> param) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			String cateSequence = param.get("cateSequence");
+			if (CStringUtils.isEmpty(cateSequence)) {
+				throw new BusinessException("参数不合法");
+			}
+			
+			Map<String, String> cateParam = new HashMap<String, String>();
+			cateParam.put("cateSequence", cateSequence);
+			ReleaseCategary categary = releaseBiz.queryCategaryMsg(cateParam);
+			if (null == categary) {
+				throw new BusinessException("当前种类不存在，添加藏品失败");
+			}
+			dbAccess.commitTransction();
+			return 1;
+		} catch (BusinessException e) {
+			dbAccess.rollBack();
+			throw e;
+		} catch (Exception e) {
+			dbAccess.rollBack();
+			throw new BusinessException("添加收藏品失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	
+	// 查询发布的种类和数量
+	public DataTable queryCategaryReleaseCount(Map<String, String> param, User user) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		DataTable dataTable =  new DataTable();
+		try {
+			dbAccess.startTransction();
+			String userSequence = param.get("userSequence");
+			if (CStringUtils.isEmpty(userSequence) && !TMemberUtils.isUser(user)) {
+				throw new UserNotLoginException("会话超时，请重新登录！");
+			}
+			userSequence = CStringUtils.isEmpty(userSequence) ? user.getUserSequence() : userSequence;
+			param.put("userSequence", userSequence);
+			dataTable = collectionDao.selectCategaryReleaseCount(param, dbAccess);
+			return dataTable;
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("查询发布种类失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	
+	// 查询用户点赞的种类的数量
+	public DataTable querylikeCategaryList(Map<String, String> param, User user) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		DataTable dataTable =  new DataTable();
+		try {
+			dbAccess.startTransction();
+			String userSequence = param.get("userSequence");
+			userSequence = CStringUtils.isEmpty(userSequence) ? user.getUserSequence() : userSequence;
+			param.put("userSequence", userSequence);
+			dataTable = collectionDao.selectlikeCategaryList(param, dbAccess);
+			return dataTable;
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("查询发布种类失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	
+	// 查询用户点赞的种类的数量(暂时没用)
+	public DataTable queryReleaseCategaryMap(List<User> userList, HttpServletRequest request) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+
+			return null;
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("查询发布种类失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	
+	//---------------------------------------修复数据------------------------------------------//
+	public void repairCollectionData() throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			Map<String,String> param = new HashMap<String,String>();
+			Map<String,String> relParam = new HashMap<String,String>();
+			Collection collection = null;
+			List<Collection> colList = collectionDao.selectCollectionSeqList(param, dbAccess);
+			for (int i = 0;null!=colList &&  i < colList.size(); i++) {
+				collection = colList.get(i);
+				param.put("colSequence", collection.getColSequence());
+				int count = collectionDao.selectCollectionRelCate(param, dbAccess);
+				param = new HashMap<String,String>();
+				if (count == 0) {
+					String relSequence = dbAccess.getSeqID("r_collection_cate");
+					relParam.put("relSequence", relSequence);
+					relParam.put("colSequence", collection.getColSequence());
+					relParam.put("cateSequence", collection.getCateSequence());
+					relParam.put("cateName", collection.getCateName());
+					relParam.put("cateStatus", Collection.STATUS_NORMAL);
+					relParam.put("userSequence", collection.getUserSequence());
+					collectionDao.insertCollectionRelCate(relParam, dbAccess);
+					relParam = new HashMap<>();
+				}
+			}
+			dbAccess.commitTransction();
+		} catch (BusinessException e) {
+			dbAccess.rollBack();
+			throw e;
+		} catch (Exception e) {
+			dbAccess.rollBack();
+			throw new BusinessException("修复原始数据失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+	//---------------------------------------搜索藏品------------------------------------------//
+	// 搜索藏品
+	public QueryResponse searchCollectionData(Map<String, String> param,int pageNo, int pageSize) throws BusinessException {
+		dbAccess = MyBatisDBAccess.getInstance();
+		try {
+			dbAccess.startTransction();
+			String searchKey = param.get("searchKey");
+			QueryResponse response = TSolrUtils.searchCollectionResponse(searchKey, pageNo, pageSize);
+			return response;
+		} catch (BusinessException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new BusinessException("搜索藏品失败:", e);
+		} finally {
+			dbAccess.endTransction();
+		}
+	}
+}

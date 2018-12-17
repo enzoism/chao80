@@ -1,0 +1,26 @@
+package cn.smartcandy.application.cms.release;
+
+public class ReleaseVideo extends Release{
+	private static final long serialVersionUID = -6173379836393259336L;
+
+	private String 	relVideo;	//视频地址
+
+	public String getRelVideo() {
+		return relVideo;
+	}
+
+	public void setRelVideo(String relVideo) {
+		this.relVideo = relVideo;
+	}
+
+	@Override
+	public String toString() {
+		return "ReleaseVideo [relVideo=" + relVideo + ", relSequence=" + relSequence + ", relTitle=" + relTitle
+				+ ", relSubTitle=" + relSubTitle + ", relBrief=" + relBrief + ", relContent=" + relContent
+				+ ", relStatus=" + relStatus + ", relThumbImage=" + relThumbImage + ", userSequence=" + userSequence
+				+ ", userName=" + userName + ", cateSequence=" + cateSequence + ", cateName=" + cateName + ", relDate="
+				+ relDate + ", relImageBatchNo=" + relImageBatchNo + ", relType=" + relType + "]";
+	}
+	
+
+}

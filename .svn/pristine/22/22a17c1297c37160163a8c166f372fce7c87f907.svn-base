@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="collection">
+
+	<sql id="collectionCate">colSequence IN <foreach collection="colList" item="id" open="(" separator="," close=")">#{id}</foreach></sql>
+
+
+	<!-- 添加藏品信息 -->
+	<insert id="insertCollection" parameterType="Map">
+		INSERT INTO a_collection (
+			colSequence,
+			colDate,
+			colTitle,
+			colSubTitle,
+			colContent,
+			userSequence,
+			userName,
+			colThumb,
+			colImageBatch,
+			colPrice,
+			createDate,
+			colStatus,
+			imgWidth,
+			imgHeigh
+		)VALUES(
+			#{colSequence},
+			#{colDate},
+			#{colTitle},
+			#{colSubTitle},
+			#{colContent},
+			#{userSequence},
+			#{userName},
+			#{colThumb},
+			#{colImageBatch},
+			#{colPrice},
+			#{createDate},
+			#{colStatus},
+			#{imgWidth},
+			#{imgHeigh}	
+		)
+	</insert>
+	
+	<!-- 更新藏品 -->
+	<update id="updateCollection" parameterType="Map">
+		UPDATE a_collection 
+			<trim prefix="set" suffixOverrides=",">
+			<if test="null != colDate">colDate = #{colDate},</if>
+			<if test="null != colTitle">colTitle = #{colTitle},</if>
+			<if test="null != colSubTitle">colSubTitle = #{colSubTitle},</if>
+			<if test="null != colContent">colContent = #{colContent},</if>
+			<if test="null != colThumb">colThumb = #{colThumb},</if>
+			<if test="null != colStatus">colStatus = #{colStatus},</if>
+			<if test="null != colPrice">colPrice = #{colPrice},</if>
+			<if test="null != imgWidth">imgWidth = #{imgWidth},</if>
+			<if test="null != imgHeigh">imgHeigh = #{imgHeigh},</if>
+			</trim>
+		WHERE
+			colSequence = #{colSequence}
+	</update>
+	
+	<!-- 查询藏品 -->
+	<select id="selectCollectionMsg" parameterType="Map" resultType="cn.smartcandy.application.a.collection.Collection">
+		SELECT
+			<include refid="BASEREF.COLLECTION_BASE"/>
+		from a_collection col
+		WHERE col.colSequence = #{colSequence}
+	</select>
+	<!-- 查询藏品种类 -->
+	<select id="selectCollectionCateList" parameterType="Map" resultType="String">
+		SELECT
+			cateRel.cateSequence
+		from 
+			r_collection_cate cateRel
+		WHERE 
+			cateRel.colSequence = #{colSequence} 
+		AND cateRel.cateStatus = 'N'
+	</select>
+	<!-- 查询藏品种类 -->
+	<select id="selectCollectionCate" parameterType="Map" resultType="Map">
+		SELECT
+			cateRel.relSequence,
+			cateRel.colSequence,
+			cateRel.cateSequence,
+			cateRel.cateName
+		from 
+			r_collection_cate cateRel
+		WHERE 
+			cateRel.colSequence = #{colSequence} 
+		AND cateRel.cateStatus = 'N'
+	</select>
+	<!-- 查询用户藏品没有cate -->
+	<select id="selectCollectionDataListWithoutCate" parameterType="Map" resultType="Map">
+		SELECT
+			<include refid="BASEREF.COLLECTION_BASE"/>
+		from a_collection col
+		WHERE  
+			col.colStatus = 'N'
+		ORDER BY
+			<!-- col.colLikeNum DESC -->
+			col.colSequence DESC
+	</select>
+	<!-- 查询用户藏品有cate -->
+	<select id="selectCollectionDataListWithCate" parameterType="Map" resultType="Map">
+		SELECT
+			<include refid="BASEREF.COLLECTION_BASE"/>
+		FROM
+			r_collection_cate AS cateRel
+		INNER JOIN a_collection AS col ON cateRel.colSequence = col.colSequence
+		WHERE
+		 	cateRel.cateSequence = #{cateSequence}
+		AND	cateRel.cateStatus = 'N'
+		AND col.colStatus = 'N'
+		ORDER BY
+			<!-- col.colLikeNum DESC -->	
+			col.colSequence DESC		
+	</select>
+	
+	<!-- 查询用藏品 -->
+	<select id="selectUserCollectionDataList" parameterType="Map" resultType="Map">
+		SELECT
+			<include refid="BASEREF.COLLECTION_BASE"/>
+		from a_collection col
+		WHERE 
+			col.userSequence = ${userSequence}
+		AND col.colStatus = 'N'
+			<if test="null != cateSequence">AND col.cateSequence = ${cateSequence}</if>
+		ORDER BY
+		col.colSequence DESC
+	</select>
+	
+	<!-- 查询藏品种类 -->
+	<select id="selecCollectionCateList" parameterType="Map" resultType="Map">
+		SELECT
+			cateRel.colSequence,
+			cateRel.cateSequence,
+			cateRel.cateName
+		FROM
+			a_collection AS col
+		INNER JOIN r_collection_cate AS cateRel ON col.colSequence = cateRel.colSequence
+		WHERE 
+			col.colStatus = 'N'
+		AND
+			col.colSequence IN <foreach collection="colList" item="colSequence" open="(" separator="," close=")">#{colSequence}</foreach>
+	</select>
+	
+	<!-- 查询用藏品 -->
+	<select id="selectUserCollectionDataList2" parameterType="Map" resultType="Map">
+		SELECT
+			<include refid="BASEREF.COLLECTION_BASE"/>
+		from a_collection col
+		WHERE 
+			col.userSequence = ${userSequence}
+		AND col.colStatus = 'N'
+			<if test="null != cateSequence">AND col.cateSequence = ${cateSequence}</if>
+		ORDER BY
+		col.colSequence DESC
+	</select>
+	
+	
+	<!-- 查询用藏品 Top 10-->
+	<select id="selectTopCollectionList" parameterType="Map" resultType="cn.smartcandy.application.a.collection.Collection">
+		SELECT
+			<include refid="BASEREF.COLLECTION_BASE"/>
+		FROM
+			a_collection col
+		WHERE
+			col.userSequence = ${userSequence}
+		AND col.colStatus = 'N'
+		LIMIT 0, 
+		<if test="null != colCount">${colCount}</if>
+		<if test="null == colCount">10</if>
+	</select>
+	
+	<!-- 查询用户发布的藏品 DONE -->
+	<select id="selectCateCollectionDataList" parameterType="Map" resultType="Map">
+		SELECT
+			<include refid="BASEREF.COLLECTION_BASE"/>
+		FROM
+			a_collection AS col
+		INNER JOIN r_collection_cate AS cateRel ON cateRel.colSequence = col.colSequence
+		WHERE
+			cateRel.userSequence = #{userSequence}
+		AND cateRel.cateSequence = #{cateSequence}
+		AND col.colStatus = 'N'
+		AND cateRel.cateStatus = 'N'
+	</select>
+	
+	<!-- 更新藏品的点赞数量 -->
+	<update id="updateCollectionLikeCount" parameterType="Map">
+		UPDATE a_collection 
+			<trim prefix="set" suffixOverrides=",">
+			<if test="null != colLikeNum">colLikeNum = colLikeNum + #{colLikeNum},</if>
+			</trim>
+		WHERE
+		colSequence = #{colSequence}
+	</update>
+	
+	<!-- 查询发布的种类和数量 -->
+	<select id="selectCategaryReleaseCount" parameterType="Map" resultType="Map">
+	SELECT
+		cateRel.cateSequence cateSequence,
+		Count(cateRel.colSequence) colCount
+	FROM
+		r_collection_cate AS cateRel
+	INNER JOIN a_collection AS col ON cateRel.colSequence = col.colSequence
+	WHERE
+		col.userSequence = #{userSequence}
+	AND col.colStatus = 'N'
+	AND cateRel.cateStatus = 'N'
+	GROUP BY
+		cateSequence
+	ORDER BY
+		colCount DESC
+	</select>
+	
+	<!-- 查询用户的四个最热产品列表 -->
+	<select id="selectTopCategaryCollection" parameterType="Map" resultType="cn.smartcandy.application.a.collection.Collection">
+		SELECT
+			<include refid="BASEREF.COLLECTION_SIMPLE_MSG"/>
+		FROM
+			a_collection col
+		WHERE
+			col.userSequence = #{userSequence}
+		AND col.colStatus = 'N'
+			<if test="null != cateSequence">AND col.cateSequence = ${cateSequence}</if>
+		ORDER BY
+			col.colLikeNum DESC,
+			col.colSequence DESC 
+		LIMIT 0,6
+	</select>
+	
+	<!-- 查询用户点赞的种类的数量 MODIFY -->
+	<select id="selectReleaseCategaryMap" parameterType="String" resultType="Map">
+		SELECT
+			colRelCate.cateSequence cateSequence,
+			colRelCate.cateName cateName,
+			COUNT(colRelCate.relSequence) colCount
+		FROM
+			r_collection_cate AS colRelCate
+		WHERE
+			colRelCate.userSequence = #{userSequence}
+		AND colRelCate.cateStatus = 'N'
+		GROUP BY
+			cateSequence
+	</select>
+	
+	
+	<!-- 查询用户点赞的种类的数量 -->
+	<select id="selectlikeCategaryList" parameterType="Map" resultType="Map">
+		SELECT DISTINCT
+			colAtt.cateSequence cateSequence,
+			COUNT(attentSequence) colCount
+		FROM
+			a_collection_attention colAtt
+		where  
+			colAtt.userSequence = #{userSequence}
+			AND colAtt.attentStatus = 'N'
+		GROUP BY
+			colAtt.cateSequence
+	</select>
+	<!--  *****************************************修复数据*****************************************  -->
+	<!-- 查询所有的藏品数据 -->
+	<select id="selectCollectionSeqList" parameterType="Map" resultType="cn.smartcandy.application.a.collection.Collection">
+		SELECT
+			<include refid="BASEREF.COLLECTION_BASE"/>
+		FROM
+			a_collection AS col
+	</select>
+	<!-- 查询用户点赞的种类的数量 -->
+	<select id="selectCollectionRelCate" parameterType="Map" resultType="int">
+		SELECT
+			COUNT(colRelCate.relSequence)
+		FROM
+			r_collection_cate AS colRelCate
+		INNER JOIN a_collection AS col ON colRelCate.colSequence = col.colSequence
+		WHERE
+		col.colSequence = #{colSequence}
+	</select>
+	<!-- 在关联表中插入数据-->
+	<insert id="insertCollectionRelCate" parameterType="Map">
+		INSERT INTO r_collection_cate (
+			relSequence,
+			colSequence,
+			cateSequence,
+			cateName,
+			cateStatus,
+			userSequence
+		)VALUES(
+			#{relSequence},
+			#{colSequence},
+			#{cateSequence},
+			#{cateName},
+			#{cateStatus},
+			#{userSequence}
+		)
+	</insert>
+	<!--  ****************************************种类数据*****************************************  -->
+	<!-- 更新旧种类信息 -->
+	<update id="updateCollectionCate" parameterType="Map">
+		UPDATE r_collection_cate 
+		SET 
+			cateStatus ='B'
+		WHERE
+			colSequence = #{colSequence}
+	</update>
+</mapper>
